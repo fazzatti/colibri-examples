@@ -1,0 +1,14 @@
+{
+  "license": "MIT",
+  "publish": {
+    "include": ["./**/*.ts", "./README.md", "./LICENSE", "./deno.json"]
+  },
+  "tasks": {
+    "ingest:live": "deno run -A --unstable ./ingest-live.ts",
+    "ingest:archive": "deno run -A --unstable ./ingest-archive.ts"
+  },
+  "imports": {
+    "@/": "./src/",
+    "jsr:@colibri/core": "jsr:@colibri/core@^0.9.0"
+  }
+}
