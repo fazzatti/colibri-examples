@@ -4,8 +4,8 @@ import {
   EventHandler,
   EventType,
   NetworkProviders,
+  SACEvents,
 } from "@colibri/core";
-import { scValToNative, xdr } from "stellar-sdk";
 import { Server } from "stellar-sdk/rpc";
 import chalk from "chalk";
 
@@ -29,11 +29,27 @@ const networkConfig = NetworkProviders.Lightsail.MainNet();
  *
  * These can have any number and combination of topic segments
  * after the `transfer` function name as we use a double wildcard (`**`).
+ *
+ *
+ * In this example, we load the SACEvents helper, which contains
+ * predefined event structures for the SAC (Stellar Asset Contract),
+ * including the `TransferEvent` type we use here.
+ *
+ * With this helper, we can easily create the topic filter
+ * for the `transfer` event using the `toTopicFilter` method.
+ *
+ * By not providing any additional conditions to the `toTopicFilter` method,
+ * we indicate we want to capture all `transfer` events regardless
+ * of their parameters.
+ *
+ * If needed, we could provide specific parameter values to filter
+ * only a subset of the `transfer` events, such as those transferring a specific asset
+ * or to a specific recipient.
  */
 const filter = new EventFilter({
   contractIds: ["CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"], // XLM Contract ID in Mainnet
   type: EventType.Contract,
-  topics: [[xdr.ScVal.scvSymbol("transfer"), "**"]],
+  topics: [SACEvents.TransferEvent.toTopicFilter()],
 });
 
 /**
@@ -79,14 +95,30 @@ let counter = 0;
  * streamer ingests new ledgers
  */
 const onEvent: EventHandler = (event) => {
+  // We can use the SACEvents helper to parse the raw event
+  // into a structured TransferEvent instance. This gives us
+  // easy access to the event parameters as well as
+  // type-checking and validation.
+  const transferEvent = SACEvents.TransferEvent.fromEvent(event);
+
   // Here we simply log the event details to the console
-  console.log(`\nEvent received with id: ${chalk.green(event.id)}`);
-  console.log(`  > Ledger ${chalk.green(event.ledger)}`);
-  console.log(`  > Transaction ${chalk.green(event.txHash)}`);
-  console.log(
-    `  > Topics ${chalk.green(event.topic.map((t) => scValToNative(t)))}`
-  );
-  console.log(`  > Value ${chalk.green(scValToNative(event.value))}`);
+  console.log(`\nEvent received with id: ${chalk.green(transferEvent.id)}`);
+  console.log(`  > Ledger ${chalk.green(transferEvent.ledger)}`);
+  console.log(`  > Transaction ${chalk.green(transferEvent.txHash)}`);
+  console.log(`  > From ${chalk.green(transferEvent.from)}`);
+  console.log(`  > To ${chalk.green(transferEvent.to)}`);
+  console.log(`  > Amount ${chalk.green(transferEvent.amount)}`);
+  console.log(`  > Asset ${chalk.green(transferEvent.asset)}`);
+
+  // Since CAP67, SAC transfer events can include optional
+  // Muxed Account IDs for `to` field when the recipient
+  // is a muxed account.
+  //
+  // We can check if these are present and log them as well.
+  if (transferEvent.hasMuxedId()) {
+    console.log(`  > To Muxed ID ${chalk.green(transferEvent.toMuxedId)}`);
+  }
+
   // Increment and log the counter
   counter++;
 };
