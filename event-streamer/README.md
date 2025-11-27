@@ -43,6 +43,11 @@ This script:
 3. Ingests events from ledger `59895694` (contains 9 KALE mint events)
 4. Logs each event's details
 
+**Other Configuration:**
+If you'd like to try some other event types try ingesting one of the ledgers below:
+
+- `60044284`: Contains events for the native XLM involving Liquidity pool transfers and receivers with muxed addresses.
+
 ## Key Concepts
 
 ### EventFilter
