@@ -4,8 +4,8 @@ import {
   EventHandler,
   EventType,
   NetworkProviders,
+  SACEvents,
 } from "@colibri/core";
-import { scValToNative, xdr } from "stellar-sdk";
 import chalk from "chalk";
 
 console.log(
@@ -28,11 +28,26 @@ const networkConfig = NetworkProviders.Lightsail.MainNet();
  *
  * These can have any number and combination of topic segments
  * after the `mint` function name as we use a double wildcard (`**`).
+ *
+ * In this example, we load the SACEvents helper, which contains
+ * predefined event structures for the SAC (Stellar Asset Contract),
+ * including the `MintEvent` type we use here.
+ *
+ * With this helper, we can easily create the topic filter
+ * for the `mint` event using the `toTopicFilter` method.
+ *
+ * By not providing any additional conditions to the `toTopicFilter` method,
+ * we indicate we want to capture all `mint` events regardless
+ * of their parameters.
+ *
+ * If needed, we could provide specific parameter values to filter
+ * only a subset of the `mint` events, such as those minting a specific asset
+ * or to a specific recipient.
  */
 const filter = new EventFilter({
   contractIds: ["CB23WRDQWGSP6YPMY4UV5C4OW5CBTXKYN3XEATG7KJEZCXMJBYEHOUOV"], // KALE Contract ID in Mainnet
   type: EventType.Contract,
-  topics: [[xdr.ScVal.scvSymbol("mint"), "**"]],
+  topics: [SACEvents.MintEvent.toTopicFilter()],
 });
 
 /**
@@ -77,14 +92,20 @@ let counter = 0;
  * streamer ingests new ledgers
  */
 const onEvent: EventHandler = (event) => {
+  // We can use the SACEvents helper to parse the raw event
+  // into a structured MintEvent instance. This gives us
+  // easy access to the event parameters as well as
+  // type-checking and validation.
+  const mintEvent = SACEvents.MintEvent.fromEvent(event);
+
   // Here we simply log the event details to the console
-  console.log(`\nEvent received with id: ${chalk.green(event.id)}`);
-  console.log(`  > Ledger ${chalk.green(event.ledger)}`);
-  console.log(`  > Transaction ${chalk.green(event.txHash)}`);
-  console.log(
-    `  > Topics ${chalk.green(event.topic.map((t) => scValToNative(t)))}`
-  );
-  console.log(`  > Value ${chalk.green(scValToNative(event.value))}`);
+  console.log(`\nEvent received with id: ${chalk.green(mintEvent.id)}`);
+  console.log(`  > Ledger ${chalk.green(mintEvent.ledger)}`);
+  console.log(`  > Transaction ${chalk.green(mintEvent.txHash)}`);
+  console.log(`  > To ${chalk.green(mintEvent.to)}`);
+  console.log(`  > Amount ${chalk.green(mintEvent.amount)}`);
+  console.log(`  > Asset ${chalk.green(mintEvent.asset)}`);
+
   // Increment and log the counter
   counter++;
 };
