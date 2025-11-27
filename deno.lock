@@ -1,8 +1,9 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@colibri/core@0.9": "0.9.0",
-    "jsr:@colibri/event-streamer@0.1": "0.1.0",
+    "jsr:@colibri/core@0.10": "0.10.3",
+    "jsr:@colibri/core@~0.10.3": "0.10.3",
+    "jsr:@colibri/event-streamer@0.2": "0.2.0",
     "jsr:@fifo/convee@~0.9.2": "0.9.2",
     "npm:@stellar/stellar-sdk@^14.3.3": "14.3.3",
     "npm:@types/node@*": "24.2.0",
@@ -10,18 +11,18 @@
     "npm:chalk@^5.3.0": "5.6.2"
   },
   "jsr": {
-    "@colibri/core@0.9.0": {
-      "integrity": "15b800394ad0f3f8814c58d834de2c97e40f24015510a309a0f1c28a5eab4bda",
+    "@colibri/core@0.10.3": {
+      "integrity": "958bf6d6b154dbca1ea21f42d569792c04e7031706c3225bae9e151a75682666",
       "dependencies": [
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk",
         "npm:buffer"
       ]
     },
-    "@colibri/event-streamer@0.1.0": {
-      "integrity": "323b9259f742ad3479a128934907a3c541bb92815f06a771ff7f6429d9c08684",
+    "@colibri/event-streamer@0.2.0": {
+      "integrity": "a101453523ad64affeae9d6d7bf150cffebacf360686e4be7d60ebcbf160ffee",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.10",
         "npm:@stellar/stellar-sdk"
       ]
     },
@@ -363,8 +364,8 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@colibri/core@0.9",
-      "jsr:@colibri/event-streamer@0.1",
+      "jsr:@colibri/core@~0.10.3",
+      "jsr:@colibri/event-streamer@0.2",
       "npm:@stellar/stellar-sdk@^14.3.3",
       "npm:buffer@^6.0.3",
       "npm:chalk@^5.3.0"
