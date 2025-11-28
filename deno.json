@@ -1,5 +1,5 @@
 {
-  "workspace": ["./event-streamer"],
+  "workspace": ["./examples/*"],
   "nodeModulesDir": "auto",
   "imports": {
     "@colibri/core": "jsr:@colibri/core@^0.10.3",

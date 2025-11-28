@@ -14,7 +14,7 @@ A collection of examples using the @colibri tools for the Stellar network. Navig
 deno install
 ```
 
-Then proceed to the desired example and follow its instructions.
+Then proceed to the desired example under `./examples/` and follow its instructions.
 
 ## About @colibri
 
