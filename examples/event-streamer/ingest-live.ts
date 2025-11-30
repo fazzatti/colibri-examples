@@ -1,3 +1,20 @@
+/**
+ * Example: Ingest live XLM transfer events using EventStreamer
+ *
+ * This example connects to the public Lightsail Mainnet
+ * network infrastructure, but you can replace this
+ * with your own NetworkConfig or other predefined setups.
+ *
+ * The example sets up an Event Filter to capture only
+ * `transfer` events emitted by the XLM contract on Mainnet.
+ *
+ * It then ingests events from new ledgers as they are
+ * produced on the network, for a total of 5 ledgers.
+ *
+ * For each event received, the example logs the event details
+ * to the console.
+ *
+ */
 import { EventStreamer, EventFilter } from "@colibri/event-streamer";
 import {
   EventHandler,

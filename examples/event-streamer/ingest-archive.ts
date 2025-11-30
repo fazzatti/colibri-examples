@@ -1,3 +1,23 @@
+/**
+ * Example: Ingest KALE mint events from a historical ledger
+ * using the Event Streamer archival ingestion mode.
+ *
+ * This example connects to the public Lightsail Mainnet
+ * network infrastructure, but you can replace this
+ * with your own NetworkConfig or other predefined setups.
+ *
+ * The example sets up an Event Filter to capture only
+ * `mint` events emitted by the KALE contract on Mainnet.
+ *
+ * It then ingests events from a single historical ledger
+ * (ledger number 59895694) which is known to contain
+ * 9 KALE mint events.
+ *
+ * For each event received, the example logs the event details
+ * to the console.
+ *
+ */
+
 import { EventStreamer, EventFilter } from "@colibri/event-streamer";
 import {
   EventHandler,
@@ -17,7 +37,6 @@ console.log(
  * In this example we'll use the public network infrastructre
  * provided by Lightsail. You can replace this with your own
  * NetworkConfig or other predefined setups.
- *
  */
 const networkConfig = NetworkProviders.Lightsail.MainNet();
 
