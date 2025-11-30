@@ -6,12 +6,6 @@ A collection of examples using the @colibri tools for the Stellar network. Navig
 
 - [Deno](https://deno.land/) runtime installed
 
-## Getting Started
-
-If you're new to Colibri, start with the examples under [`./getting-started/`](./getting-started/). These simpler examples walk through the SDK's core concepts step by step:
-
-- [Contract Transfer](./getting-started/contract-transfer/) - Learn how to transfer XLM using the Stellar Asset Contract helper
-
 ## Setup
 
 1. Install the dependencies by running:
@@ -21,6 +15,10 @@ deno install
 ```
 
 Then proceed to the desired example under `./examples/` and follow its instructions.
+
+## Getting Started
+
+If you're new to Colibri, start with the examples under [`./getting-started/`](./getting-started/). These simpler examples walk through the SDK's core concepts step by step.
 
 ## About @colibri
 
