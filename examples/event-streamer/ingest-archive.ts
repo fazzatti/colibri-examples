@@ -1,6 +1,5 @@
-import { EventStreamer } from "@colibri/event-streamer";
+import { EventStreamer, EventFilter } from "@colibri/event-streamer";
 import {
-  EventFilter,
   EventHandler,
   EventType,
   NetworkProviders,
