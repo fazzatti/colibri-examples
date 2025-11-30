@@ -6,8 +6,5 @@
   "tasks": {
     "ingest:live": "deno run -A --unstable ./ingest-live.ts",
     "ingest:archive": "deno run -A --unstable ./ingest-archive.ts"
-  },
-  "imports": {
-    "@/": "./src/"
   }
 }
