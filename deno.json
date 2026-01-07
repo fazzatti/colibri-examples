@@ -4,7 +4,7 @@
   "imports": {
     "@/": "./src/",
     "@colibri/core": "jsr:@colibri/core@^0.15.0",
-    "@colibri/sep10": "jsr:@colibri/sep10@^0.2.0",
+    "@colibri/sep10": "jsr:@colibri/sep10@^0.3.0",
     "@colibri/event-streamer": "jsr:@colibri/event-streamer@^0.6.0",
     "stellar-sdk": "npm:@stellar/stellar-sdk@^14.3.3",
     "buffer": "npm:buffer@^6.0.3",

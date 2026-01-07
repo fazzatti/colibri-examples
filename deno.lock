@@ -2,8 +2,7 @@
   "version": "5",
   "specifiers": {
     "jsr:@colibri/core@0.15": "0.15.0",
-    "jsr:@colibri/event-streamer@0.6": "0.6.0",
-    "jsr:@colibri/sep10@0.2": "0.2.0",
+    "jsr:@colibri/sep10@0.3": "0.3.0",
     "jsr:@fifo/convee@~0.9.2": "0.9.2",
     "jsr:@std/collections@^1.1.3": "1.1.3",
     "jsr:@std/toml@^1.0.11": "1.0.11",
@@ -22,15 +21,8 @@
         "npm:buffer"
       ]
     },
-    "@colibri/event-streamer@0.6.0": {
-      "integrity": "9acc50784f5ea1a2279804b91431eb1a23ecf6589523962c168e9d5c3d31b161",
-      "dependencies": [
-        "jsr:@colibri/core",
-        "npm:@stellar/stellar-sdk"
-      ]
-    },
-    "@colibri/sep10@0.2.0": {
-      "integrity": "4baf95eb6a7d976cd87c4092ea1030e866ca961dc7a005078ece3d59b8ff0715",
+    "@colibri/sep10@0.3.0": {
+      "integrity": "715409f2d09c2c90c4bf39dd5127970d5bbcbf4544789556c2b1a6481489f2ea",
       "dependencies": [
         "jsr:@colibri/core",
         "npm:@stellar/stellar-sdk",
@@ -385,7 +377,7 @@
     "dependencies": [
       "jsr:@colibri/core@0.15",
       "jsr:@colibri/event-streamer@0.6",
-      "jsr:@colibri/sep10@0.2",
+      "jsr:@colibri/sep10@0.3",
       "npm:@stellar/stellar-sdk@^14.3.3",
       "npm:buffer@^6.0.3",
       "npm:chalk@^5.3.0"
