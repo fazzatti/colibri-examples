@@ -1,41 +1,53 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@colibri/core@0.10": "0.10.3",
-    "jsr:@colibri/core@~0.11.2": "0.11.2",
-    "jsr:@colibri/event-streamer@0.2": "0.2.0",
+    "jsr:@colibri/core@0.15": "0.15.0",
+    "jsr:@colibri/event-streamer@0.6": "0.6.0",
+    "jsr:@colibri/sep10@0.2": "0.2.0",
     "jsr:@fifo/convee@~0.9.2": "0.9.2",
-    "npm:@stellar/stellar-sdk@^14.3.3": "14.3.3",
+    "jsr:@std/collections@^1.1.3": "1.1.3",
+    "jsr:@std/toml@^1.0.11": "1.0.11",
+    "npm:@stellar/stellar-sdk@^14.3.3": "14.4.3",
     "npm:@types/node@*": "24.2.0",
     "npm:buffer@^6.0.3": "6.0.3",
     "npm:chalk@^5.3.0": "5.6.2"
   },
   "jsr": {
-    "@colibri/core@0.10.3": {
-      "integrity": "958bf6d6b154dbca1ea21f42d569792c04e7031706c3225bae9e151a75682666",
+    "@colibri/core@0.15.0": {
+      "integrity": "f5df213b5428a945e4436e9603282db2a9b79c4dc1530aa95f56f616c05e7d21",
       "dependencies": [
         "jsr:@fifo/convee",
+        "jsr:@std/toml",
         "npm:@stellar/stellar-sdk",
         "npm:buffer"
       ]
     },
-    "@colibri/core@0.11.2": {
-      "integrity": "6dfaa2f2097a4aa12a8ba760aef21a63eeb2f0e49769a88a317dff9b567a401c",
+    "@colibri/event-streamer@0.6.0": {
+      "integrity": "9acc50784f5ea1a2279804b91431eb1a23ecf6589523962c168e9d5c3d31b161",
       "dependencies": [
-        "jsr:@fifo/convee",
-        "npm:@stellar/stellar-sdk",
-        "npm:buffer"
-      ]
-    },
-    "@colibri/event-streamer@0.2.0": {
-      "integrity": "a101453523ad64affeae9d6d7bf150cffebacf360686e4be7d60ebcbf160ffee",
-      "dependencies": [
-        "jsr:@colibri/core@0.10",
+        "jsr:@colibri/core",
         "npm:@stellar/stellar-sdk"
+      ]
+    },
+    "@colibri/sep10@0.2.0": {
+      "integrity": "4baf95eb6a7d976cd87c4092ea1030e866ca961dc7a005078ece3d59b8ff0715",
+      "dependencies": [
+        "jsr:@colibri/core",
+        "npm:@stellar/stellar-sdk",
+        "npm:buffer"
       ]
     },
     "@fifo/convee@0.9.2": {
       "integrity": "178066e406335a88f90558e89f9a01d7b57f9aa3e675cd2f6548534b8ff14286"
+    },
+    "@std/collections@1.1.3": {
+      "integrity": "bf8b0818886df6a32b64c7d3b037a425111f28278d69fd0995aeb62777c986b0"
+    },
+    "@std/toml@1.0.11": {
+      "integrity": "e084988b872ca4bad6aedfb7350f6eeed0e8ba88e9ee5e1590621c5b5bb8f715",
+      "dependencies": [
+        "jsr:@std/collections"
+      ]
     }
   },
   "npm": {
@@ -51,8 +63,8 @@
     "@stellar/js-xdr@3.1.2": {
       "integrity": "sha512-VVolPL5goVEIsvuGqDc5uiKxV03lzfWdvYg1KikvwheDmTBO68CKDji3bAZ/kppZrx5iTA8z3Ld5yuytcvhvOQ=="
     },
-    "@stellar/stellar-base@14.0.2": {
-      "integrity": "sha512-2/zQLw3kwHOn4jka7pZDwu24++MDvW0gthuPINF2gCNl7V8LwjmkLTuZ/eUMJjwfo6uDpujgrCkSy9JFrgdVzg==",
+    "@stellar/stellar-base@14.0.4": {
+      "integrity": "sha512-UbNW6zbdOBXJwLAV2mMak0bIC9nw3IZVlQXkv2w2dk1jgCbJjy3oRVC943zeGE5JAm0Z9PHxrIjmkpGhayY7kw==",
       "dependencies": [
         "@noble/curves",
         "@stellar/js-xdr",
@@ -62,8 +74,8 @@
         "sha.js"
       ]
     },
-    "@stellar/stellar-sdk@14.3.3": {
-      "integrity": "sha512-qEK4tCoaHS8NaXM/U8DeYexydZO3J/mCkf/OEwryqsLYX3nu6exxcSLVOIqbzHpKyxZeO6fX57WYLhdei6DwQQ==",
+    "@stellar/stellar-sdk@14.4.3": {
+      "integrity": "sha512-QfaScSNd4Ku0GGfaZjR8679+M5gLHG+09OLLqV3Bv1VaDKXjHmhf8ikalz2jlx3oFnmlEpEgnqXIdf4kdD2x/w==",
       "dependencies": [
         "@stellar/stellar-base",
         "axios",
@@ -73,8 +85,7 @@
         "randombytes",
         "toml",
         "urijs"
-      ],
-      "scripts": true
+      ]
     },
     "@types/node@24.2.0": {
       "integrity": "sha512-3xyG3pMCq3oYCNg7/ZP+E1ooTaGB4cG8JWRsqqOYQdbWNY4zbaV0Ennrd7stjiJEFZCaybcIgpTjJWHRfBSIDw==",
@@ -372,8 +383,9 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@colibri/core@~0.11.2",
-      "jsr:@colibri/event-streamer@0.2",
+      "jsr:@colibri/core@0.15",
+      "jsr:@colibri/event-streamer@0.6",
+      "jsr:@colibri/sep10@0.2",
       "npm:@stellar/stellar-sdk@^14.3.3",
       "npm:buffer@^6.0.3",
       "npm:chalk@^5.3.0"
