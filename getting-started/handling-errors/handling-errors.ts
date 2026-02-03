@@ -51,7 +51,7 @@ try {
   await XLM.transfer({
     from: sender.publicKey(),
     to: receiver.publicKey(),
-    amount: 1_0000000n, // 10 XLM in stroops
+    amount: 1_0000000n, // 1 XLM in stroops
     config: {
       source: sender.publicKey(),
       fee: "0", // invalid
