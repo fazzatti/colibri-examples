@@ -1,0 +1,9 @@
+{
+  "license": "MIT",
+  "publish": {
+    "include": ["./**/*.ts", "./README.md", "./LICENSE", "./deno.json"]
+  },
+  "tasks": {
+    "handling-errors": "deno run -A ./handling-errors.ts"
+  }
+}

@@ -25,6 +25,9 @@ If you're new to Colibri, start with the examples under
 [`./getting-started/`](./getting-started/). These simpler examples walk through
 the SDK's core concepts step by step.
 
+- `handling-errors` - Learn how to identify a Colibri error and read metadata for graceful handling.
+- `contract-transfer` - Perform a simple XLM transfer using the Stellar Asset Contract (SAC).
+
 ## About @colibri
 
 This project is built with [@colibri](https://github.com/fazzatti/colibri), a
