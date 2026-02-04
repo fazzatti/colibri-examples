@@ -1,6 +1,6 @@
 /**
  * Example: Ingest KALE mint events from a historical ledger
- * using the Event Streamer archival ingestion mode.
+ * using RPCStreamer (event variant) with archive ingestion.
  *
  * This example connects to the public Lightsail Mainnet
  * network infrastructure, but you can replace this
@@ -15,11 +15,11 @@
  *
  * For each event received, the example logs the event details
  * to the console.
- *
  */
 
-import { EventStreamer, EventFilter } from "@colibri/event-streamer";
+import { RPCStreamer } from "@colibri/rpc-streamer";
 import {
+  EventFilter,
   EventHandler,
   EventType,
   NetworkProviders,
@@ -29,8 +29,8 @@ import chalk from "chalk";
 
 console.log(
   chalk.bgBlue(
-    `Starting the Event Streamer archive ingestion for KALE mint events...`
-  )
+    `Starting the RPC streamer archive ingestion for KALE mint events...`,
+  ),
 );
 
 /**
@@ -72,18 +72,17 @@ const filter = new EventFilter({
  * We'll be ingesting events for a single historical ledger only.
  * Ledger number: 59895694
  * (This should contain 9 KALE mint events)
- *
  */
 const startLedger = 59895694;
 const stopLedger = 59895694;
 
 console.log(
-  `Will ingest events from historical ledger ${chalk.green(startLedger)}.`
+  `Will ingest events from historical ledger ${chalk.green(startLedger)}.`,
 );
 console.log(`We expect to find ${chalk.green("9")} KALE mint events.`);
 
 /**
- * Now we can create the EventStreamer instance
+ * Now we can create the RPCStreamer instance (event variant)
  * with our filter and network configuration.
  *
  * We also set options to control the polling
@@ -91,7 +90,7 @@ console.log(`We expect to find ${chalk.green("9")} KALE mint events.`);
  * interval when fetching multiple events
  * from a single ledger.
  */
-const eventStreamer = new EventStreamer({
+const eventStreamer = RPCStreamer.event({
   rpcUrl: networkConfig.rpcUrl,
   archiveRpcUrl: networkConfig.archiveRpcUrl,
   filters: [filter],
@@ -137,11 +136,10 @@ const onEvent: EventHandler = (event) => {
  *
  * Since we are starting with a target historical ledger,
  * that falls outside the normal RPC retention window,
- * the Event Streamer will automatically use the archival
- * ingestion mode.
+ * the RPC streamer will automatically use the archival ingestion mode.
  *
  * If we targeted a range that would shift from outside of
- * the retention window to inside of it, the Event Streamer
+ * the retention window to inside of it, the RPC streamer
  * would automatically switch from archival ingestion to
  * live ingestion when reaching the point where the normal
  * RPC can be used.

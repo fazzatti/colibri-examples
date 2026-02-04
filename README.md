@@ -1,6 +1,8 @@
 # colibri-examples
 
-A collection of examples using the @colibri tools for the Stellar network. Navigate to each directory to find the instructions of the respective example in their `README.md` file.
+A collection of examples using the @colibri tools for the Stellar network.
+Navigate to each directory to find the instructions of the respective example in
+their `README.md` file.
 
 ## Prerequisites
 
@@ -14,15 +16,25 @@ A collection of examples using the @colibri tools for the Stellar network. Navig
 deno install
 ```
 
-Then proceed to the desired example under `./examples/` and follow its instructions.
+Then proceed to the desired example under `./examples/` and follow its
+instructions.
 
 ## Getting Started
 
-If you're new to Colibri, start with the examples under [`./getting-started/`](./getting-started/). These simpler examples walk through the SDK's core concepts step by step.
+If you're new to Colibri, start with the examples under
+[`./getting-started/`](./getting-started/). These simpler examples walk through
+the SDK's core concepts step by step.
 
 - `handling-errors` - Learn how to identify a Colibri error and read metadata for graceful handling.
 - `contract-transfer` - Perform a simple XLM transfer using the Stellar Asset Contract (SAC).
 
 ## About @colibri
 
-This project is built with [@colibri](https://github.com/fazzatti/colibri), a TypeScript-first toolkit for building robust Stellar and Soroban applications. Colibri provides deterministic error handling, composable transaction pipelines, and an extensible plugin architecture. Key packages include [@colibri/core](https://jsr.io/@colibri/core) for transaction orchestration and event parsing, and [@colibri/event-streamer](https://jsr.io/@colibri/event-streamer) for real-time and historical Soroban event ingestion. Learn more at the [GitHub repository](https://github.com/fazzatti/colibri).
+This project is built with [@colibri](https://github.com/fazzatti/colibri), a
+TypeScript-first toolkit for building robust Stellar and Soroban applications.
+Colibri provides deterministic error handling, composable transaction pipelines,
+and an extensible plugin architecture. Key packages include
+[@colibri/core](https://jsr.io/@colibri/core) for transaction orchestration and
+event parsing, and [@colibri/rpc-streamer](https://jsr.io/@colibri/rpc-streamer)
+for streaming Soroban RPC data (including contract events). Learn more at the
+[GitHub repository](https://github.com/fazzatti/colibri).

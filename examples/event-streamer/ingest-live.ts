@@ -1,5 +1,5 @@
 /**
- * Example: Ingest live XLM transfer events using EventStreamer
+ * Example: Ingest live XLM transfer events using RPCStreamer (event variant)
  *
  * This example connects to the public Lightsail Mainnet
  * network infrastructure, but you can replace this
@@ -13,10 +13,10 @@
  *
  * For each event received, the example logs the event details
  * to the console.
- *
  */
-import { EventStreamer, EventFilter } from "@colibri/event-streamer";
+import { RPCStreamer } from "@colibri/rpc-streamer";
 import {
+  EventFilter,
   EventHandler,
   EventType,
   NetworkProviders,
@@ -27,15 +27,14 @@ import chalk from "chalk";
 
 console.log(
   chalk.bgBlue(
-    chalk`Starting the Event Streamer live ingestion for XLM transfer events...`
-  )
+    chalk`Starting the RPC streamer live ingestion for XLM transfer events...`,
+  ),
 );
 
 /**
  * In this example we'll use the public network infrastructre
  * provided by Lightsail. You can replace this with your own
  * NetworkConfig or other predefined setups.
- *
  */
 const networkConfig = NetworkProviders.Lightsail.MainNet();
 
@@ -45,7 +44,6 @@ const networkConfig = NetworkProviders.Lightsail.MainNet();
  *
  * These can have any number and combination of topic segments
  * after the `transfer` function name as we use a double wildcard (`**`).
- *
  *
  * In this example, we load the SACEvents helper, which contains
  * predefined event structures for the SAC (Stellar Asset Contract),
@@ -78,13 +76,15 @@ const latestLedger = await server.getLatestLedger();
 const stopLedger = latestLedger.sequence + 5;
 
 console.log(
-  `Latest ledger is ${chalk.green(
-    latestLedger.sequence
-  )}, will stop ingestion at ledger ${chalk.green(stopLedger)}`
+  `Latest ledger is ${
+    chalk.green(
+      latestLedger.sequence,
+    )
+  }, will stop ingestion at ledger ${chalk.green(stopLedger)}`,
 );
 
 /**
- * Now we can create the EventStreamer instance
+ * Now we can create the RPCStreamer instance (event variant)
  * with our filter and network configuration.
  *
  * We also set options to control the polling
@@ -92,7 +92,7 @@ console.log(
  * interval when fetching multiple events
  * from a single ledger.
  */
-const eventStreamer = new EventStreamer({
+const eventStreamer = RPCStreamer.event({
   rpcUrl: networkConfig.rpcUrl,
   archiveRpcUrl: networkConfig.archiveRpcUrl,
   filters: [filter],
@@ -161,7 +161,6 @@ const onEvent: EventHandler = (event) => {
  * By explicitely using the `startLive` method, the ingestion
  * will fail if the `startLedger` falls outside the normal
  * RPC retention window.
- *
  */
 console.log(`Starting live ingestion...`);
 await eventStreamer.start(onEvent, { stopLedger });
