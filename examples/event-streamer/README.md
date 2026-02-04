@@ -1,17 +1,22 @@
 # Event Streamer Example
 
-This example demonstrates how to use the [@colibri/event-streamer](https://jsr.io/@colibri/event-streamer) package to ingest Soroban contract events from the Stellar network in both live and archival modes.
+This example demonstrates how to use the
+[@colibri/rpc-streamer](https://jsr.io/@colibri/rpc-streamer) package (event
+variant) to ingest Soroban contract events from the Stellar network in both live
+and archival modes.
 
 ## Overview
 
 The example includes two ingestion scripts:
 
 - **Live Ingestion** - Streams events in real-time from the latest ledgers
-- **Archive Ingestion** - Fetches historical events from past ledgers outside the normal RPC retention window
+- **Archive Ingestion** - Fetches historical events from past ledgers outside
+  the normal RPC retention window
 
 ## Usage
 
-Before proceeding, make sure to follow the setup described in the [workspace README](../README.md).
+Before proceeding, make sure to follow the setup described in the
+[workspace README](../README.md).
 
 ### Live Ingestion
 
@@ -38,15 +43,17 @@ deno task ingest:archive
 
 This script:
 
-1. Connects to the Stellar Mainnet via Lightsail's public RPC (with archival support)
+1. Connects to the Stellar Mainnet via Lightsail's public RPC (with archival
+   support)
 2. Sets up a filter for `mint` events from the KALE contract
 3. Ingests events from ledger `59895694` (contains 9 KALE mint events)
 4. Logs each event's details
 
-**Other Configuration:**
-If you'd like to try some other event types try ingesting one of the ledgers below:
+**Other Configuration:** If you'd like to try some other event types try
+ingesting one of the ledgers below:
 
-- `60044284`: Contains events for the native XLM involving Liquidity pool transfers and receivers with muxed addresses.
+- `60044284`: Contains events for the native XLM involving Liquidity pool
+  transfers and receivers with muxed addresses.
 
 ## Key Concepts
 
@@ -64,14 +71,17 @@ const filter = new EventFilter({
 
 - `contractIds` - Array of contract IDs to monitor
 - `type` - Event type (e.g., `EventType.Contract`)
-- `topics` - Topic filters with wildcard support (`**` matches any remaining topics)
+- `topics` - Topic filters with wildcard support (`**` matches any remaining
+  topics)
 
-### EventStreamer
+### RPCStreamer (Event Variant)
 
 The main class for ingesting events:
 
 ```ts
-const eventStreamer = new EventStreamer({
+import { RPCStreamer } from "@colibri/rpc-streamer";
+
+const eventStreamer = RPCStreamer.event({
   rpcUrl: networkConfig.rpcUrl,
   archiveRpcUrl: networkConfig.archiveRpcUrl,
   filters: [filter],
@@ -84,13 +94,15 @@ const eventStreamer = new EventStreamer({
 
 ### Ingestion Modes
 
-- **Live mode** - Used when `startLedger` is within the RPC retention window (or omitted)
-- **Archive mode** - Automatically used when `startLedger` is outside the retention window
+- **Live mode** - Used when `startLedger` is within the RPC retention window (or
+  omitted)
+- **Archive mode** - Automatically used when `startLedger` is outside the
+  retention window
 
 The `start()` method intelligently switches between modes as needed.
 
 ## Learn More
 
-- [@colibri/event-streamer on JSR](https://jsr.io/@colibri/event-streamer)
+- [@colibri/rpc-streamer on JSR](https://jsr.io/@colibri/rpc-streamer)
 - [@colibri/core on JSR](https://jsr.io/@colibri/core)
 - [Colibri GitHub Repository](https://github.com/fazzatti/colibri)
