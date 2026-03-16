@@ -4,6 +4,6 @@
     "include": ["./**/*.ts", "./README.md", "./LICENSE", "./deno.json"]
   },
   "tasks": {
-    "transfer": "deno run -A --unstable ./transfer.ts"
+    "transfer": "deno run -A ./transfer.ts"
   }
 }

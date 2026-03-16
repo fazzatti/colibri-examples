@@ -4,7 +4,7 @@
     "include": ["./**/*.ts", "./README.md", "./LICENSE", "./deno.json"]
   },
   "tasks": {
-    "ingest:live": "deno run -A --unstable ./ingest-live.ts",
-    "ingest:archive": "deno run -A --unstable ./ingest-archive.ts"
+    "ingest:live": "deno run -A ./ingest-live.ts",
+    "ingest:archive": "deno run -A ./ingest-archive.ts"
   }
 }
