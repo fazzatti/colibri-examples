@@ -32,9 +32,16 @@ the SDK's core concepts step by step.
 
 ## Examples
 
-- `stellar-test-ledger` - Use `StellarTestLedger` for both ephemeral integration
-  tests and reusable local Quickstart ledgers with Lab, explorer, and
-  transaction scripts.
+Each example under [`./examples/`](./examples/) has its own `README.md` with
+setup and usage details:
+
+- [`event-streamer`](./examples/event-streamer/README.md) - Ingest Soroban
+  contract events in live and archival modes with `@colibri/rpc-streamer`.
+- [`sep10`](./examples/sep10/README.md) - Authenticate with a Stellar anchor
+  using the SEP-10 Web Authentication flow via `@colibri/sep10`.
+- [`stellar-test-ledger`](./examples/stellar-test-ledger/README.md) - Use
+  `StellarTestLedger` for ephemeral integration tests and reusable local
+  Quickstart ledgers with Lab, explorer, and transaction scripts.
 
 ## About @colibri
 
