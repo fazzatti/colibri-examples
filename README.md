@@ -25,8 +25,16 @@ If you're new to Colibri, start with the examples under
 [`./getting-started/`](./getting-started/). These simpler examples walk through
 the SDK's core concepts step by step.
 
-- `handling-errors` - Learn how to identify a Colibri error and read metadata for graceful handling.
-- `contract-transfer` - Perform a simple XLM transfer using the Stellar Asset Contract (SAC).
+- `handling-errors` - Learn how to identify a Colibri error and read metadata
+  for graceful handling.
+- `contract-transfer` - Perform a simple XLM transfer using the Stellar Asset
+  Contract (SAC).
+
+## Examples
+
+- `stellar-test-ledger` - Use `StellarTestLedger` for both ephemeral integration
+  tests and reusable local Quickstart ledgers with Lab, explorer, and
+  transaction scripts.
 
 ## About @colibri
 
