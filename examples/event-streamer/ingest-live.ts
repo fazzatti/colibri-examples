@@ -16,8 +16,8 @@
  */
 import { RPCStreamer } from "@colibri/rpc-streamer";
 import {
+  Event,
   EventFilter,
-  EventHandler,
   EventType,
   NetworkProviders,
   SACEvents,
@@ -110,7 +110,7 @@ let counter = 0;
  * for each event that fits our filtering conditions as the
  * streamer ingests new ledgers
  */
-const onEvent: EventHandler = (event) => {
+const onEvent = (event: Event) => {
   // We can use the SACEvents helper to parse the raw event
   // into a structured TransferEvent instance. This gives us
   // easy access to the event parameters as well as

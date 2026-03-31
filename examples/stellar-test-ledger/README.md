@@ -39,7 +39,8 @@ This use case shows how to:
 - start a pristine local ledger in `beforeAll`
 - turn the exposed service URLs into a Colibri `NetworkConfig`
 - initialize accounts with the local Friendbot
-- use Colibri's RPC-backed `PIPE_ClassicTransaction` to send transactions
+- use Colibri's RPC-backed `createClassicTransactionPipeline` helper to send
+  transactions
 - stop and destroy the container in `afterAll`
 
 The suite includes two transaction tests:

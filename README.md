@@ -37,6 +37,9 @@ setup and usage details:
 
 - [`event-streamer`](./examples/event-streamer/README.md) - Ingest Soroban
   contract events in live and archival modes with `@colibri/rpc-streamer`.
+- [`channel-accounts`](./examples/channel-accounts/README.md) - Open sponsored
+  channel accounts, combine them with fee bumps, and send XLM to muxed addresses
+  in parallel on TestNet.
 - [`sep10`](./examples/sep10/README.md) - Authenticate with a Stellar anchor
   using the SEP-10 Web Authentication flow via `@colibri/sep10`.
 - [`stellar-test-ledger`](./examples/stellar-test-ledger/README.md) - Use
@@ -51,5 +54,9 @@ Colibri provides deterministic error handling, composable transaction pipelines,
 and an extensible plugin architecture. Key packages include
 [@colibri/core](https://jsr.io/@colibri/core) for transaction orchestration and
 event parsing, and [@colibri/rpc-streamer](https://jsr.io/@colibri/rpc-streamer)
-for streaming Soroban RPC data (including contract events). Learn more at the
+for streaming Soroban RPC data (including contract events). This workspace also
+includes examples for the newer
+[@colibri/plugin-channel-accounts](https://jsr.io/@colibri/plugin-channel-accounts)
+and [@colibri/plugin-fee-bump](https://jsr.io/@colibri/plugin-fee-bump)
+packages. Learn more at the
 [GitHub repository](https://github.com/fazzatti/colibri).

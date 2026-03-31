@@ -10,7 +10,7 @@
  */
 import { assertEquals, assertExists } from "@std/assert";
 import { afterAll, beforeAll, describe, it } from "@std/testing/bdd";
-import { NetworkConfig, PIPE_ClassicTransaction } from "@colibri/core";
+import { createClassicTransactionPipeline, NetworkConfig } from "@colibri/core";
 import { Asset, Operation } from "stellar-sdk";
 import {
   createContainerLog,
@@ -28,7 +28,7 @@ const containerLog = createContainerLog("test");
  * Shared integration test state populated during `beforeAll`.
  */
 let networkConfig: NetworkConfig;
-let classicPipeline: ReturnType<typeof PIPE_ClassicTransaction.create>;
+let classicPipeline: ReturnType<typeof createClassicTransactionPipeline>;
 
 describe(
   {
@@ -61,7 +61,7 @@ describe(
        * The pipeline uses the local ledger's Soroban RPC endpoint under the
        * hood to build, submit, and wait for each transaction.
        */
-      classicPipeline = PIPE_ClassicTransaction.create({ networkConfig });
+      classicPipeline = createClassicTransactionPipeline({ networkConfig });
 
       containerLog("Container is ready. Running Colibri transaction tests...");
     });

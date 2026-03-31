@@ -15,7 +15,7 @@
  *
  * Run with: deno task connect
  */
-import { StellarToml, LocalSigner } from "@colibri/core";
+import { LocalSigner, StellarToml } from "@colibri/core";
 import { Sep10Client } from "@colibri/sep10";
 import { Networks } from "stellar-sdk";
 import chalk from "chalk";
@@ -130,7 +130,7 @@ console.log(chalk.white(jwt.token));
 console.log(chalk.blue.bold("\n💡 Usage:"));
 console.log(chalk.gray("  Use this token in the Authorization header:"));
 console.log(
-  chalk.white(`  Authorization: Bearer ${jwt.token.slice(0, 50)}...`)
+  chalk.white(`  Authorization: Bearer ${jwt.token.slice(0, 50)}...`),
 );
 
 console.log(chalk.green.bold("\n✅ Done!\n"));
