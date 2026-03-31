@@ -10,7 +10,7 @@
  *
  * Run with: deno task ledger:transactions
  */
-import { NetworkConfig, PIPE_ClassicTransaction } from "@colibri/core";
+import { createClassicTransactionPipeline, NetworkConfig } from "@colibri/core";
 import { Asset, Operation } from "stellar-sdk";
 import {
   completeStreamingLogCommand,
@@ -44,7 +44,7 @@ printReusableLedgerLinks(details, containerLog);
 containerLog(
   "Building the classic transaction pipeline. Colibri will use the reusable ledger RPC endpoint for transaction submission.",
 );
-const classicPipeline = PIPE_ClassicTransaction.create({ networkConfig });
+const classicPipeline = createClassicTransactionPipeline({ networkConfig });
 
 const sender = await initializeAccount(
   networkConfig,

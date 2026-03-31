@@ -1,10 +1,11 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@colibri/core@~0.17.1": "0.17.3",
-    "jsr:@colibri/core@~0.17.3": "0.17.3",
-    "jsr:@colibri/rpc-streamer@~0.2.1": "0.2.1",
-    "jsr:@colibri/sep10@~0.5.1": "0.5.1",
+    "jsr:@colibri/core@0.18": "0.18.0",
+    "jsr:@colibri/plugin-channel-accounts@0.1": "0.1.0",
+    "jsr:@colibri/plugin-fee-bump@~0.9.3": "0.9.3",
+    "jsr:@colibri/rpc-streamer@~0.2.4": "0.2.4",
+    "jsr:@colibri/sep10@~0.5.3": "0.5.3",
     "jsr:@colibri/test-tooling@0.3": "0.3.0",
     "jsr:@colibri/test-tooling@0.3.0": "0.3.0",
     "jsr:@fifo/convee@1.0.0": "1.0.0",
@@ -15,7 +16,6 @@
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/testing@1": "1.0.17",
     "jsr:@std/toml@^1.0.11": "1.0.11",
-    "npm:@stellar/stellar-sdk@^14.3.3": "14.6.1",
     "npm:@stellar/stellar-sdk@^14.6.1": "14.6.1",
     "npm:@types/node@*": "24.2.0",
     "npm:buffer@^6.0.3": "6.0.3",
@@ -23,27 +23,43 @@
     "npm:dockerode@3.3.3": "3.3.3"
   },
   "jsr": {
-    "@colibri/core@0.17.3": {
-      "integrity": "2de02ec5dc86d2ccc7dbe241e9c9c119908a1d0129253c1f00b177831fb8fee9",
+    "@colibri/core@0.18.0": {
+      "integrity": "6a906235f36dc9d065e7b602ce6049692bec199049ca0788822a71ed045edbc5",
       "dependencies": [
         "jsr:@fifo/convee",
         "jsr:@std/toml",
-        "npm:@stellar/stellar-sdk@^14.6.1",
+        "npm:@stellar/stellar-sdk",
         "npm:buffer"
       ]
     },
-    "@colibri/rpc-streamer@0.2.1": {
-      "integrity": "578e260d45ab4af31642955aaa48c0086191c4be737a6a93dffc52778b446596",
+    "@colibri/plugin-channel-accounts@0.1.0": {
+      "integrity": "02076cd46fc13e00734b7b12ceb6b2dccd8886b42d5258abcf25de7e85506fe9",
       "dependencies": [
-        "jsr:@colibri/core@~0.17.1",
-        "npm:@stellar/stellar-sdk@^14.6.1"
+        "jsr:@colibri/core",
+        "jsr:@fifo/convee",
+        "npm:@stellar/stellar-sdk"
       ]
     },
-    "@colibri/sep10@0.5.1": {
-      "integrity": "6f7e629a8fa976a8adbebcfe65facc06cc7c02a3c2355e47b757a63521b6c861",
+    "@colibri/plugin-fee-bump@0.9.3": {
+      "integrity": "477822acdf53d38df91c03a813a0509d25e25a25ccde7aab912fc67393bf7e4b",
       "dependencies": [
-        "jsr:@colibri/core@~0.17.1",
-        "npm:@stellar/stellar-sdk@^14.6.1",
+        "jsr:@colibri/core",
+        "jsr:@fifo/convee",
+        "npm:@stellar/stellar-sdk"
+      ]
+    },
+    "@colibri/rpc-streamer@0.2.4": {
+      "integrity": "afa1aca56a6ef8ea6a83373b23dff8ed9391f3512c7b7f1a6741cfa0bc3c2aab",
+      "dependencies": [
+        "jsr:@colibri/core",
+        "npm:@stellar/stellar-sdk"
+      ]
+    },
+    "@colibri/sep10@0.5.3": {
+      "integrity": "913fdf06063ad8aca9eabe5885304dee19e58e6f40baca4f594683c6b7dd9869",
+      "dependencies": [
+        "jsr:@colibri/core",
+        "npm:@stellar/stellar-sdk",
         "npm:buffer"
       ]
     },
@@ -574,13 +590,15 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@colibri/core@~0.17.3",
-      "jsr:@colibri/rpc-streamer@~0.2.1",
-      "jsr:@colibri/sep10@~0.5.1",
+      "jsr:@colibri/core@0.18",
+      "jsr:@colibri/plugin-channel-accounts@0.1",
+      "jsr:@colibri/plugin-fee-bump@~0.9.3",
+      "jsr:@colibri/rpc-streamer@~0.2.4",
+      "jsr:@colibri/sep10@~0.5.3",
       "jsr:@colibri/test-tooling@0.3",
       "jsr:@std/assert@1",
       "jsr:@std/testing@1",
-      "npm:@stellar/stellar-sdk@^14.3.3",
+      "npm:@stellar/stellar-sdk@^14.6.1",
       "npm:buffer@^6.0.3",
       "npm:chalk@^5.3.0"
     ]
