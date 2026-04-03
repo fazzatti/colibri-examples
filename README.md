@@ -29,6 +29,8 @@ the SDK's core concepts step by step.
   for graceful handling.
 - `contract-transfer` - Perform a simple XLM transfer using the Stellar Asset
   Contract (SAC).
+- `issue-asset` - Issue a custom `COLIBRI` asset with a trustline
+  and mint flow using the Stellar Asset Contract (SAC).
 
 ## Examples
 
