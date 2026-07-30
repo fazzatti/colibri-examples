@@ -1,18 +1,20 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@colibri/core@0.24": "0.24.0",
-    "jsr:@colibri/plugin-channel-accounts@~0.2.8": "0.2.8",
-    "jsr:@colibri/plugin-fee-bump@~0.9.11": "0.9.11",
-    "jsr:@colibri/rpc-streamer@~0.2.12": "0.2.12",
+    "jsr:@colibri/core@0.25": "0.25.0",
+    "jsr:@colibri/plugin-channel-accounts@~0.2.9": "0.2.9",
+    "jsr:@colibri/plugin-fee-bump@0.10": "0.10.0",
+    "jsr:@colibri/rpc-streamer@~0.2.13": "0.2.13",
     "jsr:@colibri/test-tooling@~0.3.1": "0.3.1",
-    "jsr:@colibri/webauth@0.1": "0.1.0",
+    "jsr:@colibri/webauth@~0.1.2": "0.1.2",
     "jsr:@fifo/convee@1.0.0": "1.0.0",
     "jsr:@std/assert@*": "1.0.19",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.17": "1.0.19",
     "jsr:@std/collections@^1.1.3": "1.3.0",
     "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@std/internal@^1.0.14": "1.0.14",
+    "jsr:@std/path@*": "1.1.6",
     "jsr:@std/testing@1": "1.0.17",
     "jsr:@std/toml@^1.0.11": "1.0.11",
     "npm:@stellar/stellar-sdk@^16.0.1": "16.1.0",
@@ -22,8 +24,8 @@
     "npm:dockerode@3.3.3": "3.3.3"
   },
   "jsr": {
-    "@colibri/core@0.24.0": {
-      "integrity": "242e4584e4d89108f1f560f0854500c15a2bf4236876f3593e3220132896875d",
+    "@colibri/core@0.25.0": {
+      "integrity": "ce400fab429fb3b7c9619ad69a7f8a1639da296781e5cd41691b50c371b45488",
       "dependencies": [
         "jsr:@fifo/convee",
         "jsr:@std/toml",
@@ -31,24 +33,24 @@
         "npm:buffer"
       ]
     },
-    "@colibri/plugin-channel-accounts@0.2.8": {
-      "integrity": "eae8590a85f01df755e50c25315109a76b9bb34154fd6145eec76bcfaa84e05a",
+    "@colibri/plugin-channel-accounts@0.2.9": {
+      "integrity": "6f1993aa1f709703eeb3c10049b8efd5b03f7cdb9648d2e26ebff6b68aefb015",
       "dependencies": [
         "jsr:@colibri/core",
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk"
       ]
     },
-    "@colibri/plugin-fee-bump@0.9.11": {
-      "integrity": "09ba1d73f91c5dbfd75de21edcbdd32ec6d01d33f902378ec777375647e1f584",
+    "@colibri/plugin-fee-bump@0.10.0": {
+      "integrity": "16946a17c6e38f5c02aca0e09d77cc1b389fe9c3c2a066135984747b70967b3d",
       "dependencies": [
         "jsr:@colibri/core",
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk"
       ]
     },
-    "@colibri/rpc-streamer@0.2.12": {
-      "integrity": "7b1c61c710f52855f183c6aabb2410f47d4481c3a8561c6dd2b27c6ff8e36e34",
+    "@colibri/rpc-streamer@0.2.13": {
+      "integrity": "de61d304718fb2cb84a7d69f8ab075d5951be4e214cf9acc726019b1b60e6a39",
       "dependencies": [
         "jsr:@colibri/core",
         "npm:@stellar/stellar-sdk"
@@ -60,8 +62,8 @@
         "npm:dockerode"
       ]
     },
-    "@colibri/webauth@0.1.0": {
-      "integrity": "bcad4d0ac49b9093fd932f631f5b06e2f65a9c30093e01eb28dcab6f7475d980",
+    "@colibri/webauth@0.1.2": {
+      "integrity": "bafbfd6f7035b609b1e324e3e3f176ddb450d411c64a9fc9126fbda3009520e6",
       "dependencies": [
         "jsr:@colibri/core",
         "npm:@stellar/stellar-sdk",
@@ -74,7 +76,7 @@
     "@std/assert@1.0.19": {
       "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
       "dependencies": [
-        "jsr:@std/internal"
+        "jsr:@std/internal@^1.0.12"
       ]
     },
     "@std/collections@1.3.0": {
@@ -83,11 +85,20 @@
     "@std/internal@1.0.12": {
       "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
     },
+    "@std/internal@1.0.14": {
+      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    },
+    "@std/path@1.1.6": {
+      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.14"
+      ]
+    },
     "@std/testing@1.0.17": {
       "integrity": "87bdc2700fa98249d48a17cd72413352d3d3680dcfbdb64947fd0982d6bbf681",
       "dependencies": [
         "jsr:@std/assert@^1.0.17",
-        "jsr:@std/internal"
+        "jsr:@std/internal@^1.0.12"
       ]
     },
     "@std/toml@1.0.11": {
@@ -487,12 +498,12 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@colibri/core@0.24",
-      "jsr:@colibri/plugin-channel-accounts@~0.2.8",
-      "jsr:@colibri/plugin-fee-bump@~0.9.11",
-      "jsr:@colibri/rpc-streamer@~0.2.12",
+      "jsr:@colibri/core@0.25",
+      "jsr:@colibri/plugin-channel-accounts@~0.2.9",
+      "jsr:@colibri/plugin-fee-bump@0.10",
+      "jsr:@colibri/rpc-streamer@~0.2.13",
       "jsr:@colibri/test-tooling@~0.3.1",
-      "jsr:@colibri/webauth@0.1",
+      "jsr:@colibri/webauth@~0.1.2",
       "jsr:@std/assert@1",
       "jsr:@std/testing@1",
       "npm:@stellar/stellar-sdk@^16.0.1",
