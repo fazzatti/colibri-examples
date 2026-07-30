@@ -1,0 +1,7 @@
+{
+  "sorobanSdk": "27.0.3",
+  "artifacts": {
+    "recursive_delegate_account_contract.wasm": "a872f3d4f7b9b27f24ad179ac96cd2e30fd66d1b00fef794410e9a7ad0099e6d",
+    "delegated_asset_account_contract.wasm": "539bad623e11f4c73dff0e972068d75ced4aedc0d590360adde1d2980c2bf22e"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "license": "MIT",
+  "imports": {
+    "@colibri/core": "jsr:@colibri/core@^0.25.0",
+    "chalk": "npm:chalk@^5.3.0",
+    "stellar-sdk": "npm:@stellar/stellar-sdk@^16.0.1"
+  },
+  "tasks": {
+    "contract:build": "deno run -A ./contracts/build.ts",
+    "contract:check": "deno run -A ./contracts/build.ts --check",
+    "direct": "deno run -A ./direct-delegate.ts",
+    "recursive": "deno run -A ./recursive-delegate.ts",
+    "nested": "deno run -A ./nested-delegates.ts",
+    "branching": "deno run -A ./branching-delegates.ts"
+  }
+}

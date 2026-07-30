@@ -14,13 +14,17 @@ console.log(chalk.blue.bold("\n🔐 WebAuth: explicit SEP-10\n"));
 console.log(chalk.gray("Account:"), wallet.publicKey());
 console.log(chalk.gray("Home domain:"), anchorDomain);
 
+const anchorFetch: typeof globalThis.fetch = async (input, init) => {
+  const headers = new Headers(
+    init && typeof init === "object" ? Reflect.get(init, "headers") : undefined,
+  );
+  headers.set("Accept", "*/*");
+  return await fetch(input, { ...init, headers });
+};
+
 const client = await WebAuthClient.fromDomain(anchorDomain, {
   network: NetworkConfig.TestNet(),
-  fetch: async (input, init) => {
-    const headers = new Headers(init?.headers);
-    headers.set("Accept", "*/*");
-    return await fetch(input, { ...init, headers });
-  },
+  fetch: anchorFetch,
 });
 
 console.log(

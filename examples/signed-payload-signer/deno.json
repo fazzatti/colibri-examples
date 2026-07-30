@@ -1,0 +1,12 @@
+{
+  "license": "MIT",
+  "imports": {
+    "@colibri/core": "jsr:@colibri/core@^0.25.0",
+    "buffer": "npm:buffer@^6.0.3",
+    "chalk": "npm:chalk@^5.3.0",
+    "stellar-sdk": "npm:@stellar/stellar-sdk@^16.0.1"
+  },
+  "tasks": {
+    "signed-payload": "deno run -A ./signed-payload.ts"
+  }
+}
