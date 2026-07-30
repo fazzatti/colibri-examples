@@ -27,6 +27,11 @@ cd examples/signed-payload-signer
 deno task signed-payload
 ```
 
+The complete example lives in [`signed-payload.ts`](./signed-payload.ts).
+Sequence planning, transaction construction, signer installation, envelope
+authorization, submission, and cleanup are kept together rather than hidden
+behind example-specific helpers.
+
 ## Flow
 
 The example follows a two-transaction authorization lifecycle:

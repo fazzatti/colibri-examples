@@ -24,6 +24,11 @@ cd examples/pre-authorized-transaction-signer
 deno task pre-authorized
 ```
 
+The complete example lives in
+[`pre-authorized-transaction.ts`](./pre-authorized-transaction.ts). Sequence
+planning, exact transaction construction, signer installation, envelope
+authorization, submission, and verification are all visible in that file.
+
 ## Sequence Timeline
 
 The future transaction must be finalized before its hash can be installed, but
@@ -62,10 +67,11 @@ accepted because the transaction itself matches the installed `T...` signer.
 
 ## What Colibri Handles
 
-`PreAuthorizedTransactionSigner` derives the StrKey `T...` identity, exposes the
-raw 32-byte signer key needed by `setOptions`, verifies that a transaction
-matches it, and participates in Colibri's normal envelope-signing abstraction.
-For this signer type, successful authorization means preserving the transaction
+`PreAuthorizedTransactionSigner` derives the StrKey `T...` identity, verifies
+that a transaction matches it, and participates in Colibri's normal
+envelope-signing abstraction. The example uses `StrKey.decodePreAuthTx(...)` to
+convert that identity into the raw 32-byte value required by `setOptions`. For
+this signer type, successful authorization means preserving the transaction
 unchanged rather than appending a signature.
 
 ## One-Shot Lifecycle

@@ -64,10 +64,14 @@ they do not act as the transaction source.
 The Ed25519 leaves are funded Testnet accounts because Stellar resolves their
 account signer weights during enforcing simulation.
 
-The four entrypoint files define their topologies independently and never invoke
-one another. [`shared.ts`](./shared.ts) contains only the repeated Testnet
-setup, contract deployment, funding, and withdrawal mechanics so that each
-entrypoint can keep its own authorization tree visible.
+Each entrypoint is a complete, self-contained example. The files intentionally
+repeat Testnet setup, WASM upload, contract deployment, signer construction,
+funding, invocation, and result inspection so that readers can follow one path
+from beginning to end without jumping into an example-only wrapper.
+
+The only separate code is the generated contract specs and reproducible contract
+build tooling under [`./contracts`](./contracts). Every Colibri call a developer
+would make in an application remains visible in the runnable file.
 
 ## 1. Direct Delegate
 

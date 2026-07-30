@@ -29,6 +29,10 @@ cd examples/hash-x-signer
 deno task hash-x
 ```
 
+The complete example lives in [`hash-x.ts`](./hash-x.ts). Network setup,
+Friendbot funding, signer installation, pipeline execution, cleanup, and
+zeroization are kept in that one file so every public Colibri call is visible.
+
 The script:
 
 1. creates and funds a disposable source account and recipient;

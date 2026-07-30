@@ -6,7 +6,7 @@
  * signer key. To authorize a transaction, the envelope reveals the original
  * preimage, and Stellar hashes it to verify that it matches the installed key.
  *
- * This example demonstrates the complete lifecycle:
+ * This single file demonstrates the complete lifecycle:
  *
  * 1. create a disposable account, recipient, and secret preimage;
  * 2. install the preimage's hash as an account signer;
@@ -14,17 +14,39 @@
  * 4. remove the signer after the preimage becomes public; and
  * 5. zeroize Colibri's retained copy of the preimage.
  */
-import { HashXSigner, LocalSigner, StrKey } from "@colibri/core";
-import { Asset, Operation } from "stellar-sdk";
-import chalk from "chalk";
 import {
-  classicPipeline,
-  configFor,
-  fund,
-  installAccountSigner,
-} from "./shared.ts";
+  createClassicTransactionPipeline,
+  HashXSigner,
+  initializeWithFriendbot,
+  LocalSigner,
+  NetworkConfig,
+  StrKey,
+} from "@colibri/core";
+import { Asset, Operation } from "stellar-sdk";
+import { Server } from "stellar-sdk/rpc";
+import chalk from "chalk";
 
 console.log(chalk.bgBlue("Hash-X signer example on Stellar Testnet"));
+
+/**
+ * Hash-X authorizes a classic transaction envelope, so we create Colibri's
+ * classic transaction pipeline for Testnet.
+ *
+ * `NetworkConfig.TestNet()` keeps the network passphrase, RPC URL, and
+ * Friendbot URL together. The RPC client is passed explicitly so every step
+ * uses the same connection.
+ */
+const networkConfig = NetworkConfig.TestNet();
+const rpc = new Server(networkConfig.rpcUrl, {
+  allowHttp: networkConfig.allowHttp,
+});
+const classicPipeline = createClassicTransactionPipeline({
+  networkConfig,
+  rpc,
+});
+
+const baseFee = "100" as const;
+const timeout = 120;
 
 /**
  * We create three independent pieces of state:
@@ -42,15 +64,33 @@ const account = LocalSigner.generateRandom();
 const recipient = LocalSigner.generateRandom();
 const hashXSigner = HashXSigner.generateRandom(true);
 
-/**
- * Friendbot creates and funds the two Testnet accounts. The Hash-X signer is
- * not an account and therefore does not need funding.
- */
-await fund(account, recipient);
-
 console.log("Account:", chalk.green(account.publicKey()));
 console.log("Recipient:", chalk.green(recipient.publicKey()));
 console.log("Hash-X signer:", chalk.green(hashXSigner.signerKey()));
+
+/**
+ * Friendbot creates and funds the two disposable Testnet accounts. The Hash-X
+ * signer is not an account and therefore does not need funding.
+ */
+console.log("Funding the source account with Friendbot...");
+await initializeWithFriendbot(
+  networkConfig.friendbotUrl,
+  account.publicKey(),
+  {
+    rpcUrl: networkConfig.rpcUrl,
+    allowHttp: networkConfig.allowHttp,
+  },
+);
+
+console.log("Funding the recipient with Friendbot...");
+await initializeWithFriendbot(
+  networkConfig.friendbotUrl,
+  recipient.publicKey(),
+  {
+    rpcUrl: networkConfig.rpcUrl,
+    allowHttp: networkConfig.allowHttp,
+  },
+);
 
 /**
  * Before a Hash-X value can authorize this account, the account owner must add
@@ -66,19 +106,29 @@ console.log("Hash-X signer:", chalk.green(hashXSigner.signerKey()));
  * active also gives us a safe way to remove the disclosed signer later.
  */
 console.log(chalk.bold("\n1. Installing the Hash-X signer on the account..."));
-const installHash = await installAccountSigner(
-  account,
-  Operation.setOptions({
-    lowThreshold: 1,
-    medThreshold: 1,
-    highThreshold: 1,
-    signer: {
-      sha256Hash: StrKey.decodeSha256Hash(hashXSigner.signerKey()),
-      weight: 1,
-    },
-  }),
+const installHash = await classicPipeline.run({
+  operations: [
+    Operation.setOptions({
+      lowThreshold: 1,
+      medThreshold: 1,
+      highThreshold: 1,
+      signer: {
+        sha256Hash: StrKey.decodeSha256Hash(hashXSigner.signerKey()),
+        weight: 1,
+      },
+    }),
+  ],
+  config: {
+    source: account.publicKey(),
+    fee: baseFee,
+    timeout,
+    signers: [account],
+  },
+});
+console.log(
+  "Installed the hash in transaction:",
+  chalk.green(installHash.hash),
 );
-console.log("Installed the hash in transaction:", chalk.green(installHash));
 
 /**
  * A Colibri envelope signer declares which account it can satisfy.
@@ -93,10 +143,16 @@ hashXSigner.addTarget(account.publicKey());
  * We now build and submit a normal 1 XLM payment, but the transaction config
  * contains only `hashXSigner`. The account's master key is intentionally absent.
  *
- * The classic transaction pipeline builds the envelope, determines that the
- * source account needs a signature, selects the targeted Hash-X signer, and
- * calls its transaction-signing capability. Unlike Ed25519 signing, this adds
- * the preimage itself to the envelope.
+ * The classic transaction pipeline:
+ *
+ * 1. loads the source account and builds the transaction;
+ * 2. determines the envelope's signing requirements;
+ * 3. matches the account requirement with the targeted Hash-X signer;
+ * 4. adds the preimage to the envelope; and
+ * 5. submits and confirms the transaction.
+ *
+ * Unlike Ed25519 signing, the envelope contains the preimage itself rather than
+ * a signature over the transaction hash.
  */
 console.log(
   chalk.bold("\n2. Paying 1 XLM using only the Hash-X preimage..."),
@@ -109,7 +165,12 @@ const payment = await classicPipeline.run({
       amount: "1",
     }),
   ],
-  config: configFor(account.publicKey(), [hashXSigner]),
+  config: {
+    source: account.publicKey(),
+    fee: baseFee,
+    timeout,
+    signers: [hashXSigner],
+  },
 });
 
 console.log(
@@ -126,18 +187,25 @@ console.log(
  * operation with weight 0, which removes the Hash-X signer from the account.
  */
 console.log(chalk.bold("\n3. Removing the disclosed signer..."));
-const removeHash = await installAccountSigner(
-  account,
-  Operation.setOptions({
-    signer: {
-      sha256Hash: StrKey.decodeSha256Hash(hashXSigner.signerKey()),
-      weight: 0,
-    },
-  }),
-);
+const removeHash = await classicPipeline.run({
+  operations: [
+    Operation.setOptions({
+      signer: {
+        sha256Hash: StrKey.decodeSha256Hash(hashXSigner.signerKey()),
+        weight: 0,
+      },
+    }),
+  ],
+  config: {
+    source: account.publicKey(),
+    fee: baseFee,
+    timeout,
+    signers: [account],
+  },
+});
 console.log(
   "Removed the disclosed Hash-X signer:",
-  chalk.green(removeHash),
+  chalk.green(removeHash.hash),
 );
 
 /**
