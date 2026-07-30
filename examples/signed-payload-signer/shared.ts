@@ -1,3 +1,11 @@
+/**
+ * Shared transaction helpers for the signed-payload example.
+ *
+ * The interesting authorization policy remains in `signed-payload.ts`. This
+ * module exposes the lower-level mechanics needed to plan sequence numbers,
+ * update account signers, sign one already-finalized envelope, and submit it
+ * without rebuilding it.
+ */
 import {
   buildTransaction,
   createClassicTransactionPipeline,
@@ -19,11 +27,24 @@ const networkConfig = NetworkConfig.TestNet();
 const rpc = new Server(networkConfig.rpcUrl, {
   allowHttp: networkConfig.allowHttp,
 });
+
+/**
+ * The setup and cleanup transactions are ordinary classic transactions signed
+ * by the account's master key, so Colibri's classic pipeline can build and
+ * submit them end to end.
+ */
 const classicPipeline = createClassicTransactionPipeline({
   networkConfig,
   rpc,
 });
 
+/**
+ * Creates a classic transaction configuration.
+ *
+ * The `signers` array can contain different signer implementations. Colibri
+ * inspects the transaction requirements and invokes only capabilities that
+ * declare they can satisfy the relevant account.
+ */
 const configFor = (
   source: ReturnType<LocalSigner["publicKey"]>,
   signers: TransactionConfig["signers"],
@@ -34,6 +55,12 @@ const configFor = (
   signers,
 });
 
+/**
+ * Uses Friendbot to create disposable Testnet accounts.
+ *
+ * This removes unrelated account bootstrapping from the example. Production
+ * systems should replace Friendbot with their own account lifecycle.
+ */
 export async function fund(
   ...signers: LocalSigner[]
 ): Promise<void> {
@@ -50,6 +77,12 @@ export async function fund(
   }
 }
 
+/**
+ * Runs a single `setOptions` operation with the account's existing master key.
+ *
+ * This helper is used both to install the `P...` signer with weight 1 and to
+ * remove it later with weight 0.
+ */
 export async function installAccountSigner(
   account: LocalSigner,
   signerOperation: xdr.Operation,
@@ -64,9 +97,14 @@ export async function installAccountSigner(
 /**
  * Builds a transaction whose sequence follows one setup transaction.
  *
- * `buildTransaction` increments the supplied account sequence. Passing the
- * current sequence plus one therefore prepares the transaction at
- * `current + 2`.
+ * Suppose RPC reports the account's current sequence as `N`:
+ *
+ * - the setup transaction built later by `classicPipeline` consumes `N + 1`;
+ * - `buildTransaction` itself increments the sequence supplied to it; therefore
+ * - supplying `N + 1` creates the future transaction at `N + 2`.
+ *
+ * This lets us hash the exact future transaction before the setup transaction
+ * installs a signer derived from that hash.
  */
 export async function buildAfterSetup(
   source: ReturnType<LocalSigner["publicKey"]>,
@@ -89,6 +127,15 @@ export async function buildAfterSetup(
   });
 }
 
+/**
+ * Signs and submits an already-finalized transaction without rebuilding it.
+ *
+ * Rebuilding would risk changing hash-affecting fields and invalidating the
+ * payload policy. `envelopeSigningRequirements` identifies the accounts that
+ * must authorize the prepared envelope. `signEnvelope` routes those
+ * requirements to the supplied signer capabilities, and `sendTransaction`
+ * waits for RPC confirmation.
+ */
 export async function authorizeAndSubmit(
   transaction: Transaction,
   signers: Signer[],
@@ -102,6 +149,8 @@ export async function authorizeAndSubmit(
     signatureRequirements: envelopeSigningRequirements({ transaction }),
     signers,
   });
+
+  // This example prepares a classic transaction, not a fee-bump envelope.
   if (!(authorized instanceof Transaction)) {
     throw new Error("Expected a classic transaction after envelope signing");
   }

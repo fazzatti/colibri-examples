@@ -1,3 +1,10 @@
+/**
+ * Shared transaction helpers for the pre-authorized transaction example.
+ *
+ * The main script teaches the `T...` signer lifecycle. This module documents
+ * the sequence planning and low-level submission mechanics that let us install
+ * a hash in one transaction and submit the exact hashed transaction next.
+ */
 import {
   buildTransaction,
   createClassicTransactionPipeline,
@@ -19,11 +26,22 @@ export const networkConfig = NetworkConfig.TestNet();
 const rpc = new Server(networkConfig.rpcUrl, {
   allowHttp: networkConfig.allowHttp,
 });
+
+/**
+ * The setup transaction is an ordinary master-key-authorized account update,
+ * so Colibri's classic pipeline can build, sign, submit, and confirm it.
+ */
 const classicPipeline = createClassicTransactionPipeline({
   networkConfig,
   rpc,
 });
 
+/**
+ * Every transaction needs a source account, a fee, a timeout, and signers.
+ *
+ * The caller selects the signers because setup uses the account's master key,
+ * while the future payment is authorized by its pre-authorized `T...` signer.
+ */
 const configFor = (
   source: ReturnType<LocalSigner["publicKey"]>,
   signers: TransactionConfig["signers"],
@@ -34,6 +52,10 @@ const configFor = (
   signers,
 });
 
+/**
+ * Friendbot creates and funds disposable Testnet accounts. Never use Friendbot
+ * or randomly generated demonstration keys for production accounts.
+ */
 export async function fund(
   ...signers: LocalSigner[]
 ): Promise<void> {
@@ -50,6 +72,10 @@ export async function fund(
   }
 }
 
+/**
+ * Submits the account update that installs the future transaction's hash as a
+ * signer. The account's master key authorizes this setup transaction.
+ */
 export async function installAccountSigner(
   account: LocalSigner,
   signerOperation: xdr.Operation,
@@ -64,9 +90,12 @@ export async function installAccountSigner(
 /**
  * Builds a transaction whose sequence follows one setup transaction.
  *
- * `buildTransaction` increments the supplied account sequence. Passing the
- * current sequence plus one therefore prepares the transaction at
- * `current + 2`.
+ * If the current account sequence is `N`, the setup transaction will use
+ * `N + 1`. Because `buildTransaction` increments the sequence passed to it, we
+ * pass `N + 1` to prepare the future transaction at `N + 2`.
+ *
+ * Preparing those exact bytes first is mandatory: the account signer installed
+ * by setup is the hash of this complete transaction.
  */
 export async function buildAfterSetup(
   source: ReturnType<LocalSigner["publicKey"]>,
@@ -89,6 +118,13 @@ export async function buildAfterSetup(
   });
 }
 
+/**
+ * Authorizes an already-finalized transaction and submits those same bytes.
+ *
+ * A `PreAuthorizedTransactionSigner` verifies that its stored hash matches the
+ * transaction. It deliberately adds no decorated signature because Stellar
+ * reads the matching transaction hash from the source account itself.
+ */
 export async function authorizeAndSubmit(
   transaction: Transaction,
   signers: Signer[],
@@ -102,6 +138,7 @@ export async function authorizeAndSubmit(
     signatureRequirements: envelopeSigningRequirements({ transaction }),
     signers,
   });
+  // This example prepares a classic transaction, not a fee-bump envelope.
   if (!(authorized instanceof Transaction)) {
     throw new Error("Expected a classic transaction after envelope signing");
   }

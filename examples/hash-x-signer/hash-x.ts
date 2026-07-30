@@ -1,8 +1,18 @@
 /**
- * Authorizes a Testnet payment by revealing a Hash-X preimage.
+ * Example: Authorize a Stellar payment with a Hash-X signer.
  *
- * The account owner installs the hash first, the payment is signed only by
- * the preimage, and the owner removes the disclosed signer afterwards.
+ * A Hash-X signer proves knowledge of a secret value called a preimage. The
+ * Stellar account stores only the SHA-256 hash of that value as an `X...`
+ * signer key. To authorize a transaction, the envelope reveals the original
+ * preimage, and Stellar hashes it to verify that it matches the installed key.
+ *
+ * This example demonstrates the complete lifecycle:
+ *
+ * 1. create a disposable account, recipient, and secret preimage;
+ * 2. install the preimage's hash as an account signer;
+ * 3. authorize a payment using only the preimage;
+ * 4. remove the signer after the preimage becomes public; and
+ * 5. zeroize Colibri's retained copy of the preimage.
  */
 import { HashXSigner, LocalSigner, StrKey } from "@colibri/core";
 import { Asset, Operation } from "stellar-sdk";
@@ -16,16 +26,46 @@ import {
 
 console.log(chalk.bgBlue("Hash-X signer example on Stellar Testnet"));
 
+/**
+ * We create three independent pieces of state:
+ *
+ * - `account` owns the XLM and initially controls itself through its master
+ *   Ed25519 key;
+ * - `recipient` receives the example payment; and
+ * - `hashXSigner` owns a secure random 32-byte preimage.
+ *
+ * Passing `true` to `generateRandom` prevents application code from reading the
+ * preimage directly. The signer can still reveal it when authorizing an
+ * envelope, which is the only place this example needs it.
+ */
 const account = LocalSigner.generateRandom();
 const recipient = LocalSigner.generateRandom();
 const hashXSigner = HashXSigner.generateRandom(true);
 
+/**
+ * Friendbot creates and funds the two Testnet accounts. The Hash-X signer is
+ * not an account and therefore does not need funding.
+ */
 await fund(account, recipient);
 
 console.log("Account:", chalk.green(account.publicKey()));
 console.log("Recipient:", chalk.green(recipient.publicKey()));
 console.log("Hash-X signer:", chalk.green(hashXSigner.signerKey()));
 
+/**
+ * Before a Hash-X value can authorize this account, the account owner must add
+ * its SHA-256 hash with a `setOptions` operation.
+ *
+ * Stellar's `setOptions` operation expects the raw 32-byte hash, while Colibri
+ * exposes the same identity as an `X...` StrKey. `decodeSha256Hash` converts
+ * between those two representations.
+ *
+ * We set every account threshold to 1 and give the new signer weight 1. The
+ * master key keeps its existing weight, so either the master key or the Hash-X
+ * preimage can satisfy the payment's medium threshold. Keeping the master key
+ * active also gives us a safe way to remove the disclosed signer later.
+ */
+console.log(chalk.bold("\n1. Installing the Hash-X signer on the account..."));
 const installHash = await installAccountSigner(
   account,
   Operation.setOptions({
@@ -40,8 +80,27 @@ const installHash = await installAccountSigner(
 );
 console.log("Installed the hash in transaction:", chalk.green(installHash));
 
+/**
+ * A Colibri envelope signer declares which account it can satisfy.
+ *
+ * Adding this target lets the envelope-signing process match the source
+ * account's signature requirement with `hashXSigner`. It also prevents a signer
+ * from being used accidentally for an unrelated account.
+ */
 hashXSigner.addTarget(account.publicKey());
 
+/**
+ * We now build and submit a normal 1 XLM payment, but the transaction config
+ * contains only `hashXSigner`. The account's master key is intentionally absent.
+ *
+ * The classic transaction pipeline builds the envelope, determines that the
+ * source account needs a signature, selects the targeted Hash-X signer, and
+ * calls its transaction-signing capability. Unlike Ed25519 signing, this adds
+ * the preimage itself to the envelope.
+ */
+console.log(
+  chalk.bold("\n2. Paying 1 XLM using only the Hash-X preimage..."),
+);
 const payment = await classicPipeline.run({
   operations: [
     Operation.payment({
@@ -58,6 +117,15 @@ console.log(
   chalk.green(payment.hash),
 );
 
+/**
+ * The submitted envelope is public ledger data, so the preimage is no longer a
+ * secret. Leaving the same `X...` signer installed would let anyone who reads
+ * that envelope reuse the disclosed value.
+ *
+ * We therefore use the still-private master key to submit another `setOptions`
+ * operation with weight 0, which removes the Hash-X signer from the account.
+ */
+console.log(chalk.bold("\n3. Removing the disclosed signer..."));
 const removeHash = await installAccountSigner(
   account,
   Operation.setOptions({
@@ -72,6 +140,12 @@ console.log(
   chalk.green(removeHash),
 );
 
+/**
+ * Finally, `destroy` overwrites and invalidates the preimage retained inside
+ * this signer instance on a best-effort basis. This protects against accidental
+ * reuse inside the running application; it cannot erase the value already
+ * published in the transaction envelope.
+ */
 hashXSigner.destroy();
 console.log(
   chalk.yellow(
