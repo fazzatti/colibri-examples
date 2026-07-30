@@ -1,0 +1,6 @@
+{
+  "license": "MIT",
+  "tasks": {
+    "hash-x": "deno run -A ./hash-x.ts"
+  }
+}

@@ -45,9 +45,15 @@ setup and usage details:
 - [`webauth`](./examples/webauth/README.md) - Authenticate through explicit
   SEP-10 and SEP-45 paths with the unified `@colibri/webauth` client, including
   a Testnet-deployed passkey contract-account example.
-- [`signers`](./examples/signers/README.md) - Run delegated Soroban
-  authorization topologies and Hash-X, signed-payload, and pre-authorized
-  transaction signer lifecycles on Testnet.
+- [`delegated-signers`](./examples/delegated-signers/README.md) - Compose and
+  execute direct, recursive, deep, and branching delegated Soroban authorization
+  topologies on Testnet.
+- [`hash-x-signer`](./examples/hash-x-signer/README.md) - Install, use, remove,
+  and zeroize a Hash-X signer on Testnet.
+- [`signed-payload-signer`](./examples/signed-payload-signer/README.md) - Bind
+  an Ed25519 signed-payload signer to a prepared Testnet transaction.
+- [`pre-authorized-transaction-signer`](./examples/pre-authorized-transaction-signer/README.md) -
+  Install and execute one exact pre-authorized Testnet transaction.
 - [`stellar-test-ledger`](./examples/stellar-test-ledger/README.md) - Use
   `StellarTestLedger` for ephemeral integration tests and reusable local
   Quickstart ledgers with Lab, explorer, and transaction scripts.

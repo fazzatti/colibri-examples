@@ -15,7 +15,7 @@ import {
 import chalk from "chalk";
 import { DELEGATED_ASSET_ACCOUNT_SPEC } from "./contracts/specs/delegated-asset-account.ts";
 import { RECURSIVE_DELEGATE_ACCOUNT_SPEC } from "./contracts/specs/recursive-delegate-account.ts";
-import { fund, networkConfig, rpc } from "./shared.ts";
+import { fund, networkConfig, rpc } from "./stellar.ts";
 
 type Topology = {
   name: string;

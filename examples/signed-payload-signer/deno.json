@@ -1,0 +1,6 @@
+{
+  "license": "MIT",
+  "tasks": {
+    "signed-payload": "deno run -A ./signed-payload.ts"
+  }
+}

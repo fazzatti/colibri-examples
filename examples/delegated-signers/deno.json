@@ -1,0 +1,8 @@
+{
+  "license": "MIT",
+  "tasks": {
+    "contract:build": "deno run -A ./contracts/build.ts",
+    "contract:check": "deno run -A ./contracts/build.ts --check",
+    "delegated": "deno task contract:build && deno run -A ./delegated.ts"
+  }
+}

@@ -13,18 +13,18 @@ import {
 import { Transaction, type xdr } from "stellar-sdk";
 import { Server } from "stellar-sdk/rpc";
 
-export const BASE_FEE = "100" as const;
-export const TIMEOUT = 120;
-export const networkConfig = NetworkConfig.TestNet();
-export const rpc = new Server(networkConfig.rpcUrl, {
+const BASE_FEE = "100" as const;
+const TIMEOUT = 120;
+const networkConfig = NetworkConfig.TestNet();
+const rpc = new Server(networkConfig.rpcUrl, {
   allowHttp: networkConfig.allowHttp,
 });
-export const classicPipeline = createClassicTransactionPipeline({
+const classicPipeline = createClassicTransactionPipeline({
   networkConfig,
   rpc,
 });
 
-export const configFor = (
+const configFor = (
   source: ReturnType<LocalSigner["publicKey"]>,
   signers: TransactionConfig["signers"],
 ): TransactionConfig => ({

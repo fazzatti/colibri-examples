@@ -1,0 +1,6 @@
+{
+  "license": "MIT",
+  "tasks": {
+    "pre-authorized": "deno run -A ./pre-authorized-transaction.ts"
+  }
+}
