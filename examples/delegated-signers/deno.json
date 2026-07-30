@@ -3,6 +3,9 @@
   "tasks": {
     "contract:build": "deno run -A ./contracts/build.ts",
     "contract:check": "deno run -A ./contracts/build.ts --check",
-    "delegated": "deno task contract:build && deno run -A ./delegated.ts"
+    "direct": "deno run -A ./direct-delegate.ts",
+    "recursive": "deno run -A ./recursive-delegate.ts",
+    "nested": "deno run -A ./nested-delegates.ts",
+    "branching": "deno run -A ./branching-delegates.ts"
   }
 }
