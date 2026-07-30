@@ -509,6 +509,37 @@
       "npm:@stellar/stellar-sdk@^16.0.1",
       "npm:buffer@^6.0.3",
       "npm:chalk@^5.3.0"
-    ]
+    ],
+    "members": {
+      "examples/delegated-signers": {
+        "dependencies": [
+          "jsr:@colibri/core@0.25",
+          "npm:@stellar/stellar-sdk@^16.0.1",
+          "npm:chalk@^5.3.0"
+        ]
+      },
+      "examples/hash-x-signer": {
+        "dependencies": [
+          "jsr:@colibri/core@0.25",
+          "npm:@stellar/stellar-sdk@^16.0.1",
+          "npm:chalk@^5.3.0"
+        ]
+      },
+      "examples/pre-authorized-transaction-signer": {
+        "dependencies": [
+          "jsr:@colibri/core@0.25",
+          "npm:@stellar/stellar-sdk@^16.0.1",
+          "npm:chalk@^5.3.0"
+        ]
+      },
+      "examples/signed-payload-signer": {
+        "dependencies": [
+          "jsr:@colibri/core@0.25",
+          "npm:@stellar/stellar-sdk@^16.0.1",
+          "npm:buffer@^6.0.3",
+          "npm:chalk@^5.3.0"
+        ]
+      }
+    }
   }
 }

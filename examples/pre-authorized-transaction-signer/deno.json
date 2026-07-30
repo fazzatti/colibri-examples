@@ -1,5 +1,10 @@
 {
   "license": "MIT",
+  "imports": {
+    "@colibri/core": "jsr:@colibri/core@^0.25.0",
+    "chalk": "npm:chalk@^5.3.0",
+    "stellar-sdk": "npm:@stellar/stellar-sdk@^16.0.1"
+  },
   "tasks": {
     "pre-authorized": "deno run -A ./pre-authorized-transaction.ts"
   }
