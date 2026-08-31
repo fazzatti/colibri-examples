@@ -1,7 +1,9 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@colibri/build-verification@0.2": "0.2.0",
     "jsr:@colibri/core@0.25": "0.25.0",
+    "jsr:@colibri/core@0.26": "0.26.0",
     "jsr:@colibri/plugin-channel-accounts@~0.2.9": "0.2.9",
     "jsr:@colibri/plugin-fee-bump@0.10": "0.10.0",
     "jsr:@colibri/rpc-streamer@~0.2.13": "0.2.13",
@@ -24,8 +26,26 @@
     "npm:dockerode@3.3.3": "3.3.3"
   },
   "jsr": {
+    "@colibri/build-verification@0.2.0": {
+      "integrity": "6411a5c8698c1b928d72c36beaf79d5a235f6e5422294b42d2b3c7bba9cb4eb0",
+      "dependencies": [
+        "jsr:@colibri/core@0.26",
+        "jsr:@fifo/convee",
+        "npm:@stellar/stellar-sdk",
+        "npm:dockerode"
+      ]
+    },
     "@colibri/core@0.25.0": {
       "integrity": "ce400fab429fb3b7c9619ad69a7f8a1639da296781e5cd41691b50c371b45488",
+      "dependencies": [
+        "jsr:@fifo/convee",
+        "jsr:@std/toml",
+        "npm:@stellar/stellar-sdk",
+        "npm:buffer"
+      ]
+    },
+    "@colibri/core@0.26.0": {
+      "integrity": "7852f9363a5c1d57f8abe415039af25f82159c87509f087a273f83bf6a906721",
       "dependencies": [
         "jsr:@fifo/convee",
         "jsr:@std/toml",
@@ -36,7 +56,7 @@
     "@colibri/plugin-channel-accounts@0.2.9": {
       "integrity": "6f1993aa1f709703eeb3c10049b8efd5b03f7cdb9648d2e26ebff6b68aefb015",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.25",
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk"
       ]
@@ -44,7 +64,7 @@
     "@colibri/plugin-fee-bump@0.10.0": {
       "integrity": "16946a17c6e38f5c02aca0e09d77cc1b389fe9c3c2a066135984747b70967b3d",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.25",
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk"
       ]
@@ -52,7 +72,7 @@
     "@colibri/rpc-streamer@0.2.13": {
       "integrity": "de61d304718fb2cb84a7d69f8ab075d5951be4e214cf9acc726019b1b60e6a39",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.25",
         "npm:@stellar/stellar-sdk"
       ]
     },
@@ -65,7 +85,7 @@
     "@colibri/webauth@0.1.2": {
       "integrity": "bafbfd6f7035b609b1e324e3e3f176ddb450d411c64a9fc9126fbda3009520e6",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.25",
         "npm:@stellar/stellar-sdk",
         "npm:buffer"
       ]
@@ -511,6 +531,12 @@
       "npm:chalk@^5.3.0"
     ],
     "members": {
+      "examples/build-verification": {
+        "dependencies": [
+          "jsr:@colibri/build-verification@0.2",
+          "npm:chalk@^5.3.0"
+        ]
+      },
       "examples/delegated-signers": {
         "dependencies": [
           "jsr:@colibri/core@0.25",

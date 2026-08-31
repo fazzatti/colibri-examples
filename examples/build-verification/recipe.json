@@ -1,0 +1,11 @@
+{
+  "image": "docker.io/stellar/stellar-cli@sha256:ccdebe3bd4af47e01f275c3da6caeb2752d02b06bc8bc1b3db534432498810c0",
+  "arguments": ["contract", "build"],
+  "options": [
+    "--locked",
+    "--manifest-path=hello_world/Cargo.toml",
+    "--package=soroban-hello-world-contract",
+    "--optimize"
+  ],
+  "sourceSha256": "99914f1ae0c24483e5269026954be74532976cf3182ff4a30c196f826f53aa5d"
+}
