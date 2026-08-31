@@ -57,6 +57,9 @@ setup and usage details:
 - [`stellar-test-ledger`](./examples/stellar-test-ledger/README.md) - Use
   `StellarTestLedger` for ephemeral integration tests and reusable local
   Quickstart ledgers with Lab, explorer, and transaction scripts.
+- [`build-verification`](./examples/build-verification/README.md) - Rebuild an
+  immutable Soroban Hello World source with the TypeScript API or the
+  zero-install JSR CLI and compare its Wasm bytes exactly.
 
 ## About @colibri
 
@@ -68,7 +71,9 @@ and an extensible plugin architecture. Key packages include
 event parsing, [@colibri/webauth](https://jsr.io/@colibri/webauth) for SEP-10
 and SEP-45 authentication, and
 [@colibri/rpc-streamer](https://jsr.io/@colibri/rpc-streamer) for streaming
-Soroban RPC data (including contract events). This workspace also includes
+Soroban RPC data (including contract events), and
+[@colibri/build-verification](https://jsr.io/@colibri/build-verification) for
+reproducible contract rebuilds and byte comparison. This workspace also includes
 examples for the newer
 [@colibri/plugin-channel-accounts](https://jsr.io/@colibri/plugin-channel-accounts)
 and [@colibri/plugin-fee-bump](https://jsr.io/@colibri/plugin-fee-bump)
