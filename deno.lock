@@ -1,7 +1,7 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@colibri/build-verification@0.2": "0.2.0",
+    "jsr:@colibri/build-verification@0.3": "0.3.0",
     "jsr:@colibri/core@0.25": "0.25.0",
     "jsr:@colibri/core@0.26": "0.26.0",
     "jsr:@colibri/plugin-channel-accounts@~0.2.9": "0.2.9",
@@ -26,8 +26,8 @@
     "npm:dockerode@3.3.3": "3.3.3"
   },
   "jsr": {
-    "@colibri/build-verification@0.2.0": {
-      "integrity": "6411a5c8698c1b928d72c36beaf79d5a235f6e5422294b42d2b3c7bba9cb4eb0",
+    "@colibri/build-verification@0.3.0": {
+      "integrity": "c44ada38264c46f79bfb4b47e5e5f3925a21ec02e77e6d9126f12e073c2016f8",
       "dependencies": [
         "jsr:@colibri/core@0.26",
         "jsr:@fifo/convee",
@@ -533,7 +533,7 @@
     "members": {
       "examples/build-verification": {
         "dependencies": [
-          "jsr:@colibri/build-verification@0.2",
+          "jsr:@colibri/build-verification@0.3",
           "npm:chalk@^5.3.0"
         ]
       },

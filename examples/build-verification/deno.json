@@ -1,12 +1,12 @@
 {
   "license": "MIT",
   "imports": {
-    "@colibri/build-verification": "jsr:@colibri/build-verification@^0.2.0",
+    "@colibri/build-verification": "jsr:@colibri/build-verification@^0.3.0",
     "chalk": "npm:chalk@^5.3.0"
   },
   "tasks": {
     "verify:github": "deno run -A ./verify-from-github.ts",
-    "verify:cli": "deno run -A jsr:@colibri/build-verification@0.2.0/cli --wasm ./contract/hello-world.wasm --github-owner stellar --github-repository soroban-examples --github-revision 13b9f51d184aabde23dec820e44eed056cf9690f --recipe ./recipe.json --allow-build-network",
-    "verify:cli:files": "deno run -A jsr:@colibri/build-verification@0.2.0/cli --wasm ./contract/hello-world.wasm --github-owner stellar --github-repository soroban-examples --github-revision 13b9f51d184aabde23dec820e44eed056cf9690f --recipe ./recipe.json --allow-build-network --json --evidence ./.verification/cli-evidence.json --logs ./.verification/cli-logs.jsonl"
+    "verify:cli": "deno run -A jsr:@colibri/build-verification@0.3.0/cli --wasm ./contract/hello-world.wasm --github-owner stellar --github-repository soroban-examples --github-revision 13b9f51d184aabde23dec820e44eed056cf9690f --recipe ./recipe.json --allow-build-network",
+    "verify:cli:files": "deno run -A jsr:@colibri/build-verification@0.3.0/cli --wasm ./contract/hello-world.wasm --github-owner stellar --github-repository soroban-examples --github-revision 13b9f51d184aabde23dec820e44eed056cf9690f --recipe ./recipe.json --allow-build-network --json --evidence ./.verification/cli-evidence.json --logs ./.verification/cli-logs.jsonl"
   }
 }

@@ -80,7 +80,7 @@ The same verification can run through Colibri's CLI without installing the
 package or cloning the Colibri SDK:
 
 ```bash
-deno run -A jsr:@colibri/build-verification@0.2.0/cli \
+deno run -A jsr:@colibri/build-verification@0.3.0/cli \
   --wasm ./contract/hello-world.wasm \
   --github-owner stellar \
   --github-repository soroban-examples \
@@ -99,8 +99,10 @@ For convenience, the same command is available as:
 deno task verify:cli
 ```
 
-The default CLI output is one concise status line. A successful rebuild of this
-fixture prints:
+On an interactive terminal, the CLI displays a stage-aware verification spinner
+on standard error while the build is running, then clears it before printing one
+concise result line on standard output. Pass `--quiet` when progress should be
+suppressed. A successful rebuild of this fixture prints:
 
 ```text
 VERIFIED ba789fe6627de52ebfbd5353f5eb6b7efef23d7e8633ab59051c1a22b2f00a88
@@ -109,9 +111,10 @@ VERIFIED ba789fe6627de52ebfbd5353f5eb6b7efef23d7e8633ab59051c1a22b2f00a88
 This path does not create evidence or log files. It is useful for an immediate
 human-readable answer while preserving machine-friendly exit codes:
 
-- `0` for `verified` or `notApplicable`;
+- `0` when the rebuilt Wasm is verified;
+- `1` when verification or reporting could not complete;
 - `2` for a completed build whose Wasm differs; and
-- `1` when verification could not complete.
+- `3` when verification is not applicable.
 
 ## 3. Complete JSON, Evidence, and Logs
 
@@ -123,9 +126,10 @@ deno task verify:cli:files
 ```
 
 This task adds `--json` for the complete result on stdout, `--evidence` for the
-structured evidence document, and `--logs` for the bounded execution log. These
-reporting flags are independent: a real integration can request only the
-outputs it needs.
+structured evidence document, and `--logs` for the bounded execution log.
+Machine-readable JSON mode disables the interactive spinner automatically. These
+reporting flags are independent: a real integration can request only the outputs
+it needs.
 
 ## Evidence and Logs
 
