@@ -43,6 +43,7 @@ export async function deployTestnetContracts(publicKey: Uint8Array): Promise<
       rpcUrl: network.rpcUrl,
       allowHttp: network.allowHttp,
     });
+
     await initializeWithFriendbot(
       network.friendbotUrl,
       serverSigner.publicKey() as `G${string}`,
@@ -65,7 +66,9 @@ export async function deployTestnetContracts(publicKey: Uint8Array): Promise<
         spec: WEB_AUTH_SPEC,
       },
     });
+
     await webAuthContract.uploadWasm(transactionConfig);
+
     await webAuthContract.deploy({ config: transactionConfig });
 
     const passkeyAccount = new Contract({
@@ -75,13 +78,16 @@ export async function deployTestnetContracts(publicKey: Uint8Array): Promise<
         spec: PASSKEY_ACCOUNT_SPEC,
       },
     });
+
     await passkeyAccount.uploadWasm(transactionConfig);
+
     await passkeyAccount.deploy({
       config: transactionConfig,
       constructorArgs: {
         public_key: publicKey,
       },
     });
+
     const contractAccount = passkeyAccount.getContractId();
 
     server = startLocalWebAuthServer({
@@ -101,6 +107,7 @@ export async function deployTestnetContracts(publicKey: Uint8Array): Promise<
     };
   } catch (cause) {
     await server?.close();
+
     throw cause;
   }
 }

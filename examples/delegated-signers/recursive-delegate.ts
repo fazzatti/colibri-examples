@@ -39,11 +39,13 @@ const rpc = new Server(networkConfig.rpcUrl, {
 });
 
 const latestLedger = await rpc.getLatestLedger();
+
 if (Number(latestLedger.protocolVersion) < 27) {
   throw new Error(
     `Delegated authorization requires Protocol 27; Testnet reports ${latestLedger.protocolVersion}`,
   );
 }
+
 console.log("Protocol:", chalk.green(latestLedger.protocolVersion));
 
 /**
@@ -64,6 +66,7 @@ console.log("Delegate leaf:", chalk.green(leaf.publicKey()));
  */
 for (const signer of [admin, recipient, leaf]) {
   console.log(`Funding ${signer.publicKey()} with Friendbot...`);
+
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
     signer.publicKey(),
@@ -88,21 +91,24 @@ const transactionConfig: TransactionConfig = {
 /**
  * Upload the top-level asset-account code.
  */
+const assetAccountWasm = await Deno.readFile(
+  new URL(
+    "./contracts/artifacts/delegated_asset_account_contract.wasm",
+    import.meta.url,
+  ),
+);
+
 const assetAccountTemplate = new Contract({
   networkConfig,
   rpc,
   contractConfig: {
-    wasm: await Deno.readFile(
-      new URL(
-        "./contracts/artifacts/delegated_asset_account_contract.wasm",
-        import.meta.url,
-      ),
-    ),
+    wasm: assetAccountWasm,
     spec: DELEGATED_ASSET_ACCOUNT_SPEC,
   },
 });
 
 console.log("Uploading the delegated asset account WASM...");
+
 await assetAccountTemplate.uploadWasm(transactionConfig);
 
 /**
@@ -111,21 +117,24 @@ await assetAccountTemplate.uploadWasm(transactionConfig);
  * Uploading once is sufficient even though more complex examples deploy
  * multiple instances of this same WASM.
  */
+const recursiveWasm = await Deno.readFile(
+  new URL(
+    "./contracts/artifacts/recursive_delegate_account_contract.wasm",
+    import.meta.url,
+  ),
+);
+
 const recursiveTemplate = new Contract({
   networkConfig,
   rpc,
   contractConfig: {
-    wasm: await Deno.readFile(
-      new URL(
-        "./contracts/artifacts/recursive_delegate_account_contract.wasm",
-        import.meta.url,
-      ),
-    ),
+    wasm: recursiveWasm,
     spec: RECURSIVE_DELEGATE_ACCOUNT_SPEC,
   },
 });
 
 console.log("Uploading the recursive delegate account WASM...");
+
 await recursiveTemplate.uploadWasm(transactionConfig);
 
 /**
@@ -151,6 +160,7 @@ await recursiveDelegate.deploy({
 });
 
 const recursiveDelegateId = recursiveDelegate.getContractId();
+
 console.log("Recursive delegate:", chalk.green(recursiveDelegateId));
 
 /**
@@ -177,6 +187,7 @@ await assetAccount.deploy({
 });
 
 const assetAccountId = assetAccount.getContractId();
+
 console.log("Asset account:", chalk.green(assetAccountId));
 
 /**
@@ -217,6 +228,7 @@ const deposit = 20_000_000n;
 const withdrawal = 10_000_000n;
 
 console.log("Depositing 2 XLM into the contract account...");
+
 await XLM.transfer({
   from: admin.publicKey(),
   to: assetAccountId,
@@ -225,6 +237,7 @@ await XLM.transfer({
 });
 
 const balanceBefore = await XLM.balance({ id: assetAccountId });
+
 console.log(
   "Balance before withdrawal:",
   chalk.green(balanceBefore),
@@ -242,6 +255,7 @@ console.log(
  * The final branch succeeds when Stellar validates the leaf signature.
  */
 console.log("Withdrawing 1 XLM through the recursive delegate...");
+
 const result = await assetAccount.invoke({
   method: "withdraw",
   methodArgs: {

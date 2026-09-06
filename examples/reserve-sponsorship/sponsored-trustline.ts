@@ -25,6 +25,7 @@ import { Asset, Operation } from "stellar-sdk";
 const networkConfig = NetworkConfig.TestNet();
 using sponsor = LocalSigner.generateRandom();
 using holder = LocalSigner.generateRandom();
+
 for (const signer of [sponsor, holder]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -56,16 +57,19 @@ const createSponsoredTrustline = createClassicTransactionPipeline({
  * It does not rewrite the inner operation source; state that owner explicitly.
  * The holder signs its trustline/end operation even though the sponsor pays.
  */
+const sponsoredOperations = wrapSponsorship({
+  sponsor: sponsor.publicKey(),
+  sponsored: holder.publicKey(),
+  operations: [Operation.changeTrust({
+    source: holder.publicKey(),
+    asset,
+    limit: "1000",
+  })],
+});
+
+// Submit the three-operation sequence with both the sponsor and holder signers.
 const result = await createSponsoredTrustline({
-  operations: wrapSponsorship({
-    sponsor: sponsor.publicKey(),
-    sponsored: holder.publicKey(),
-    operations: [Operation.changeTrust({
-      source: holder.publicKey(),
-      asset,
-      limit: "1000",
-    })],
-  }),
+  operations: sponsoredOperations,
   config: {
     ...sponsorConfig,
     signers: [sponsor, holder],
@@ -81,10 +85,12 @@ console.log("Operation count:", result.operations.length); // 3, including the b
  * transfer issued DEMO into the holder's balance.
  */
 const ledger = new LedgerEntries({ networkConfig });
+
 const trustline = await ledger.trustline({
   accountId: holder.publicKey(),
   asset,
 });
+
 console.log("Trustline owner:", trustline.accountId);
 console.log("Asset:", trustline.asset);
 console.log(

@@ -30,10 +30,14 @@ describe({
 }, () => {
   beforeAll(async () => {
     await ledger.start();
+
     // Use the running container's URLs AND passphrase, never Testnet defaults.
-    networkConfig = NetworkConfig.CustomNet(await ledger.getNetworkDetails());
+    const networkDetails = await ledger.getNetworkDetails();
+
+    networkConfig = NetworkConfig.CustomNet(networkDetails);
     sendTransaction = createClassicTransactionPipeline({ networkConfig });
   });
+
   afterAll(async () => {
     // Cleanup is important even when an assertion or transaction fails.
     try {
@@ -46,6 +50,7 @@ describe({
   it("confirms an XLM payment through Colibri", async () => {
     using sender = LocalSigner.generateRandom();
     using receiver = LocalSigner.generateRandom();
+
     for (const signer of [sender, receiver]) {
       await initializeWithFriendbot(
         networkConfig.friendbotUrl!,
@@ -56,6 +61,7 @@ describe({
         },
       );
     }
+
     const paid = await sendTransaction({
       operations: [
         Operation.payment({
@@ -71,6 +77,7 @@ describe({
         timeout: 60,
       },
     });
+
     assertEquals(paid.response.status, "SUCCESS");
     assertEquals(paid.response.txHash, paid.hash);
     assertEquals(paid.operations[0].type, "payment");
@@ -79,6 +86,7 @@ describe({
 
   it("reuses that ledger for a separate account-settings transaction", async () => {
     using account = LocalSigner.generateRandom();
+
     await initializeWithFriendbot(
       networkConfig.friendbotUrl!,
       account.publicKey(),
@@ -87,6 +95,7 @@ describe({
         allowHttp: networkConfig.allowHttp,
       },
     );
+
     const updated = await sendTransaction({
       operations: [Operation.setOptions({ homeDomain: "colibri.test" })],
       config: {
@@ -96,6 +105,7 @@ describe({
         timeout: 60,
       },
     });
+
     assertEquals(updated.response.status, "SUCCESS");
     assertEquals(updated.operations[0].type, "setOptions");
   });

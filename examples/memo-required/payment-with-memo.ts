@@ -21,6 +21,7 @@ import { Asset, Memo, Operation } from "stellar-sdk";
 const networkConfig = NetworkConfig.TestNet();
 using sender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
+
 for (const signer of [sender, recipient]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -61,6 +62,7 @@ await configureRecipient({
 });
 
 const sendPayment = createClassicTransactionPipeline({ networkConfig });
+
 sendPayment.use(createSep29Plugin());
 
 /**
@@ -76,4 +78,5 @@ const result = await sendPayment({
   })],
   config: { ...senderConfig, memo: Memo.id("12345") },
 });
+
 console.log("Confirmed memo-bearing payment:", result.hash);

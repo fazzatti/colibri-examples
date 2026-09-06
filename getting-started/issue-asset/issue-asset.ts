@@ -51,6 +51,7 @@ await initializeWithFriendbot(networkConfig.friendbotUrl, issuer.publicKey(), {
   rpcUrl: networkConfig.rpcUrl,
   allowHttp: networkConfig.allowHttp,
 });
+
 await initializeWithFriendbot(networkConfig.friendbotUrl, holder.publicKey(), {
   rpcUrl: networkConfig.rpcUrl,
   allowHttp: networkConfig.allowHttp,
@@ -113,12 +114,11 @@ console.log("Holder trustline added for COLIBRI.");
 const holderBalanceBefore = await COLIBRI.balance({
   id: holder.publicKey(),
 });
+
+const displayedBalanceBefore = toDecimals(holderBalanceBefore, assetDecimals);
+
 console.log(
-  `Holder balance before mint: ${
-    chalk.green(
-      toDecimals(holderBalanceBefore, assetDecimals),
-    )
-  } COLIBRI`,
+  `Holder balance before mint: ${chalk.green(displayedBalanceBefore)} COLIBRI`,
 );
 
 /**
@@ -147,11 +147,9 @@ const holderBalanceAfter = await COLIBRI.balance({
   id: holder.publicKey(),
 });
 
+const displayedBalanceAfter = toDecimals(holderBalanceAfter, assetDecimals);
+
 console.log(
-  `Holder balance after mint: ${
-    chalk.green(
-      toDecimals(holderBalanceAfter, assetDecimals),
-    )
-  } COLIBRI`,
+  `Holder balance after mint: ${chalk.green(displayedBalanceAfter)} COLIBRI`,
 );
 console.log("✅ Asset issuance successful!");

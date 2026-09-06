@@ -58,12 +58,14 @@ const senderSigner = LocalSigner.generateRandom();
  * Friendbot is the public service that creates and funds new TestNet accounts.
  */
 console.log("Funding sponsor with Friendbot...");
+
 await initializeWithFriendbot(
   networkConfig.friendbotUrl,
   sponsorSigner.publicKey(),
 );
 
 console.log("Funding sender with Friendbot...");
+
 await initializeWithFriendbot(
   networkConfig.friendbotUrl,
   senderSigner.publicKey(),
@@ -82,6 +84,7 @@ console.log(
   "Example muxed receiver:",
   chalk.green(sender.muxedAddress("1")),
 );
+
 /**
  * We open five channel accounts and reuse them across thirty transactions.
  *
@@ -89,6 +92,7 @@ console.log(
  * fighting over the same sequence number.
  */
 console.log(`Opening ${numberOfChannels} channel accounts...`);
+
 const channels = await ChannelAccounts.open({
   numberOfChannels,
   sponsor,
@@ -165,6 +169,7 @@ for (let index = 0; index < numberOfTransactions; index++) {
     })
     .catch((error) => {
       console.error(`Receiver ${receiverNumber} failed.`);
+
       throw error;
     });
 
@@ -178,6 +183,7 @@ const settledPayments = await Promise.allSettled(paymentPromises);
  * balances are merged back into the sponsor account.
  */
 console.log("Closing channel accounts...");
+
 await ChannelAccounts.close({
   channels,
   sponsor,

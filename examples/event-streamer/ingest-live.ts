@@ -71,7 +71,9 @@ const filter = new EventFilter({
  * so the stop ledger is four sequence numbers after the start.
  */
 const server = new Server(networkConfig.rpcUrl);
+
 const latestLedger = await server.getLatestLedger();
+
 const stopLedger = latestLedger.sequence + 4;
 
 console.log(
@@ -134,7 +136,7 @@ const onEvent = (event: Event) => {
     console.log(`  > To Muxed ID ${chalk.green(transferEvent.toMuxedId)}`);
   }
 
-  // Increment and log the counter
+  // Count this event after its details have been handled.
   counter++;
 };
 
@@ -151,10 +153,12 @@ const onEvent = (event: Event) => {
  * Use start() when you want the archive-to-live routing demonstrated separately.
  */
 console.log(`Starting live ingestion...`);
+
 await eventStreamer.startLive(onEvent, {
   startLedger: latestLedger.sequence,
   stopLedger,
 });
 
 console.log(`\nIngestion completed. Processed ${chalk.green(counter)} events.`);
+
 Deno.exit(0);

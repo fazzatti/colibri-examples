@@ -30,7 +30,9 @@ class NonceStore {
 
   consume(nonce: string): boolean {
     if (!this.#issued.has(nonce) || this.#used.has(nonce)) return false;
+
     this.#used.add(nonce);
+
     return true;
   }
 }
@@ -60,10 +62,12 @@ async function postedValue(
 ): Promise<string | undefined> {
   if (request.headers.get("content-type")?.includes("application/json")) {
     const body = await request.json();
+
     return body && typeof body === "object"
       ? (body as Record<string, unknown>)[key] as string | undefined
       : undefined;
   }
+
   return new URLSearchParams(await request.text()).get(key) ?? undefined;
 }
 
@@ -81,19 +85,23 @@ async function issueJwt(
   const now = Math.floor(Date.now() / 1_000);
   const encode = (value: unknown) =>
     base64Url(new TextEncoder().encode(JSON.stringify(value)));
-  const signingInput = `${encode({ alg: "HS256", typ: "JWT" })}.${
-    encode({
-      iss: "https://colibri.test/webauth",
-      sub: subject,
-      iat: now,
-      exp: now + 300,
-    })
-  }`;
+
+  // A JWT signs the encoded header and claims joined by a period.
+  const header = encode({ alg: "HS256", typ: "JWT" });
+  const claims = encode({
+    iss: "https://colibri.test/webauth",
+    sub: subject,
+    iat: now,
+    exp: now + 300,
+  });
+  const signingInput = `${header}.${claims}`;
+
   const signature = await crypto.subtle.sign(
     "HMAC",
     await signingKey,
     new TextEncoder().encode(signingInput),
   );
+
   return `${signingInput}.${base64Url(new Uint8Array(signature))}`;
 }
 
@@ -123,11 +131,16 @@ export function startLocalWebAuthServer(
 
   async function sep45Get(requestUrl: URL): Promise<Response> {
     const account = requestUrl.searchParams.get("account");
+
     if (!account) return json({ error: "account required" }, 400);
+
     const latestLedger = await config.rpc.getLatestLedger();
+
     const expiration = latestLedger.sequence + 30;
     const nonce = crypto.randomUUID();
+
     nonces.issue(nonce);
+
     const values = {
       account,
       home_domain: homeDomain,
@@ -151,11 +164,13 @@ export function startLocalWebAuthServer(
       )
       .setTimeout(0)
       .build();
+
     const recording = await config.rpc.simulateTransaction(
       recordingTransaction,
       undefined,
       "record",
     );
+
     if (Api.isSimulationError(recording) || !recording.result) {
       throw new TypeError(
         `Could not record SEP-45 authorization: ${
@@ -165,35 +180,47 @@ export function startLocalWebAuthServer(
         }`,
       );
     }
+
     // Recording discovers requirements, not a signed SEP-45 challenge.
     // Current RPC records V2; SEP-45 v0.1.1 requires legacy address credentials.
     // Choose the protocol's format BEFORE producing any signature, because the
     // credential version changes the signing preimage. Never convert signed entries.
-    const entries = recording.result.auth.map((entry) =>
-      entry.credentials.type === "sorobanCredentialsAddressV2"
-        ? new xdr.SorobanAuthorizationEntry({
-          rootInvocation: entry.rootInvocation,
-          credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(
-            entry.credentials.addressV2,
-          ),
-        })
-        : entry
-    );
+    const entries = recording.result.auth.map((entry) => {
+      if (entry.credentials.type !== "sorobanCredentialsAddressV2") {
+        return entry;
+      }
+
+      const addressCredentials = entry.credentials.addressV2;
+
+      return new xdr.SorobanAuthorizationEntry({
+        rootInvocation: entry.rootInvocation,
+        credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(
+          addressCredentials,
+        ),
+      });
+    });
+
+    // The server signs its own requirement before returning the challenge.
+    // The client contract entry remains for the client's authorization callback.
     const serverIndex = entries.findIndex((entry) => {
       const credentials = getAddressCredentialsFromAuthEntry(entry);
+
       return credentials !== null &&
         Address.fromScAddress(credentials.address).toString() ===
           config.server.publicKey();
     });
+
     if (serverIndex === -1) {
       throw new TypeError("Recording simulation omitted the server entry");
     }
+
     entries[serverIndex] = await authorizeEntry(
       entries[serverIndex],
       config.server,
       expiration,
       config.networkPassphrase,
     );
+
     return json({
       authorization_entries: encodeSep45AuthorizationEntries(entries),
       network_passphrase: config.networkPassphrase,
@@ -205,30 +232,45 @@ export function startLocalWebAuthServer(
       request,
       "authorization_entries",
     );
+
     if (!authorizationEntriesXdr) {
       return json({ error: "authorization_entries required" }, 400);
     }
+
+    // One HTTP error boundary keeps verification failures as rejected responses.
+    // Decode, verify the challenge shape, enforce authorization, then issue a JWT.
     try {
       const entries = decodeSep45AuthorizationEntries(
         authorizationEntriesXdr,
       );
-      const root = entries[0].rootInvocation.function;
+      const rootInvocation = entries[0].rootInvocation;
+      const root = rootInvocation.function;
+
       if (root.type !== "sorobanAuthorizedFunctionTypeContractFn") {
         throw new TypeError("Expected contract invocation");
       }
-      const argument = root.value.args[0];
+
+      const contractInvocation = root.value;
+      const argument = contractInvocation.args[0];
+
       if (argument.type !== "scvMap") {
         throw new TypeError("Expected argument map");
       }
+
+      // The verification contract receives one symbol-to-string argument map.
+      const argumentEntries = argument.value ?? [];
       const argumentsMap = Object.fromEntries(
-        (argument.value ?? []).map((entry) => {
+        argumentEntries.map((entry) => {
           if (
             entry.key.type !== "scvSymbol" || entry.val.type !== "scvString"
           ) throw new TypeError("Expected string argument");
+
           return [entry.key.value, entry.val.value];
         }),
       );
+
       const latest = await config.rpc.getLatestLedger();
+
       const verified = verifySep45Challenge({
         authorizationEntriesXdr,
         networkPassphrase: config.networkPassphrase,
@@ -242,26 +284,36 @@ export function startLocalWebAuthServer(
       const clientCredentials = getAddressCredentialsFromAuthEntry(
         entries[verified.clientEntryIndex],
       );
+
       if (!clientCredentials) {
         throw new TypeError("Expected client address credentials");
       }
+
       const clientExpiration = clientCredentials.signatureExpirationLedger;
+
+      // This simulation executes the account contract's custom authorization.
+      const authorizedChallenge = new Sep45AuthorizedChallenge(
+        verified,
+        entries,
+        clientExpiration,
+      );
+
       await simulateSep45Challenge(
-        new Sep45AuthorizedChallenge(
-          verified,
-          entries,
-          clientExpiration,
-        ),
+        authorizedChallenge,
         {
           rpc: config.rpc,
           networkPassphrase: config.networkPassphrase,
           webAuthContractId: config.webAuthContractId,
         },
       );
+
+      // Consume the nonce only after authorization succeeds to prevent replay.
       if (!nonces.consume(verified.arguments.nonce)) {
         return json({ error: "challenge already used" }, 409);
       }
+
       const jwt = await issueJwt(verified.account, tokenSigningKey);
+
       return json({ token: jwt });
     } catch (cause) {
       return json({
@@ -274,6 +326,7 @@ export function startLocalWebAuthServer(
     { hostname: "127.0.0.1", port: 0 },
     async (request) => {
       const url = new URL(request.url);
+
       if (
         request.method === "GET" &&
         url.pathname === "/.well-known/stellar.toml"
@@ -288,17 +341,22 @@ export function startLocalWebAuthServer(
           { headers: { "content-type": "text/plain" } },
         );
       }
+
       if (request.method === "GET" && url.pathname === "/sep45") {
         return await sep45Get(url);
       }
+
       if (request.method === "POST" && url.pathname === "/sep45") {
         return await sep45Post(request);
       }
+
       return json({ error: "not found" }, 404);
     },
   );
   const address = server.addr as Deno.NetAddr;
+
   homeDomain = `${address.hostname}:${address.port}`;
+
   return {
     get homeDomain() {
       return homeDomain;

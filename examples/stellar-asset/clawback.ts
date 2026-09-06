@@ -12,10 +12,12 @@ import {
   AuthRevocableFlag,
   Operation,
 } from "stellar-sdk";
+
 // Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
 const networkConfig = NetworkConfig.TestNet();
 using issuer = LocalSigner.generateRandom();
 using holder = LocalSigner.generateRandom();
+
 for (const signer of [issuer, holder]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -26,6 +28,7 @@ for (const signer of [issuer, holder]) {
     },
   );
 }
+
 const issuerConfig: TransactionConfig = {
   source: issuer.publicKey(),
   signers: [issuer],
@@ -43,6 +46,7 @@ const holderConfig: TransactionConfig = {
 // Enable the issuer flags BEFORE this holder creates a trustline. Existing
 // trustlines do not automatically gain clawback support retroactively.
 const configureIssuer = createClassicTransactionPipeline({ networkConfig });
+
 await configureIssuer({
   operations: [
     Operation.setOptions({
@@ -51,11 +55,15 @@ await configureIssuer({
   ],
   config: issuerConfig,
 });
+
+// Create the holder's trustline after enabling the clawback policy.
 const asset = new StellarAsset({
   asset: new Asset("RECALL", issuer.publicKey()),
   networkConfig,
 });
+
 await asset.changeTrust({ limit: "1000", config: holderConfig });
+
 await asset.mint({
   destination: holder.publicKey(),
   amount: "10",
@@ -69,7 +77,10 @@ await asset.clawback({
   amount: "3",
   config: issuerConfig,
 });
-console.log(
-  "Holder balance after clawback:",
-  asset.formatAmount(await asset.balance({ id: holder.publicKey() })),
-);
+
+// Read the post-clawback balance and convert smallest units to display text.
+const balanceAfterClawback = await asset.balance({ id: holder.publicKey() });
+
+const formattedBalance = asset.formatAmount(balanceAfterClawback);
+
+console.log("Holder balance after clawback:", formattedBalance);

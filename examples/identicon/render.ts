@@ -16,8 +16,11 @@ const icon = new Identicon(account.publicKey());
  * by Git because each run generates a new demonstration identity.
  */
 const output = new URL("./.output/", import.meta.url);
+
 await Deno.mkdir(output, { recursive: true });
+
 await Deno.writeTextFile(new URL("account.svg", output), icon.toSvg());
+
 await Deno.writeFile(new URL("account.png", output), icon.toPng({ size: 224 }));
 
 console.log("Account:", account.publicKey());

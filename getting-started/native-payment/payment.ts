@@ -24,6 +24,7 @@ import { Asset, Operation } from "stellar-sdk";
 const networkConfig = NetworkConfig.TestNet();
 using sender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
+
 for (const signer of [sender, recipient]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -63,5 +64,7 @@ console.log("Actual fee charged (stroops):", result.feeCharged);
 // The operations are native SDK values, so results narrow by a runtime tag,
 // rather than by a special Colibri operation builder or a TypeScript cast.
 const outcome = result.operations[0];
+
 if (outcome.type !== "payment") throw new Error("Expected a payment outcome.");
+
 console.log("Operation result:", outcome.result.type);

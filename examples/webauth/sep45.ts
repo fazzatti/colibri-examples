@@ -14,19 +14,25 @@ const keyPair = await crypto.subtle.generateKey(
   false,
   ["sign", "verify"],
 );
+
 const publicKey = new Uint8Array(
   await crypto.subtle.exportKey("raw", keyPair.publicKey),
 );
 
 // Only deployment and the local HTTP fixture are setup helpers. All Colibri
 // discovery/authentication and account-specific authorization remain here.
+// The contract is deployed on Testnet; the HTTP fixture runs locally.
+// Nothing here creates a production WebAuth server or hardware passkey.
 const { contractAccount, network, server, close } =
   await deployTestnetContracts(publicKey);
+
+// Always close the local HTTP fixture, including when discovery or signing fails.
 try {
   const client = await WebAuthClient.fromDomain(server.homeDomain, {
     network,
     allowHttp: true, // localhost fixture only; production uses HTTPS
   });
+
   console.log("Contract account:", contractAccount);
 
   const jwt = await client.sep45.authenticate({
@@ -39,14 +45,26 @@ try {
         context.validUntilLedgerSeq,
         context.networkPassphrase,
       );
-      const challenge = btoa(String.fromCharCode(...hash(preimage.toXdr())))
-        .replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, "");
+
+      // WebAuthn carries the authorization hash as an unpadded base64url challenge.
+      const authorizationHash = hash(preimage.toXdr());
+      const base64Challenge = btoa(String.fromCharCode(...authorizationHash));
+      const challenge = base64Challenge
+        .replaceAll("+", "-")
+        .replaceAll("/", "_")
+        .replace(/=+$/u, "");
+
+      // These JSON bytes bind the challenge to this demonstration's origin.
+      // The contract checks the exact fixture layout, not arbitrary browser JSON.
       const clientDataJSON = new TextEncoder().encode(JSON.stringify({
         type: "webauthn.get",
         challenge,
         origin: "https://colibri.test",
         crossOrigin: false,
       }));
+
+      // Authenticator data starts with SHA-256 of the relying-party ID, followed
+      // by flags and a counter. These are simulated bytes for this local fixture.
       const rpIdHash = new Uint8Array(
         await crypto.subtle.digest(
           "SHA-256",
@@ -54,14 +72,20 @@ try {
         ),
       );
       const authenticatorData = new Uint8Array(37);
+
       authenticatorData.set(rpIdHash);
       authenticatorData[32] = 0x05; // simulated UP + UV flags; counter stays zero
+
+      // The authenticator signs authenticatorData || SHA-256(clientDataJSON).
       const clientDataHash = new Uint8Array(
         await crypto.subtle.digest("SHA-256", clientDataJSON),
       );
       const signedData = new Uint8Array(37 + 32);
+
       signedData.set(authenticatorData);
       signedData.set(clientDataHash, 37);
+
+      // Sign those exact bytes with the software P-256 private key.
       const signature = new Uint8Array(
         await crypto.subtle.sign(
           { name: "ECDSA", hash: "SHA-256" },
@@ -74,26 +98,29 @@ try {
       // This is signature encoding, not an extra Colibri authorization policy.
       const order =
         0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551n;
-      const s = BigInt(
-        "0x" +
-          Array.from(
-            signature.subarray(32),
-            (b) => b.toString(16).padStart(2, "0"),
-          ).join(""),
-      );
+      const sBytes = signature.subarray(32);
+      const sHex = Array.from(
+        sBytes,
+        (byte) => byte.toString(16).padStart(2, "0"),
+      ).join("");
+      const s = BigInt(`0x${sHex}`);
+
       if (s > order / 2n) {
         let lowS = order - s;
+
         for (let i = 63; i >= 32; i--) {
           signature[i] = Number(lowS & 255n);
           lowS >>= 8n;
         }
       }
 
-      // SDK 17 XDR objects are immutable. Return a new entry with the complete
-      // credential payload; never mutate the original getter-style object.
+      // This SEP-45 fixture uses address credentials. Narrow the native SDK
+      // union before reading the original address, nonce, and signature fields.
       if (entry.credentials.type !== "sorobanCredentialsAddress") {
         throw new Error("This passkey example expects address credentials");
       }
+
+      // The contract expects these three named fields in canonical map order.
       const assertion = xdr.ScVal.scvMap([
         new xdr.ScMapEntry({
           key: xdr.ScVal.scvSymbol("authenticator_data"),
@@ -108,11 +135,16 @@ try {
           val: xdr.ScVal.scvBytes(signature),
         }),
       ]);
+
+      // SDK 17 XDR objects are immutable. Preserve the original credentials and
+      // build a new entry carrying this assertion and its ledger expiration.
+      const addressCredentials = entry.credentials.value;
       const signedCredentials = new xdr.SorobanAddressCredentials({
-        ...entry.credentials.value,
+        ...addressCredentials,
         signatureExpirationLedger: context.validUntilLedgerSeq,
         signature: assertion,
       });
+
       return new xdr.SorobanAuthorizationEntry({
         rootInvocation: entry.rootInvocation,
         // SEP-45 v0.1.1 uses this legacy credential format. Keep it unchanged.
@@ -122,11 +154,10 @@ try {
       });
     },
   });
+
   // Do not print the bearer JWT itself into shared terminal logs.
   console.log("Authenticated:", jwt.protocol, jwt.subject);
   console.log("JWT expires:", jwt.expiresAt?.toISOString());
 } finally {
   await close();
 }
-// The contract is deployed on Testnet; the HTTP fixture runs locally.
-// Nothing here creates a production WebAuth server or hardware passkey.

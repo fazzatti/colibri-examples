@@ -23,6 +23,7 @@ import { Asset, Operation } from "stellar-sdk";
 const networkConfig = NetworkConfig.TestNet();
 using sender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
+
 for (const signer of [sender, recipient]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -49,7 +50,10 @@ const recipientConfig: TransactionConfig = {
   timeout: 60,
 };
 
+// The recipient publishes its memo requirement as account data. This is a
+// real ledger write; the following client plugin reads this convention.
 const configureRecipient = createClassicTransactionPipeline({ networkConfig });
+
 await configureRecipient({
   operations: [
     Operation.manageData({ name: "config.memo_required", value: "1" }),
@@ -58,8 +62,17 @@ await configureRecipient({
 });
 
 const sendPayment = createClassicTransactionPipeline({ networkConfig });
+
+/**
+ * This safeguard is opt-in client behavior, not consensus enforcement. Omitting
+ * the plugin would not make the network enforce the convention. M-address
+ * destinations are exempt because their embedded ID already identifies a
+ * logical recipient. This file deliberately uses a G-address.
+ */
 sendPayment.use(createSep29Plugin());
 
+// This lesson deliberately omits the memo. Catch only that expected failure;
+// the catch must not turn unrelated network errors into a successful example.
 try {
   await sendPayment({
     operations: [Operation.payment({
@@ -69,19 +82,14 @@ try {
     })],
     config: senderConfig,
   });
+
   throw new Error(
     "The example expected the memo guard to reject this payment.",
   );
 } catch (error) {
   // Do not mistake an RPC outage or another failure for the expected result.
   if (!(error instanceof Sep29Errors.MEMO_REQUIRED)) throw error;
+
   console.log("Payment not submitted:", error.code);
   console.log(error.details);
 }
-
-/**
- * This safeguard is opt-in client behavior, not consensus enforcement. Omitting
- * the plugin would not make the network enforce the convention. M-address
- * destinations are exempt because their embedded ID already identifies a
- * logical recipient. This file deliberately uses a G-address.
- */

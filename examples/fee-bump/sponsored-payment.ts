@@ -30,6 +30,7 @@ const networkConfig = NetworkConfig.TestNet();
 using sender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
 using sponsor = LocalSigner.generateRandom();
+
 for (const signer of [sender, recipient, sponsor]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -80,14 +81,21 @@ const result = await sendPayment({
  * A fee bump does not authorize the sender's payment, fund account reserves or
  * change the amount received. Those remain separate concerns.
  */
+const confirmedEnvelope = result.response.envelopeXdr.toXdr("base64");
 const envelope = TransactionBuilder.fromXdr(
-  result.response.envelopeXdr.toXdr("base64"),
+  confirmedEnvelope,
   networkConfig.networkPassphrase,
 );
+
 if (!(envelope instanceof FeeBumpTransaction)) {
   throw new Error("Expected the confirmed fee-bump envelope.");
 }
-console.log("Payment source:", envelope.innerTransaction.source);
+
+// The inner transaction identifies the payment source. The outer envelope
+// identifies the fee payer; these two accounts have separate signing roles.
+const paymentTransaction = envelope.innerTransaction;
+
+console.log("Payment source:", paymentTransaction.source);
 console.log("Fee payer:", envelope.feeSource);
 console.log("Outer fee bid (stroops):", envelope.fee);
 console.log("Actual fee charged (stroops):", result.feeCharged);

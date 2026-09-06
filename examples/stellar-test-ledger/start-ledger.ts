@@ -36,13 +36,17 @@ if (streamingLogs) {
 containerLog(
   "Starting the reusable Stellar Test Ledger container...",
 );
+
 await ledger.start();
 
 const details = await ledger.getNetworkDetails();
+
 containerLog(
   "Container is ready and will stay running after this script exits.",
 );
+
 printReusableLedgerLinks(details, containerLog);
+
 containerLog(
   "Use `deno task ledger:transactions` to submit sample transactions.",
 );

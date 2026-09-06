@@ -5,22 +5,38 @@ import { Server } from "stellar-sdk/rpc";
 // The operation stream preserves the Stellar SDK's discriminated operation.
 // Filter success first: an operation in a failed transaction is only intent.
 const networkConfig = NetworkConfig.TestNet();
-const latest = await new Server(networkConfig.rpcUrl).getLatestLedger();
+const rpc = new Server(networkConfig.rpcUrl);
+
+const latest = await rpc.getLatestLedger();
+
 const payments = RPCStreamer.operation({ networkConfig });
+
+// Both endpoints are inclusive, so this observes exactly five ledgers.
+const ledgerRange = {
+  startLedger: latest.sequence,
+  stopLedger: latest.sequence + 4,
+};
 let count = 0;
+
+// This narrow lesson does not count path payments or Soroban token transfers.
+// Callbacks may replay after interruption; durable consumers need idempotency.
 await payments.startLive((item) => {
   if (item.transactionStatus !== "success") return;
-  if (item.operation.type !== "payment") return;
+
+  const operation = item.operation;
+
+  if (operation.type !== "payment") return;
+
   console.log({
     ledger: item.ledgerSequence,
     transaction: item.transactionHash,
     operationIndex: item.operationIndex,
-    destination: item.operation.destination,
-    amount: item.operation.amount,
-    asset: item.operation.asset.toString(),
+    destination: operation.destination,
+    amount: operation.amount,
+    asset: operation.asset.toString(),
   });
+
   count++;
-}, { startLedger: latest.sequence, stopLedger: latest.sequence + 4 });
+}, ledgerRange);
+
 console.log("Native payment operations in the slice:", count);
-// This narrow lesson does not count path payments or Soroban token transfers.
-// Callbacks may replay after interruption; durable consumers need idempotency.

@@ -9,10 +9,14 @@ import {
 const wasm = await Deno.readFile(
   new URL("../sep41-token/contract/token.wasm", import.meta.url),
 );
+
 const metadata = extractContractMetadata(wasm);
+
 console.log("All metadata:", metadata);
-const claims = extractSepClaims(metadata);
-console.log("SEP claims:", claims);
-console.log("Claims SEP-41:", claimsSep(claims, 41));
+
 // A claim only means the author wrote this metadata. It does not verify the
 // interface, authorization policy, behavior, or source reproducibility.
+const claims = extractSepClaims(metadata);
+
+console.log("SEP claims:", claims);
+console.log("Claims SEP-41:", claimsSep(claims, 41));

@@ -6,10 +6,12 @@ import {
   type TransactionConfig,
 } from "@colibri/core";
 import { Asset, Operation, TransactionBuilder } from "stellar-sdk";
+
 // Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
 const networkConfig = NetworkConfig.TestNet();
 using sender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
+
 for (const signer of [sender, recipient]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -20,6 +22,7 @@ for (const signer of [sender, recipient]) {
     },
   );
 }
+
 const senderConfig: TransactionConfig = {
   source: sender.publicKey(),
   signers: [sender],
@@ -30,6 +33,7 @@ const senderConfig: TransactionConfig = {
 // Both operations are in ONE transaction. 205 stroops is the exact total inclusion bid, not 205 per operation.
 // Confirmed feeCharged can be lower than that bid when there is no congestion.
 const sendTwoPayments = createClassicTransactionPipeline({ networkConfig });
+
 const result = await sendTwoPayments({
   operations: [
     Operation.payment({
@@ -45,10 +49,15 @@ const result = await sendTwoPayments({
   ],
   config: { ...senderConfig, fee: { inclusion: "205" } },
 });
+
+// Decode the envelope returned by RPC after confirmation. Its fee is the bid;
+// the transaction result reports what the network actually charged.
+const confirmedEnvelope = result.response.envelopeXdr.toXdr("base64");
 const confirmed = TransactionBuilder.fromXdr(
-  result.response.envelopeXdr.toXdr("base64"),
+  confirmedEnvelope,
   networkConfig.networkPassphrase,
 );
+
 console.log("Confirmed envelope fee bid:", confirmed.fee, "stroops");
 console.log("Actually charged:", result.feeCharged, "stroops");
 console.log("Transaction:", result.hash);

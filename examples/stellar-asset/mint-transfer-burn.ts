@@ -25,6 +25,7 @@ const networkConfig = NetworkConfig.TestNet();
 using issuer = LocalSigner.generateRandom();
 using alice = LocalSigner.generateRandom();
 using bob = LocalSigner.generateRandom();
+
 for (const signer of [issuer, alice, bob]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -68,6 +69,7 @@ const credits = new StellarAsset({
  * another issuer could create a completely unrelated asset also called DEMO.
  */
 await credits.changeTrust({ limit: "1000", config: aliceConfig });
+
 await credits.changeTrust({ limit: "1000", config: bobConfig });
 
 // A payment from the issuer mints units into Alice's balance.
@@ -93,13 +95,14 @@ await credits.burn({ amount: "5", config: bobConfig });
  * them without floating-point arithmetic. Total balance is not necessarily
  * spendable balance: reserves, liabilities and authorization still matter.
  */
+const aliceBalance = await credits.balance({ id: alice.publicKey() });
+
+const bobBalance = await credits.balance({ id: bob.publicKey() });
+
+const formattedAliceBalance = credits.formatAmount(aliceBalance);
+const formattedBobBalance = credits.formatAmount(bobBalance);
+
 console.log("Asset:", credits.toString());
-console.log(
-  "Alice:",
-  credits.formatAmount(await credits.balance({ id: alice.publicKey() })),
-);
-console.log(
-  "Bob:",
-  credits.formatAmount(await credits.balance({ id: bob.publicKey() })),
-);
+console.log("Alice:", formattedAliceBalance);
+console.log("Bob:", formattedBobBalance);
 console.log("Expected balances: Alice 75 DEMO; Bob 20 DEMO.");

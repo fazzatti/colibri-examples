@@ -7,11 +7,13 @@ import {
   type TransactionConfig,
 } from "@colibri/core";
 import { Server } from "stellar-sdk/rpc";
+
 // Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
 const networkConfig = NetworkConfig.TestNet();
 using owner = LocalSigner.generateRandom();
 using spender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
+
 for (const signer of [owner, spender, recipient]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -22,6 +24,7 @@ for (const signer of [owner, spender, recipient]) {
     },
   );
 }
+
 const ownerConfig: TransactionConfig = {
   source: owner.publicKey(),
   signers: [owner],
@@ -37,16 +40,19 @@ const spenderConfig: TransactionConfig = {
 
 // Upload stores code once; deploying creates an instance and invokes this
 // fixture's constructor. Neither step is part of the SEP-41 token interface.
+const wasm = await Deno.readFile(
+  new URL("./contract/token.wasm", import.meta.url),
+);
+
 const deployment = new Contract({
   networkConfig,
-  contractConfig: {
-    wasm: await Deno.readFile(
-      new URL("./contract/token.wasm", import.meta.url),
-    ),
-  },
+  contractConfig: { wasm },
 });
+
 await deployment.loadSpecFromWasm();
+
 await deployment.uploadWasm(ownerConfig);
+
 await deployment.deploy({
   constructorArgs: { recipient: owner.publicKey() },
   config: ownerConfig,
@@ -58,8 +64,19 @@ const token = new SEP41TokenContract({
   networkConfig,
   contractId: deployment.getContractId(),
 });
-console.log("Token:", await token.name(), "decimals:", await token.decimals());
-const latest = await new Server(networkConfig.rpcUrl).getLatestLedger();
+
+const tokenName = await token.name();
+
+const decimals = await token.decimals();
+
+console.log("Token:", tokenName, "decimals:", decimals);
+
+// The approval expires at a ledger number, not a wall-clock timestamp.
+const rpc = new Server(networkConfig.rpcUrl);
+
+const latest = await rpc.getLatestLedger();
+
+const allowanceExpiration = latest.sequence + 100;
 
 // SEP-41 uses integers in the token's smallest unit. Here decimals() is 7.
 // Owner authorizes a 10-token allowance, expiring at a specific ledger.
@@ -67,16 +84,16 @@ await token.approve({
   from: owner.publicKey(),
   spender: spender.publicKey(),
   amount: 10_0000000n,
-  liveUntilLedger: latest.sequence + 100,
+  liveUntilLedger: allowanceExpiration,
   config: ownerConfig,
 });
-console.log(
-  "Allowance before:",
-  await token.allowance({
-    from: owner.publicKey(),
-    spender: spender.publicKey(),
-  }),
-);
+
+const allowanceBefore = await token.allowance({
+  from: owner.publicKey(),
+  spender: spender.publicKey(),
+});
+
+console.log("Allowance before:", allowanceBefore);
 
 // Spender, not owner, signs the transferFrom call. The contract validates the
 // allowance and reduces it by the 3 tokens transferred to recipient.
@@ -87,14 +104,14 @@ await token.transferFrom({
   amount: 3_0000000n,
   config: spenderConfig,
 });
-console.log(
-  "Allowance after:",
-  await token.allowance({
-    from: owner.publicKey(),
-    spender: spender.publicKey(),
-  }),
-);
-console.log(
-  "Recipient's smallest-unit balance:",
-  await token.balance({ id: recipient.publicKey() }),
-);
+
+// Compare the remaining spending permission with the actual received balance.
+const allowanceAfter = await token.allowance({
+  from: owner.publicKey(),
+  spender: spender.publicKey(),
+});
+
+const recipientBalance = await token.balance({ id: recipient.publicKey() });
+
+console.log("Allowance after:", allowanceAfter);
+console.log("Recipient's smallest-unit balance:", recipientBalance);

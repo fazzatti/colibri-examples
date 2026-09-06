@@ -118,3 +118,18 @@ acceptable; a shared wrapper that hides the feature being taught is not. Keep
 genuine validation and cleanup guards, separate independent variants, and
 document expected results and limitations. Never commit private keys or
 generated JWTs.
+
+Write for someone learning both Stellar and Colibri:
+
+- Place explanations **before** the line or block they describe. Use an
+  end-of-line comment only for a short annotation. Do not put explanatory
+  comments after the action.
+- Leave one blank line between conceptual steps, including inside callbacks.
+  Keep related fields and declarations together so spacing reflects the lesson,
+  not every individual line of syntax.
+- Name intermediate values when they explain a distinction: an offer effect
+  versus an offer entry, raw balance units versus display text, or an
+  authorization preimage versus its signature. Keep the native SDK types.
+- Prefer a linear flow and short guards to nested conditionals. Use try/catch
+  for the error being taught and try/finally for required cleanup; do not hide
+  the workflow in helpers or promise chains just to make the entrypoint shorter.

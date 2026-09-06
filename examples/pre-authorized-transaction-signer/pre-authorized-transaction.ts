@@ -68,6 +68,7 @@ console.log("Recipient:", chalk.green(recipient.publicKey()));
  * Friendbot creates and funds both disposable Testnet accounts.
  */
 console.log("Funding the source account with Friendbot...");
+
 await initializeWithFriendbot(
   networkConfig.friendbotUrl,
   account.publicKey(),
@@ -78,6 +79,7 @@ await initializeWithFriendbot(
 );
 
 console.log("Funding the recipient with Friendbot...");
+
 await initializeWithFriendbot(
   networkConfig.friendbotUrl,
   recipient.publicKey(),
@@ -96,7 +98,9 @@ await initializeWithFriendbot(
  * `N` from RPC and pass `N + 1`.
  */
 console.log(chalk.bold("\n1. Preparing the exact future payment..."));
+
 const accountState = await rpc.getAccount(account.publicKey());
+
 const sequenceBeforeFuture = (
   BigInt(accountState.sequenceNumber()) + 1n
 ).toString();
@@ -152,6 +156,7 @@ console.log(
 console.log(
   chalk.bold("\n2. Installing the future transaction hash as a signer..."),
 );
+
 const installPreAuthorization = await executeTransaction({
   operations: [
     Operation.setOptions({
@@ -171,6 +176,7 @@ const installPreAuthorization = await executeTransaction({
     signers: [account],
   },
 });
+
 console.log(
   "Installed the exact transaction hash:",
   chalk.green(installPreAuthorization.hash),
@@ -199,11 +205,14 @@ console.log(
     "\n3. Verifying and submitting the pre-authorized transaction...",
   ),
 );
+
+const signatureRequirements = envelopeSigningRequirements({
+  transaction: futurePayment,
+});
+
 const authorizedPayment = await signEnvelope({
   transaction: futurePayment,
-  signatureRequirements: envelopeSigningRequirements({
-    transaction: futurePayment,
-  }),
+  signatureRequirements,
   signers: [preAuthorized],
 });
 
@@ -241,10 +250,13 @@ console.log("Confirmed in ledger:", chalk.green(submitted.ledger));
  * until another authorized transaction removed it.
  */
 console.log(chalk.bold("\n4. Confirming automatic signer removal..."));
+
 const ledgerEntries = new LedgerEntries({ rpc });
+
 const appliedAccount = await ledgerEntries.account({
   accountId: account.publicKey(),
 });
+
 const stillInstalled = appliedAccount.signers.some((signer) =>
   signer.key.type === "preAuthTx" &&
   signer.key.value === preAuthorized.signerKey()

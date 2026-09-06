@@ -135,9 +135,9 @@ export const initializeAccount = async (
   containerLog: (message: string) => void,
 ): Promise<LocalSigner> => {
   const signer = LocalSigner.generateRandom();
+
   assertExists(networkConfig.friendbotUrl);
   assertExists(networkConfig.rpcUrl);
-
   containerLog(
     `Initializing ${label} with Friendbot so it can be used in transactions...`,
   );
@@ -152,6 +152,7 @@ export const initializeAccount = async (
   );
 
   containerLog(`${label} is ready on the local ledger: ${signer.publicKey()}`);
+
   return signer;
 };
 
@@ -195,7 +196,9 @@ export const completeStreamingLogCommand = async (
   message: string,
 ): Promise<never> => {
   containerLog(message);
+
   await new Promise((resolve) => setTimeout(resolve, 100));
+
   Deno.exit(0);
 };
 
@@ -220,19 +223,24 @@ const createDockerLogDecoder = () => {
     }
 
     const unreadLength = writeOffset - readOffset;
+
     if (readOffset > 0 && (buffer.length - unreadLength) >= additional) {
       buffer.copyWithin(0, readOffset, writeOffset);
+
       writeOffset = unreadLength;
       readOffset = 0;
+
       return;
     }
 
     let capacity = Math.max(8192, buffer.length);
+
     while ((capacity - unreadLength) < additional) {
       capacity *= 2;
     }
 
     const nextBuffer = new Uint8Array(capacity);
+
     if (unreadLength > 0) {
       nextBuffer.set(buffer.subarray(readOffset, writeOffset));
     }
@@ -248,7 +256,9 @@ const createDockerLogDecoder = () => {
     }
 
     ensureCapacity(chunk.length);
+
     buffer.set(chunk, writeOffset);
+
     writeOffset += chunk.length;
   };
 
@@ -258,10 +268,12 @@ const createDockerLogDecoder = () => {
     }
 
     appendChunk(chunk);
+
     const messages: string[] = [];
 
     while (writeOffset > readOffset) {
       const available = writeOffset - readOffset;
+
       if (available < DOCKER_LOG_HEADER_LENGTH) {
         break;
       }
@@ -276,7 +288,9 @@ const createDockerLogDecoder = () => {
         messages.push(
           textDecoder.decode(buffer.subarray(readOffset, writeOffset)),
         );
+
         reset();
+
         break;
       }
 
@@ -292,7 +306,9 @@ const createDockerLogDecoder = () => {
 
       const start = readOffset + DOCKER_LOG_HEADER_LENGTH;
       const end = start + payloadLength;
+
       messages.push(textDecoder.decode(buffer.subarray(start, end)));
+
       readOffset += frameLength;
     }
 
@@ -306,11 +322,14 @@ const createDockerLogDecoder = () => {
   const flush = (): string => {
     if (writeOffset <= readOffset) {
       reset();
+
       return "";
     }
 
     const output = textDecoder.decode(buffer.subarray(readOffset, writeOffset));
+
     reset();
+
     return output;
   };
 
@@ -381,7 +400,9 @@ export const followReusableLedgerLogs = async (
     }
 
     logDecodedMessage(decoder.flush());
+
     const message = error instanceof Error ? error.message : String(error);
+
     containerLog(`[container] Log stream error: ${message}`);
   };
 
@@ -391,7 +412,9 @@ export const followReusableLedgerLogs = async (
 
   return () => {
     closing = true;
+
     logDecodedMessage(decoder.flush());
+
     logStream.destroy?.();
   };
 };

@@ -89,6 +89,7 @@ console.log(chalk.bold("\n1. Resolving the immutable GitHub source..."));
 console.log(`${source.owner}/${source.repository}@${source.revision}`);
 
 console.log(chalk.bold("\n2. Rebuilding the contract in Docker..."));
+
 const result = await verifier.verify({
   mode: "outOfBand",
   target: {
@@ -105,17 +106,21 @@ const result = await verifier.verify({
  * which source, image, recipe, artifact, and comparison produced the result.
  */
 const outputDirectory = new URL("./.verification/", import.meta.url);
+
 await Deno.mkdir(outputDirectory, { recursive: true });
+
 await writeVerificationEvidence(
   new URL("github-evidence.json", outputDirectory).pathname,
   result,
 );
+
 await writeVerificationLogs(
   new URL("github-logs.jsonl", outputDirectory).pathname,
   result.evidence.logs,
 );
 
 console.log(chalk.bold("\n3. Inspecting the byte comparison..."));
+
 switch (result.status) {
   case "verified":
     console.log(

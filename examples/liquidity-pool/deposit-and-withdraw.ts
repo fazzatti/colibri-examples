@@ -8,10 +8,12 @@ import {
   type TransactionConfig,
 } from "@colibri/core";
 import { Asset } from "stellar-sdk";
+
 // Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
 const networkConfig = NetworkConfig.TestNet();
 using issuer = LocalSigner.generateRandom();
 using provider = LocalSigner.generateRandom();
+
 for (const signer of [issuer, provider]) {
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
@@ -22,6 +24,7 @@ for (const signer of [issuer, provider]) {
     },
   );
 }
+
 const issuerConfig: TransactionConfig = {
   source: issuer.publicKey(),
   signers: [issuer],
@@ -38,7 +41,10 @@ const providerConfig: TransactionConfig = {
 const demo = new Asset("POOL", issuer.publicKey());
 const xlm = Asset.native();
 const asset = new StellarAsset({ asset: demo, networkConfig });
+
+// First acquire the issued asset; this trustline holds POOL, not pool shares.
 await asset.changeTrust({ limit: "1000", config: providerConfig });
+
 await asset.mint({
   destination: provider.publicKey(),
   amount: "100",
@@ -48,24 +54,33 @@ await asset.mint({
 // Asset trustlines and the pool-SHARE trustline are different ledger entries.
 // Colibri sorts the pair canonically; labelled amounts avoid assuming A/B order.
 const pool = new NativeLiquidityPool({ assets: [demo, xlm], networkConfig });
+
 await pool.changeTrust({ config: providerConfig });
+
+// State the acceptable XLM-per-POOL range in human terms. Colibri translates
+// that range into the protocol's canonically ordered A/B price bounds.
+const priceBounds = pool.priceBounds({
+  baseAsset: demo,
+  quoteAsset: xlm,
+  minimum: "1.9",
+  maximum: "2.1",
+});
+
 await pool.depositByAsset({
   maximumAmounts: [{ asset: demo, amount: "10" }, { asset: xlm, amount: "20" }],
-  ...pool.priceBounds({
-    baseAsset: demo,
-    quoteAsset: xlm,
-    minimum: "1.9",
-    maximum: "2.1",
-  }),
+  ...priceBounds,
   config: providerConfig,
 });
 
 // Read the pool and holder position in one RPC observation. Shares / totalShares
 // is an ownership fraction, NOT a promise of future withdrawal amounts.
 const position = await pool.getPosition(provider.publicKey());
+
 if (!position.ownership) throw new Error("Expected a funded pool position");
+
 console.log("Observed at ledger:", position.observedAtLedger);
 console.log("Ownership:", position.ownership);
+
 const shares = toDecimals(position.ownership.shares, 7);
 
 // This fresh, isolated pool has no other trades. Withdraw our full share amount,
@@ -79,7 +94,8 @@ await pool.withdrawByAsset({
   }],
   config: providerConfig,
 });
-console.log(
-  "Remaining shares:",
-  (await pool.getPosition(provider.publicKey())).trustline.balance,
-);
+
+// Read again after confirmation to see the remaining pool-share balance.
+const remainingPosition = await pool.getPosition(provider.publicKey());
+
+console.log("Remaining shares:", remainingPosition.trustline.balance);

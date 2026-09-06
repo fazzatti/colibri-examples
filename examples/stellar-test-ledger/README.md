@@ -121,6 +121,8 @@ const ledger = new StellarTestLedger({
 });
 
 await ledger.start();
+
+// Read the endpoints only after the local services are ready.
 const networkDetails = await ledger.getNetworkDetails();
 ```
 

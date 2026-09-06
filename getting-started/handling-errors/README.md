@@ -37,9 +37,12 @@ Expected outcome:
 The example checks for a specific error class first:
 
 ```ts
-if (err instanceof BTX_ERRORS.BASE_FEE_TOO_LOW_ERROR) {
-  // TypeScript now knows the precise error type and its meta shape.
-}
+// Propagate unrelated failures before handling the expected Colibri error.
+if (!(err instanceof BTX_ERRORS.BASE_FEE_TOO_LOW_ERROR)) throw err;
+
+// TypeScript now knows the precise error type and its input metadata.
+const input = err.meta.data.input;
+console.log("Rejected base fee:", input.baseFee);
 ```
 
 Colibri errors and error codes are unique and stable, so matching a specific

@@ -28,22 +28,27 @@ const containerLog = createContainerLog(scope);
 const ledger = createReusableLedger({ useRunningLedger: true });
 
 containerLog("Attaching to the running reusable ledger container...");
+
 await ledger.start();
 
 if (streamingLogs) {
   containerLog(
     "Streaming recent container logs while the sample transactions run...",
   );
+
   await followReusableLedgerLogs(ledger, containerLog);
 }
 
 const details = await ledger.getNetworkDetails();
+
 const networkConfig = NetworkConfig.CustomNet(details);
 
 printReusableLedgerLinks(details, containerLog);
+
 containerLog(
   "Building the classic transaction pipeline. Colibri will use the reusable ledger RPC endpoint for transaction submission.",
 );
+
 const executeTransaction = createClassicTransactionPipeline({ networkConfig });
 
 const sender = await initializeAccount(
@@ -51,6 +56,7 @@ const sender = await initializeAccount(
   "reusable sender",
   containerLog,
 );
+
 const receiver = await initializeAccount(
   networkConfig,
   "reusable receiver",
@@ -60,6 +66,7 @@ const receiver = await initializeAccount(
 containerLog(
   "Sending a payment transaction from the sender to the receiver...",
 );
+
 const paymentOne = await executeTransaction({
   operations: [
     Operation.payment({
@@ -75,9 +82,10 @@ const paymentOne = await executeTransaction({
     signers: [sender],
   },
 });
-containerLog(`Payment one confirmed with hash ${paymentOne.hash}.`);
 
+containerLog(`Payment one confirmed with hash ${paymentOne.hash}.`);
 containerLog("Sending a second payment back to the sender...");
+
 const paymentTwo = await executeTransaction({
   operations: [
     Operation.payment({
@@ -94,11 +102,12 @@ const paymentTwo = await executeTransaction({
     signers: [receiver],
   },
 });
-containerLog(`Payment two confirmed with hash ${paymentTwo.hash}.`);
 
+containerLog(`Payment two confirmed with hash ${paymentTwo.hash}.`);
 containerLog(
   "Sending a setOptions transaction to update the receiver account...",
 );
+
 const setOptions = await executeTransaction({
   operations: [
     Operation.setOptions({
@@ -113,6 +122,7 @@ const setOptions = await executeTransaction({
     signers: [receiver],
   },
 });
+
 containerLog(`setOptions confirmed with hash ${setOptions.hash}.`);
 containerLog(
   "Open the transactions explorer to inspect the submitted transactions in the browser:",
