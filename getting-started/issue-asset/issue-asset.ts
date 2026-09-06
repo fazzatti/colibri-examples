@@ -30,7 +30,7 @@ console.log(
  * TestNet gives us Friendbot funding and a clean place to deploy the contract.
  */
 const networkConfig = NetworkConfig.TestNet();
-const classicPipeline = createClassicTransactionPipeline({ networkConfig });
+const executeTransaction = createClassicTransactionPipeline({ networkConfig });
 
 /**
  * We use two accounts:
@@ -51,6 +51,7 @@ await initializeWithFriendbot(networkConfig.friendbotUrl, issuer.publicKey(), {
   rpcUrl: networkConfig.rpcUrl,
   allowHttp: networkConfig.allowHttp,
 });
+
 await initializeWithFriendbot(networkConfig.friendbotUrl, holder.publicKey(), {
   rpcUrl: networkConfig.rpcUrl,
   allowHttp: networkConfig.allowHttp,
@@ -91,7 +92,7 @@ const assetDecimals = await COLIBRI.decimals();
  * That is still classic Stellar behavior, so we use the classic transaction
  * pipeline for this one step and keep the rest of the flow inside SAC.
  */
-await classicPipeline.run({
+await executeTransaction({
   operations: [
     Operation.changeTrust({
       asset: new Asset("COLIBRI", issuer.publicKey()),
@@ -113,10 +114,11 @@ console.log("Holder trustline added for COLIBRI.");
 const holderBalanceBefore = await COLIBRI.balance({
   id: holder.publicKey(),
 });
+
+const displayedBalanceBefore = toDecimals(holderBalanceBefore, assetDecimals);
+
 console.log(
-  `Holder balance before mint: ${chalk.green(
-    toDecimals(holderBalanceBefore, assetDecimals),
-  )} COLIBRI`,
+  `Holder balance before mint: ${chalk.green(displayedBalanceBefore)} COLIBRI`,
 );
 
 /**
@@ -145,9 +147,9 @@ const holderBalanceAfter = await COLIBRI.balance({
   id: holder.publicKey(),
 });
 
+const displayedBalanceAfter = toDecimals(holderBalanceAfter, assetDecimals);
+
 console.log(
-  `Holder balance after mint: ${chalk.green(
-    toDecimals(holderBalanceAfter, assetDecimals),
-  )} COLIBRI`,
+  `Holder balance after mint: ${chalk.green(displayedBalanceAfter)} COLIBRI`,
 );
 console.log("✅ Asset issuance successful!");

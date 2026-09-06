@@ -34,6 +34,12 @@ pristine-ledger flow. It is useful when you want deterministic local integration
 tests that create a fresh ledger, run a few transactions, and clean everything
 up automatically at the end.
 
+Start with this file: it constructs StellarTestLedger directly and keeps network
+configuration, Friendbot calls, transactions, and cleanup visible. It does not
+import the reusable-ledger helpers. The remaining scripts and shared.ts are a
+separate, advanced workflow for a long-lived container and optional log
+forwarding, not prerequisites for the introductory test.
+
 This use case shows how to:
 
 - start a pristine local ledger in `beforeAll`
@@ -115,6 +121,8 @@ const ledger = new StellarTestLedger({
 });
 
 await ledger.start();
+
+// Read the endpoints only after the local services are ready.
 const networkDetails = await ledger.getNetworkDetails();
 ```
 

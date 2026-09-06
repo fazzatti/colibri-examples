@@ -1,22 +1,20 @@
 /**
  * Getting Started Example: Contract Transfer
- * 
+ *
  * This example demonstrates how to perform a simple transfer
  * of 50 XLM from one account to another on TestNet
  * using the Stellar Asset Contract (SAC) helper.
- * 
-
  */
 import {
-  NetworkConfig,
-  LocalSigner,
-  StellarAssetContract,
   initializeWithFriendbot,
+  LocalSigner,
+  NetworkConfig,
+  StellarAssetContract,
 } from "@colibri/core";
 import chalk from "chalk";
 
 console.log(
-  chalk.bgBlue(`Starting Getting started -> Contract Transfer example...`)
+  chalk.bgBlue(`Starting Getting started -> Contract Transfer example...`),
 );
 
 /**
@@ -40,6 +38,7 @@ const networkConfig = NetworkConfig.TestNet();
  */
 const sender = LocalSigner.generateRandom();
 const receiver = LocalSigner.generateRandom();
+
 console.log("Sender Public Key:", chalk.green(sender.publicKey()));
 console.log("Receiver Public Key:", chalk.green(receiver.publicKey()));
 
@@ -51,9 +50,11 @@ console.log("Receiver Public Key:", chalk.green(receiver.publicKey()));
  * funds new accounts with TestNet XLM for development and testing purposes.
  */
 await initializeWithFriendbot(networkConfig.friendbotUrl, sender.publicKey());
+
 console.log("Sender Account funded!");
 
 await initializeWithFriendbot(networkConfig.friendbotUrl, receiver.publicKey());
+
 console.log("Receiver Account funded!");
 
 /**
@@ -77,10 +78,11 @@ const XLM = StellarAssetContract.NativeXLM(networkConfig);
 const receiverBalanceBefore = await XLM.balance({
   id: receiver.publicKey(),
 });
+
 console.log(
-  `Receiver balance before transfer: ${chalk.green(
-    receiverBalanceBefore
-  )} stroops`
+  `Receiver balance before transfer: ${
+    chalk.green(receiverBalanceBefore)
+  } stroops`,
 );
 
 /**
@@ -96,18 +98,16 @@ console.log(
  * - source account: the account that will pay for the transaction fees.
  * In this case, the sender will cover the fees for this transfer.
  *
- * - fee: the maximum inclusion fee the sender is  willing to pay
- * for the transaction (in stroops).
+ * - fee: a per-operation inclusion bid in stroops. This Soroban transaction
+ * has one operation; simulated resource fees are added separately.
  *
  * - signers: an array of signers that will sign the transaction
  * to authorize the transfer. Here since the sender is the one
  * sending the funds and also the source of the transaction, we only
  * need the sender to sign the transaction.
  *
- * - timeout: the maximum time (in seconds) to wait for the transaction
- * to be included in a ledger before considering it failed. If the
- * transaction is not confirmed  within this time frame, it will be
- * rendered invalid.
+ * - timeout: the transaction validity duration in seconds. It sets the upper
+ * time bound for ledger inclusion, not a client-side RPC waiting deadline.
  */
 const result = await XLM.transfer({
   from: sender.publicKey(),
@@ -127,14 +127,14 @@ console.log("Initial transfer of 50 XLM completed!");
  * Finally, let's check the receiver's XLM balance again
  * to confirm that the transfer was successful.
  */
-
 const receiverBalanceAfter = await XLM.balance({
   id: receiver.publicKey(),
 });
+
 console.log(
-  `Receiver balance after transfer: ${chalk.green(
-    receiverBalanceAfter
-  )} stroops`
+  `Receiver balance after transfer: ${
+    chalk.green(receiverBalanceAfter)
+  } stroops`,
 );
 
 console.log("✅ Transaction successful!");

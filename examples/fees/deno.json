@@ -1,0 +1,7 @@
+{
+  "tasks": {
+    "base": "deno run -A ./base.ts",
+    "inclusion": "deno run -A ./inclusion.ts",
+    "max": "deno run -A ./soroban-max.ts"
+  }
+}

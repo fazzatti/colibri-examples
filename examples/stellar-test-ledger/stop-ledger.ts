@@ -22,17 +22,21 @@ const containerLog = createContainerLog(scope);
 const ledger = createReusableLedger({ useRunningLedger: true });
 
 containerLog("Attaching to the running reusable ledger container...");
+
 await ledger.start();
 
 if (streamingLogs) {
   containerLog(
     "Streaming recent container logs while the reusable ledger shuts down...",
   );
+
   await followReusableLedgerLogs(ledger, containerLog);
 }
 
 containerLog("Stopping the running container...");
+
 await ledger.getContainer().stop();
+
 containerLog("Container stopped.");
 
 if (streamingLogs) {

@@ -23,32 +23,41 @@ const scope = streamingLogs ? "ledger:restart:log" : "ledger:restart";
 const containerLog = createContainerLog(scope);
 
 containerLog("Attaching to the running reusable ledger container...");
+
 const attachedLedger = createReusableLedger({ useRunningLedger: true });
+
 await attachedLedger.start();
 
 if (streamingLogs) {
   containerLog(
     "Streaming container logs while the current reusable ledger instance shuts down...",
   );
+
   await followReusableLedgerLogs(attachedLedger, containerLog);
 }
 
 containerLog("Restarting the running container...");
+
 await attachedLedger.getContainer().restart();
 
 if (streamingLogs) {
   containerLog(
     "Streaming container logs while the restarted reusable ledger initializes...",
   );
+
   await followReusableLedgerLogs(attachedLedger, containerLog);
 }
 
 containerLog("Waiting for the restarted container to become ready again...");
+
 const refreshedLedger = createReusableLedger({ useRunningLedger: true });
+
 await refreshedLedger.start();
 
 const details = await refreshedLedger.getNetworkDetails();
+
 containerLog("Container restarted successfully.");
+
 printReusableLedgerLinks(details, containerLog);
 
 if (streamingLogs) {

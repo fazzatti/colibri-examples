@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "render": "deno run -A ./render.ts"
+  }
+}

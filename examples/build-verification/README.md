@@ -24,7 +24,7 @@ that can affect the Wasm bytes is fixed.
 
 ## What Colibri Does
 
-For every runnable path, Colibri:
+For the Hello World API and CLI paths, Colibri:
 
 1. reads the target Wasm from
    [`contract/hello-world.wasm`](./contract/hello-world.wasm);
@@ -80,7 +80,7 @@ The same verification can run through Colibri's CLI without installing the
 package or cloning the Colibri SDK:
 
 ```bash
-deno run -A jsr:@colibri/build-verification@0.3.0/cli \
+deno run -A jsr:@colibri/build-verification@0.4.3/cli \
   --wasm ./contract/hello-world.wasm \
   --github-owner stellar \
   --github-repository soroban-examples \
@@ -130,6 +130,35 @@ structured evidence document, and `--logs` for the bounded execution log.
 Machine-readable JSON mode disables the interactive spinner automatically. These
 reporting flags are independent: a real integration can request only the outputs
 it needs.
+
+## 4. Strict SEP-58 verification of a Testnet contract
+
+```sh
+deno task verify:sep58
+```
+
+`verify-sep58-testnet.ts` is a separate, linear lesson. It downloads the
+purpose-built public Colibri verification fixture and its vendored source
+archive from immutable release commit
+`0b8225d3bcd8925f762b915fa5dc7a9d78572365`, funds a disposable deployer, and
+deploys a fresh Testnet instance.
+
+It then asks `ContractBuildVerifier` to resolve that contract ID through
+`NetworkConfig` and rebuild using the SEP-58 recipe embedded in the Wasm. There
+is **no outOfBand mode or caller-supplied recipe** in this path. The caller
+downloads the archive into a Uint8Array; the `archive` source input validates
+those bytes against the digest in the embedded metadata.
+
+The expected result is `verified`. Full evidence is written to
+`.verification/sep58-evidence.json`, including the observed network target and
+rebuild details. A contract ID can later be upgraded; evidence describes the
+executable actually resolved, not a permanent guarantee about that address.
+
+This fixture intentionally exposes an unprotected upgrade method and must not be
+used as a production authorization example. Only public, purpose-built fixtures
+are used here. Docker and outbound networking are required; networking is
+explicitly enabled for build-toolchain bootstrap. The source archive is larger
+than the Hello World download because it includes vendored dependencies.
 
 ## Evidence and Logs
 

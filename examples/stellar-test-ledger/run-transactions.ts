@@ -28,29 +28,35 @@ const containerLog = createContainerLog(scope);
 const ledger = createReusableLedger({ useRunningLedger: true });
 
 containerLog("Attaching to the running reusable ledger container...");
+
 await ledger.start();
 
 if (streamingLogs) {
   containerLog(
     "Streaming recent container logs while the sample transactions run...",
   );
+
   await followReusableLedgerLogs(ledger, containerLog);
 }
 
 const details = await ledger.getNetworkDetails();
+
 const networkConfig = NetworkConfig.CustomNet(details);
 
 printReusableLedgerLinks(details, containerLog);
+
 containerLog(
   "Building the classic transaction pipeline. Colibri will use the reusable ledger RPC endpoint for transaction submission.",
 );
-const classicPipeline = createClassicTransactionPipeline({ networkConfig });
+
+const executeTransaction = createClassicTransactionPipeline({ networkConfig });
 
 const sender = await initializeAccount(
   networkConfig,
   "reusable sender",
   containerLog,
 );
+
 const receiver = await initializeAccount(
   networkConfig,
   "reusable receiver",
@@ -60,7 +66,8 @@ const receiver = await initializeAccount(
 containerLog(
   "Sending a payment transaction from the sender to the receiver...",
 );
-const paymentOne = await classicPipeline.run({
+
+const paymentOne = await executeTransaction({
   operations: [
     Operation.payment({
       destination: receiver.publicKey(),
@@ -75,10 +82,11 @@ const paymentOne = await classicPipeline.run({
     signers: [sender],
   },
 });
-containerLog(`Payment one confirmed with hash ${paymentOne.hash}.`);
 
+containerLog(`Payment one confirmed with hash ${paymentOne.hash}.`);
 containerLog("Sending a second payment back to the sender...");
-const paymentTwo = await classicPipeline.run({
+
+const paymentTwo = await executeTransaction({
   operations: [
     Operation.payment({
       source: receiver.publicKey(),
@@ -94,12 +102,13 @@ const paymentTwo = await classicPipeline.run({
     signers: [receiver],
   },
 });
-containerLog(`Payment two confirmed with hash ${paymentTwo.hash}.`);
 
+containerLog(`Payment two confirmed with hash ${paymentTwo.hash}.`);
 containerLog(
   "Sending a setOptions transaction to update the receiver account...",
 );
-const setOptions = await classicPipeline.run({
+
+const setOptions = await executeTransaction({
   operations: [
     Operation.setOptions({
       source: receiver.publicKey(),
@@ -113,6 +122,7 @@ const setOptions = await classicPipeline.run({
     signers: [receiver],
   },
 });
+
 containerLog(`setOptions confirmed with hash ${setOptions.hash}.`);
 containerLog(
   "Open the transactions explorer to inspect the submitted transactions in the browser:",

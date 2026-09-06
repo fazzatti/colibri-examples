@@ -7,8 +7,7 @@ The helper gives you a high-level interface for working with Stellar assets
 through their Stellar Asset Contract (SAC) deployment. In practice, that means
 you can use it in three different ways:
 
-- `StellarAssetContract.NativeXLM(...)` creates a client for the native XLM
-  SAC
+- `StellarAssetContract.NativeXLM(...)` creates a client for the native XLM SAC
 - `StellarAssetContract.fromAsset(...)` creates a client for an existing SAC
   that has already been deployed for a specific asset
 - `StellarAssetContract.deploy(...)` deploys a new SAC for an asset and returns
@@ -34,8 +33,8 @@ The example uses TestNet and Friendbot, so it requires internet access.
 
 ## Custom Asset
 
-In this example, the script uses `StellarAssetContract.deploy(...)` to create a new `COLIBRI` SAC on TestNet and
-get the client back immediately.
+In this example, the script uses `StellarAssetContract.deploy(...)` to create a
+new `COLIBRI` SAC on TestNet and get the client back immediately.
 
 The script shows the extra steps needed for a non-native asset:
 

@@ -1,6 +1,8 @@
 # Contract Transfer Example
 
-This example demonstrates how to perform a simple transfer of XLM between accounts on TestNet using the Stellar Asset Contract (SAC) helper from [@colibri/core](https://jsr.io/@colibri/core).
+This example demonstrates how to perform a simple transfer of XLM between
+accounts on TestNet using the Stellar Asset Contract (SAC) helper from
+[@colibri/core](https://jsr.io/@colibri/core).
 
 ## Overview
 
@@ -14,7 +16,8 @@ The example showcases:
 
 ## Usage
 
-Before proceeding, make sure to follow the setup described in the [workspace README](../../README.md).
+Before proceeding, make sure to follow the setup described in the
+[workspace README](../../README.md).
 
 ### Run the Transfer
 
@@ -36,7 +39,8 @@ This script:
 
 ### NetworkConfig
 
-Predefined network configurations provide standardized setups for different networks:
+Predefined network configurations provide standardized setups for different
+networks:
 
 ```ts
 const networkConfig = NetworkConfig.TestNet();
@@ -53,7 +57,8 @@ const receiver = LocalSigner.generateRandom();
 
 ### StellarAssetContract
 
-High-level client for interacting with Stellar Assets through their SAC smart contracts:
+High-level client for interacting with Stellar Assets through their SAC smart
+contracts:
 
 ```ts
 const XLM = StellarAssetContract.NativeXLM(networkConfig);

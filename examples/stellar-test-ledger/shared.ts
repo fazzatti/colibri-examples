@@ -1,8 +1,6 @@
 /**
- * Shared helpers for the Stellar Test Ledger example.
- *
- * The integration test and the runnable scripts all use the same small set of
- * helpers so the example stays consistent while still being easy to read.
+ * Support for the optional reusable-ledger lifecycle and log-forwarding tasks.
+ * The introductory ledger.integration.test.ts uses StellarTestLedger directly.
  */
 import { assertExists } from "@std/assert";
 import {
@@ -17,11 +15,6 @@ import {
   QuickstartServices,
   StellarTestLedger,
 } from "@colibri/test-tooling";
-
-/**
- * Fixed container name used by the isolated integration test.
- */
-export const TEST_LEDGER_NAME = "colibri-stellar-test-ledger";
 
 /**
  * Fixed container name used by the long-lived reusable ledger tasks.
@@ -84,20 +77,6 @@ type ReusableLedgerOptions = {
 };
 
 /**
- * Creates the ephemeral ledger used by the automated integration test.
- *
- * `LATEST` comes from `QuickstartImageTags`, but any valid Quickstart Docker
- * tag string would also be accepted here.
- */
-export const createIntegrationTestLedger = () => {
-  return new StellarTestLedger({
-    containerName: TEST_LEDGER_NAME,
-    containerImageVersion: QuickstartImageTags.LATEST,
-    logLevel: DEFAULT_LOG_LEVEL,
-  });
-};
-
-/**
  * Creates the reusable local ledger used by the operational tasks.
  *
  * Set `useRunningLedger` when the caller wants to attach to an already-running
@@ -156,9 +135,9 @@ export const initializeAccount = async (
   containerLog: (message: string) => void,
 ): Promise<LocalSigner> => {
   const signer = LocalSigner.generateRandom();
+
   assertExists(networkConfig.friendbotUrl);
   assertExists(networkConfig.rpcUrl);
-
   containerLog(
     `Initializing ${label} with Friendbot so it can be used in transactions...`,
   );
@@ -173,6 +152,7 @@ export const initializeAccount = async (
   );
 
   containerLog(`${label} is ready on the local ledger: ${signer.publicKey()}`);
+
   return signer;
 };
 
@@ -216,7 +196,9 @@ export const completeStreamingLogCommand = async (
   message: string,
 ): Promise<never> => {
   containerLog(message);
+
   await new Promise((resolve) => setTimeout(resolve, 100));
+
   Deno.exit(0);
 };
 
@@ -241,19 +223,24 @@ const createDockerLogDecoder = () => {
     }
 
     const unreadLength = writeOffset - readOffset;
+
     if (readOffset > 0 && (buffer.length - unreadLength) >= additional) {
       buffer.copyWithin(0, readOffset, writeOffset);
+
       writeOffset = unreadLength;
       readOffset = 0;
+
       return;
     }
 
     let capacity = Math.max(8192, buffer.length);
+
     while ((capacity - unreadLength) < additional) {
       capacity *= 2;
     }
 
     const nextBuffer = new Uint8Array(capacity);
+
     if (unreadLength > 0) {
       nextBuffer.set(buffer.subarray(readOffset, writeOffset));
     }
@@ -269,7 +256,9 @@ const createDockerLogDecoder = () => {
     }
 
     ensureCapacity(chunk.length);
+
     buffer.set(chunk, writeOffset);
+
     writeOffset += chunk.length;
   };
 
@@ -279,10 +268,12 @@ const createDockerLogDecoder = () => {
     }
 
     appendChunk(chunk);
+
     const messages: string[] = [];
 
     while (writeOffset > readOffset) {
       const available = writeOffset - readOffset;
+
       if (available < DOCKER_LOG_HEADER_LENGTH) {
         break;
       }
@@ -297,7 +288,9 @@ const createDockerLogDecoder = () => {
         messages.push(
           textDecoder.decode(buffer.subarray(readOffset, writeOffset)),
         );
+
         reset();
+
         break;
       }
 
@@ -313,7 +306,9 @@ const createDockerLogDecoder = () => {
 
       const start = readOffset + DOCKER_LOG_HEADER_LENGTH;
       const end = start + payloadLength;
+
       messages.push(textDecoder.decode(buffer.subarray(start, end)));
+
       readOffset += frameLength;
     }
 
@@ -327,11 +322,14 @@ const createDockerLogDecoder = () => {
   const flush = (): string => {
     if (writeOffset <= readOffset) {
       reset();
+
       return "";
     }
 
     const output = textDecoder.decode(buffer.subarray(readOffset, writeOffset));
+
     reset();
+
     return output;
   };
 
@@ -402,7 +400,9 @@ export const followReusableLedgerLogs = async (
     }
 
     logDecodedMessage(decoder.flush());
+
     const message = error instanceof Error ? error.message : String(error);
+
     containerLog(`[container] Log stream error: ${message}`);
   };
 
@@ -412,7 +412,9 @@ export const followReusableLedgerLogs = async (
 
   return () => {
     closing = true;
+
     logDecodedMessage(decoder.flush());
+
     logStream.destroy?.();
   };
 };

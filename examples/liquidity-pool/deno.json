@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "liquidity": "deno run -A ./deposit-and-withdraw.ts"
+  }
+}

@@ -65,47 +65,49 @@ try {
    * narrowing with `instanceof` lets TypeScript infer the exact shape,
    * which is helpful when extracting metadata for handling.
    */
-  if (err instanceof BTX_ERRORS.BASE_FEE_TOO_LOW_ERROR) {
-    console.log(chalk.red("Matched BuildTransaction BASE_FEE_TOO_LOW"));
+  if (!(err instanceof BTX_ERRORS.BASE_FEE_TOO_LOW_ERROR)) throw err;
 
-    console.log(chalk.blue.bold("\n🧩 Error Anatomy"));
-    // Identity fields: stable, unique code + where it originated.
-    // Codes are unique and stable,
-    // which makes them safe to match on in logs or retry logic.
-    console.log(chalk.gray("name:"), err.name);
-    console.log(chalk.gray("code (unique):"), err.code);
-    console.log(chalk.gray("domain:"), err.domain);
-    console.log(chalk.gray("source:"), err.source);
-    // Human-readable explanation for logs and UX.
-    console.log(chalk.gray("message:"), err.message);
-    console.log(chalk.gray("details:"), err.details);
+  console.log(chalk.red("Matched BuildTransaction BASE_FEE_TOO_LOW"));
 
-    console.log(chalk.blue.bold("\n🧾 Metadata"));
-    // Structured input that triggered the error (typed).
-    // This is meant for programmatic handling (e.g., retries or fixes),
-    // and is guaranteed to follow the error class' meta shape.
-    console.log(chalk.gray("input.baseFee:"), err.meta.data.input.baseFee);
-    console.log(chalk.gray("input.source:"), err.meta.data.input.source);
-    // `meta.cause` is where Colibri stores the original error when it wraps
-    // an external failure (RPC, network, SDK, etc.). That lets you inspect
-    // the underlying cause without losing Colibri’s typed context.
-    // Here it is undefined because this error is a pure Colibri validation
-    // that happens before any external call is made.
+  console.log(chalk.blue.bold("\n🧩 Error Anatomy"));
 
-    console.log(chalk.blue.bold("\n🩺 Diagnostic"));
-    // Diagnostic guidance to help resolve the issue.
-    // Colibri includes suggestions and references when available.
-    const diagnostic = err.diagnostic!;
-    console.log(chalk.gray("rootCause:"), diagnostic.rootCause);
-    console.log(chalk.cyan("suggestion:"), diagnostic.suggestion);
-    console.log(chalk.gray("materials:"), diagnostic.materials);
+  // Identity fields: stable, unique code + where it originated.
+  // Codes are unique and stable,
+  // which makes them safe to match on in logs or retry logic.
+  console.log(chalk.gray("name:"), err.name);
+  console.log(chalk.gray("code (unique):"), err.code);
+  console.log(chalk.gray("domain:"), err.domain);
+  console.log(chalk.gray("source:"), err.source);
 
-    // Stable JSON representation for structured logging/transport.
-    console.log(chalk.blue.bold("\n🔎 Full JSON"));
-    console.log(err.toJSON());
+  // Human-readable explanation for logs and UX.
+  console.log(chalk.gray("message:"), err.message);
+  console.log(chalk.gray("details:"), err.details);
 
-    Deno.exit(0);
-  }
+  console.log(chalk.blue.bold("\n🧾 Metadata"));
 
-  throw err;
+  // Structured input that triggered the error (typed).
+  // This is meant for programmatic handling (e.g., retries or fixes),
+  // and is guaranteed to follow the error class' meta shape.
+  const input = err.meta.data.input;
+
+  console.log(chalk.gray("input.baseFee:"), input.baseFee);
+  console.log(chalk.gray("input.source:"), input.source);
+
+  // This validation error has no wrapped external cause. Its diagnostic
+  // describes how to correct the input before retrying.
+  console.log(chalk.blue.bold("\n🩺 Diagnostic"));
+
+  // Diagnostic guidance to help resolve the issue.
+  // Colibri includes suggestions and references when available.
+  const diagnostic = err.diagnostic!;
+
+  console.log(chalk.gray("rootCause:"), diagnostic.rootCause);
+  console.log(chalk.cyan("suggestion:"), diagnostic.suggestion);
+  console.log(chalk.gray("materials:"), diagnostic.materials);
+
+  // Stable JSON representation for structured logging/transport.
+  console.log(chalk.blue.bold("\n🔎 Full JSON"));
+  console.log(err.toJSON());
+
+  Deno.exit(0);
 }

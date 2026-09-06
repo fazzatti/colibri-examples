@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "trustline": "deno run -A ./sponsored-trustline.ts"
+  }
+}

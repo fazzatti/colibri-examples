@@ -1,0 +1,7 @@
+{
+  "tasks": {
+    "prices": "deno run ./prices.ts",
+    "sell": "deno run -A ./sell-offer.ts",
+    "buy": "deno run -A ./buy-offer.ts"
+  }
+}

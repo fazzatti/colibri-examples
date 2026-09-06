@@ -44,11 +44,13 @@ const rpc = new Server(networkConfig.rpcUrl, {
 });
 
 const latestLedger = await rpc.getLatestLedger();
+
 if (Number(latestLedger.protocolVersion) < 27) {
   throw new Error(
     `Delegated authorization requires Protocol 27; Testnet reports ${latestLedger.protocolVersion}`,
   );
 }
+
 console.log("Protocol:", chalk.green(latestLedger.protocolVersion));
 
 /**
@@ -78,6 +80,7 @@ console.log("Delegate leaf:", chalk.green(leaf.publicKey()));
  */
 for (const signer of [admin, recipient, leaf]) {
   console.log(`Funding ${signer.publicKey()} with Friendbot...`);
+
   await initializeWithFriendbot(
     networkConfig.friendbotUrl,
     signer.publicKey(),
@@ -113,6 +116,7 @@ const assetAccountWasm = await Deno.readFile(
     import.meta.url,
   ),
 );
+
 const assetAccountTemplate = new Contract({
   networkConfig,
   rpc,
@@ -123,6 +127,7 @@ const assetAccountTemplate = new Contract({
 });
 
 console.log("Uploading the delegated asset account WASM...");
+
 await assetAccountTemplate.uploadWasm(transactionConfig);
 
 /**
@@ -149,6 +154,7 @@ await assetAccount.deploy({
 });
 
 const assetAccountId = assetAccount.getContractId();
+
 console.log("Asset account:", chalk.green(assetAccountId));
 
 /**
@@ -185,6 +191,7 @@ const deposit = 20_000_000n;
 const withdrawal = 10_000_000n;
 
 console.log("Depositing 2 XLM into the contract account...");
+
 await XLM.transfer({
   from: admin.publicKey(),
   to: assetAccountId,
@@ -193,6 +200,7 @@ await XLM.transfer({
 });
 
 const balanceBefore = await XLM.balance({ id: assetAccountId });
+
 console.log(
   "Balance before withdrawal:",
   chalk.green(balanceBefore),
@@ -214,6 +222,7 @@ console.log(
  * constructor policy. Only then is the final transaction submitted.
  */
 console.log("Withdrawing 1 XLM through the direct delegate...");
+
 const result = await assetAccount.invoke({
   method: "withdraw",
   methodArgs: {

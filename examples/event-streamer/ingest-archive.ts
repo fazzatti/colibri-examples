@@ -123,7 +123,7 @@ const onEvent = (event: Event) => {
   console.log(`  > Amount ${chalk.green(mintEvent.amount)}`);
   console.log(`  > Asset ${chalk.green(mintEvent.asset)}`);
 
-  // Increment and log the counter
+  // Count this event after its details have been handled.
   counter++;
 };
 
@@ -145,10 +145,12 @@ const onEvent = (event: Event) => {
  * RPC can be used.
  */
 console.log(`Starting archive ingestion...`);
+
 await eventStreamer.start(onEvent, {
   startLedger,
   stopLedger,
 });
 
 console.log(`\nIngestion completed. Processed ${chalk.green(counter)} events.`);
+
 Deno.exit(0);
