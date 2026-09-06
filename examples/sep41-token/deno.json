@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "allowance": "deno run -A ./allowance.ts",
+    "contract:build": "stellar contract build --locked --manifest-path ./contract/Cargo.toml --out-dir ./contract && mv ./contract/colibri_example_token.wasm ./contract/token.wasm"
+  }
+}

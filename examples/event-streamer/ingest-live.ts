@@ -67,13 +67,12 @@ const filter = new EventFilter({
 });
 
 /**
- * We'll be ingesting events for the next 5 ledgers only.
- * So we'll load the latest ledger and set the stopLedger
- * to 5 ledgers after that.
+ * Ingest five ledgers, including the latest one. Both bounds are inclusive,
+ * so the stop ledger is four sequence numbers after the start.
  */
 const server = new Server(networkConfig.rpcUrl);
 const latestLedger = await server.getLatestLedger();
-const stopLedger = latestLedger.sequence + 5;
+const stopLedger = latestLedger.sequence + 4;
 
 console.log(
   `Latest ledger is ${
@@ -146,24 +145,16 @@ const onEvent = (event: Event) => {
  * is an 'inclusive' condition so the stopLedger is
  * included in the ingestion.
  *
- * By not providing a `startLedger`, the ingestion
- * will start from the latest ledger available
- * in the normal RPC.
- *
- * Since we are starting at the latest ledger,
- * the `start` function will automatically identify
- * that it falls within the normal RPC retention window
- * and will use the live ingestion mode instead of
- * the historical ingestion mode.
- *
- * Alternatively, one can explicitely use the `startLive`
- * method to indicate that we want to start live ingestion.
- * By explicitely using the `startLive` method, the ingestion
- * will fail if the `startLedger` falls outside the normal
- * RPC retention window.
+ * Provide the exact start we observed above, so another ledger closing during
+ * setup does not shorten our five-ledger slice. startLive explicitly chooses
+ * the normal RPC and fails if the requested start has left its retention window.
+ * Use start() when you want the archive-to-live routing demonstrated separately.
  */
 console.log(`Starting live ingestion...`);
-await eventStreamer.start(onEvent, { stopLedger });
+await eventStreamer.startLive(onEvent, {
+  startLedger: latestLedger.sequence,
+  stopLedger,
+});
 
 console.log(`\nIngestion completed. Processed ${chalk.green(counter)} events.`);
 Deno.exit(0);

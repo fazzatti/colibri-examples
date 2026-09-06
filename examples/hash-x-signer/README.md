@@ -1,75 +1,41 @@
-# Hash-X Signer
+# Hash-X as an additional transaction condition
 
-This example uses [`@colibri/core`](https://jsr.io/@colibri/core) to authorize a
-Stellar Testnet payment by revealing a Hash-X preimage.
+[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
+[Example index](../../README.md)
 
-## What Is Hash-X?
+This standalone Testnet lesson requires **both** an ordinary Ed25519 transaction
+signature and a Hash-X preimage. It uses the transaction's `extraSigners`
+precondition, not an account-wide signer installation.
 
-Hash-X is one of Stellar's account signer types. Instead of storing a public
-key, the account stores the SHA-256 hash of a secret value called a preimage.
-The signer is represented as an `X...` StrKey.
-
-To authorize a transaction:
-
-1. the transaction envelope reveals the preimage;
-2. Stellar hashes that value with SHA-256; and
-3. the resulting hash must match the `X...` signer installed on the account.
-
-Hash-X is therefore a reveal-on-use mechanism, not a reusable digital signature.
-Once submitted, the preimage is visible to anyone who can read the transaction
-envelope.
-
-## Setup
-
-Follow the installation instructions in the [workspace README](../../README.md),
-then run:
-
-```bash
+```sh
 cd examples/hash-x-signer
 deno task hash-x
 ```
 
-The complete example lives in [`hash-x.ts`](./hash-x.ts). Network setup,
-Friendbot funding, signer installation, pipeline execution, cleanup, and
-zeroization are kept in that one file so every public Colibri call is visible.
+## Follow hash-x.ts
 
-The script:
+1. Create and fund a sender and recipient.
+2. Create a random HashXSigner; its X key exposes the SHA-256 digest, not the
+   secret.
+3. Add that X key to `config.extraSigners` and pass both signers.
+4. Call the payment pipeline. Colibri supplies the ordinary signature and the
+   preimage, then confirms the payment.
+5. Dispose the signer and best-effort zeroize its retained preimage.
 
-1. creates and funds a disposable source account and recipient;
-2. generates a hidden random preimage with `HashXSigner`;
-3. installs its `X...` hash with weight 1 and sets the account thresholds to 1;
-4. targets the signer to the source account so Colibri can match it to the
-   envelope-signing requirement;
-5. submits a 1 XLM payment using only the Hash-X signer;
-6. removes the disclosed signer with the account's master key; and
-7. zeroizes the retained preimage.
+The X key needs no account or funding. No setOptions setup or cleanup
+transaction is needed because the condition belongs to this transaction.
 
-The master key remains active throughout the example. It is not used for the
-payment, but it provides the recovery path needed to remove the Hash-X signer
-after disclosure.
+## Why not install the hash as the only account signer?
 
-## Colibri's Role
+A revealed preimage is public bearer data. Installing its hash as sufficient
+account authorization lets anyone reuse the preimage while that signer remains
+accepted. Removing it in a later transaction leaves a dangerous interval; simply
+removing it in the same transaction is not a general front-running solution.
 
-`HashXSigner` keeps the preimage, derives its hash and `X...` identity, declares
-which account it signs for, and adds the preimage to the transaction envelope.
-The classic transaction pipeline determines the source account's signing
-requirement and routes it to that capability.
+Here the ordinary sender signature binds the payment's contents. Reusing the
+preimage cannot create a new sender signature. Still, do not reuse disclosed
+preimages for other authorization policies. Local zeroization cannot erase a
+submitted envelope.
 
-The example passes `true` to `HashXSigner.generateRandom(true)`, which hides
-direct preimage access from application code while retaining the value for
-envelope authorization.
-
-## Security Boundary
-
-A submitted Hash-X envelope publishes its preimage permanently. Removing the
-account signer prevents that disclosed value from authorizing later
-transactions. Calling `destroy()` additionally zeroizes Colibri's in-memory copy
-on a best-effort basis, but it cannot remove the value from ledger history.
-
-Never reuse a disclosed preimage for another signer or authorization policy.
-
-## Learn More
-
-- [Colibri signer documentation](https://fifo-docs.gitbook.io/colibri/core/signer)
-- [Stellar multisignature documentation](https://developers.stellar.org/docs/learn/fundamentals/stellar-data-structures/accounts#multisig)
-- [Colibri repository](https://github.com/fazzatti/colibri)
+Only disposable Testnet accounts are used. This is a protocol lesson, not a
+custody or atomic-swap implementation.

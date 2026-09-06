@@ -44,7 +44,7 @@ printReusableLedgerLinks(details, containerLog);
 containerLog(
   "Building the classic transaction pipeline. Colibri will use the reusable ledger RPC endpoint for transaction submission.",
 );
-const classicPipeline = createClassicTransactionPipeline({ networkConfig });
+const executeTransaction = createClassicTransactionPipeline({ networkConfig });
 
 const sender = await initializeAccount(
   networkConfig,
@@ -60,7 +60,7 @@ const receiver = await initializeAccount(
 containerLog(
   "Sending a payment transaction from the sender to the receiver...",
 );
-const paymentOne = await classicPipeline.run({
+const paymentOne = await executeTransaction({
   operations: [
     Operation.payment({
       destination: receiver.publicKey(),
@@ -78,7 +78,7 @@ const paymentOne = await classicPipeline.run({
 containerLog(`Payment one confirmed with hash ${paymentOne.hash}.`);
 
 containerLog("Sending a second payment back to the sender...");
-const paymentTwo = await classicPipeline.run({
+const paymentTwo = await executeTransaction({
   operations: [
     Operation.payment({
       source: receiver.publicKey(),
@@ -99,7 +99,7 @@ containerLog(`Payment two confirmed with hash ${paymentTwo.hash}.`);
 containerLog(
   "Sending a setOptions transaction to update the receiver account...",
 );
-const setOptions = await classicPipeline.run({
+const setOptions = await executeTransaction({
   operations: [
     Operation.setOptions({
       source: receiver.publicKey(),

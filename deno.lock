@@ -1,78 +1,87 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@colibri/build-verification@0.3": "0.3.0",
-    "jsr:@colibri/core@0.25": "0.25.0",
-    "jsr:@colibri/core@0.26": "0.26.0",
-    "jsr:@colibri/plugin-channel-accounts@~0.2.9": "0.2.9",
-    "jsr:@colibri/plugin-fee-bump@0.10": "0.10.0",
-    "jsr:@colibri/rpc-streamer@~0.2.13": "0.2.13",
+    "jsr:@colibri/build-verification@~0.4.3": "0.4.3",
+    "jsr:@colibri/core@0.30": "0.30.0",
+    "jsr:@colibri/identicon@~0.1.3": "0.1.3",
+    "jsr:@colibri/plugin-channel-accounts@~0.2.15": "0.2.15",
+    "jsr:@colibri/plugin-fee-bump@~0.10.5": "0.10.5",
+    "jsr:@colibri/plugin-sep29@~0.1.1": "0.1.1",
+    "jsr:@colibri/rpc-streamer@0.4": "0.4.0",
     "jsr:@colibri/test-tooling@~0.3.1": "0.3.1",
-    "jsr:@colibri/webauth@~0.1.2": "0.1.2",
+    "jsr:@colibri/webauth@~0.2.3": "0.2.3",
     "jsr:@fifo/convee@1.0.0": "1.0.0",
     "jsr:@std/assert@*": "1.0.19",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.17": "1.0.19",
     "jsr:@std/collections@^1.1.3": "1.3.0",
-    "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@std/encoding@^1.0.10": "1.0.11",
+    "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/path@*": "1.1.6",
     "jsr:@std/testing@1": "1.0.17",
     "jsr:@std/toml@^1.0.11": "1.0.11",
-    "npm:@stellar/stellar-sdk@^16.0.1": "16.1.0",
+    "npm:@stellar/stellar-sdk@^17.0.1": "17.0.1",
     "npm:@types/node@*": "24.2.0",
-    "npm:buffer@^6.0.3": "6.0.3",
     "npm:chalk@^5.3.0": "5.6.2",
-    "npm:dockerode@3.3.3": "3.3.3"
+    "npm:dockerode@3.3.3": "3.3.3",
+    "npm:fast-png@8.0.0": "8.0.0"
   },
   "jsr": {
-    "@colibri/build-verification@0.3.0": {
-      "integrity": "c44ada38264c46f79bfb4b47e5e5f3925a21ec02e77e6d9126f12e073c2016f8",
+    "@colibri/build-verification@0.4.3": {
+      "integrity": "e50879d20d5094abfa92a7db02384cd974f14bfed196f0122909ba392f52bc95",
       "dependencies": [
-        "jsr:@colibri/core@0.26",
+        "jsr:@colibri/core",
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk",
         "npm:dockerode"
       ]
     },
-    "@colibri/core@0.25.0": {
-      "integrity": "ce400fab429fb3b7c9619ad69a7f8a1639da296781e5cd41691b50c371b45488",
+    "@colibri/core@0.30.0": {
+      "integrity": "94f99c1870aceb2f0f0a5fd1981ae6793a521f196635d56f524423ac24b58fc0",
       "dependencies": [
         "jsr:@fifo/convee",
         "jsr:@std/toml",
-        "npm:@stellar/stellar-sdk",
-        "npm:buffer"
+        "npm:@stellar/stellar-sdk"
       ]
     },
-    "@colibri/core@0.26.0": {
-      "integrity": "7852f9363a5c1d57f8abe415039af25f82159c87509f087a273f83bf6a906721",
+    "@colibri/identicon@0.1.3": {
+      "integrity": "3de1cc475119631b3238aef125abca05562b7cfaf8bd25e2e17c546617b058ad",
       "dependencies": [
-        "jsr:@fifo/convee",
-        "jsr:@std/toml",
+        "jsr:@colibri/core",
+        "jsr:@std/encoding",
         "npm:@stellar/stellar-sdk",
-        "npm:buffer"
+        "npm:fast-png"
       ]
     },
-    "@colibri/plugin-channel-accounts@0.2.9": {
-      "integrity": "6f1993aa1f709703eeb3c10049b8efd5b03f7cdb9648d2e26ebff6b68aefb015",
+    "@colibri/plugin-channel-accounts@0.2.15": {
+      "integrity": "af7ebf00d9e257299122d478feeb481d52021df52422fefbbed8459967de696f",
       "dependencies": [
-        "jsr:@colibri/core@0.25",
+        "jsr:@colibri/core",
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk"
       ]
     },
-    "@colibri/plugin-fee-bump@0.10.0": {
-      "integrity": "16946a17c6e38f5c02aca0e09d77cc1b389fe9c3c2a066135984747b70967b3d",
+    "@colibri/plugin-fee-bump@0.10.5": {
+      "integrity": "3d57a86633dd4d191e25315bd60715c8fd46ba07417bc480b4da1af4bca0b5d8",
       "dependencies": [
-        "jsr:@colibri/core@0.25",
+        "jsr:@colibri/core",
         "jsr:@fifo/convee",
         "npm:@stellar/stellar-sdk"
       ]
     },
-    "@colibri/rpc-streamer@0.2.13": {
-      "integrity": "de61d304718fb2cb84a7d69f8ab075d5951be4e214cf9acc726019b1b60e6a39",
+    "@colibri/plugin-sep29@0.1.1": {
+      "integrity": "c18c92b97c76cbb2b47c54c2ed52ecb03dc86cf384a4e1b11120c568ed5cb394",
       "dependencies": [
-        "jsr:@colibri/core@0.25",
+        "jsr:@colibri/core",
+        "jsr:@fifo/convee",
+        "npm:@stellar/stellar-sdk"
+      ]
+    },
+    "@colibri/rpc-streamer@0.4.0": {
+      "integrity": "05c5271188c1d779135e9b9eda8f1260704c2b92aa75751b494d3ccfa345f1c8",
+      "dependencies": [
+        "jsr:@colibri/core",
         "npm:@stellar/stellar-sdk"
       ]
     },
@@ -82,12 +91,11 @@
         "npm:dockerode"
       ]
     },
-    "@colibri/webauth@0.1.2": {
-      "integrity": "bafbfd6f7035b609b1e324e3e3f176ddb450d411c64a9fc9126fbda3009520e6",
+    "@colibri/webauth@0.2.3": {
+      "integrity": "007b6779c203f2e14d7248fdfe38bb06fda3dd16772975ef14614faef8516a25",
       "dependencies": [
-        "jsr:@colibri/core@0.25",
-        "npm:@stellar/stellar-sdk",
-        "npm:buffer"
+        "jsr:@colibri/core",
+        "npm:@stellar/stellar-sdk"
       ]
     },
     "@fifo/convee@1.0.0": {
@@ -101,6 +109,9 @@
     },
     "@std/collections@1.3.0": {
       "integrity": "eb36b43d784477ea0b476483ac034a14bdd182aff921c812ecf662a1fcef9498"
+    },
+    "@std/encoding@1.0.11": {
+      "integrity": "e7cef2f0b3153bccc17431e7c864a1de03a4b6d9647389c43e08aaa775d37385"
     },
     "@std/internal@1.0.12": {
       "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
@@ -129,25 +140,34 @@
     }
   },
   "npm": {
-    "@noble/ed25519@3.1.0": {
-      "integrity": "sha512-pfcObRY3CtvwfaG9Mt5XqZdKmAQppl37tHUeuBhDUbiwJBCVY4/A4lbMvb1xKhMDx96AqAqZpMWuBX1HulhX4g=="
-    },
-    "@noble/hashes@2.2.0": {
-      "integrity": "sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg=="
-    },
-    "@stellar/js-xdr@4.0.0": {
-      "integrity": "sha512-+NmNa7Tk5BI5XFdy/6xGTqAN4J9a9KgCrCGhj2uEUTCBhLkch0M+QbKzNH8zEnejWe0p8w+0q5hUVX6L3OzoVA=="
-    },
-    "@stellar/stellar-sdk@16.1.0": {
-      "integrity": "sha512-MOIrUvbzuTnSvUurL+9nrS1UW6Ko+QTW00RggSomm4WaWkE8onKPo2MRJMd89X7qPaGPjYjxNX6B671AEQlzxQ==",
+    "@exodus/bytes@1.15.1_@noble+hashes@2.4.0": {
+      "integrity": "sha512-S6mL0yNB/Abt9Ei4tq8gDhcczc4S3+vQ4ra7vxnAf+YHC02srtqxKKZghx2Dq6p0e66THKwR6r8N6P95wEty7Q==",
       "dependencies": [
+        "@noble/hashes"
+      ],
+      "optionalPeers": [
+        "@noble/hashes"
+      ]
+    },
+    "@noble/ed25519@3.2.0": {
+      "integrity": "sha512-criDgRlnUA09hchYrTy/JUWPIEap5rZxQe6wDWzRx51oWWpDRcUpuNzlgPxDJaOK6AsW9c0wKcj3rKRv6t+bPQ=="
+    },
+    "@noble/hashes@2.4.0": {
+      "integrity": "sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA=="
+    },
+    "@stellar/js-xdr@5.0.0": {
+      "integrity": "sha512-HBDNKnxr+ecdaEmbZ0mcKkirOF8tXXEbWSw34P3wT40Tn3g+u+cCH17xAWZymzscq8cojHB8340pR8QNVaD32w=="
+    },
+    "@stellar/stellar-sdk@17.0.1": {
+      "integrity": "sha512-fsHHbzJ14N5Ttq5Qpz4AX0ytmPSLCzcy4XC3uIgSQz0cBkEgv0Zb4KE6tWEd3nDQUk/1qP8ZX9cRonIaUXO3Sw==",
+      "dependencies": [
+        "@exodus/bytes",
         "@noble/ed25519",
         "@noble/hashes",
         "@stellar/js-xdr",
+        "@types/json-schema",
         "axios",
-        "base32.js",
         "bignumber.js",
-        "buffer@6.0.3",
         "commander",
         "eventsource",
         "feaxios",
@@ -155,6 +175,9 @@
         "uint8array-extras"
       ],
       "bin": true
+    },
+    "@types/json-schema@7.0.15": {
+      "integrity": "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="
     },
     "@types/node@24.2.0": {
       "integrity": "sha512-3xyG3pMCq3oYCNg7/ZP+E1ooTaGB4cG8JWRsqqOYQdbWNY4zbaV0Ennrd7stjiJEFZCaybcIgpTjJWHRfBSIDw==",
@@ -186,9 +209,6 @@
         "proxy-from-env"
       ]
     },
-    "base32.js@0.1.0": {
-      "integrity": "sha512-n3TkB02ixgBOhTvANakDb4xaMXnYUVkNoRFJjQflcqMQhyEKxEHdj3E6N8t8sUQ0mjH/3/JxzlXuz3ul/J90pQ=="
-    },
     "base64-js@1.5.1": {
       "integrity": "sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA=="
     },
@@ -204,20 +224,13 @@
     "bl@4.1.0": {
       "integrity": "sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==",
       "dependencies": [
-        "buffer@5.7.1",
+        "buffer",
         "inherits",
         "readable-stream"
       ]
     },
     "buffer@5.7.1": {
       "integrity": "sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==",
-      "dependencies": [
-        "base64-js",
-        "ieee754"
-      ]
-    },
-    "buffer@6.0.3": {
-      "integrity": "sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==",
       "dependencies": [
         "base64-js",
         "ieee754"
@@ -316,13 +329,20 @@
         "hasown"
       ]
     },
-    "eventsource-parser@3.1.0": {
-      "integrity": "sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg=="
+    "eventsource-parser@3.1.1": {
+      "integrity": "sha512-EKN1vKAMcZ8MlYMpaNuxN6R9yakzH6uajHcHVTqWJzvu5pWw9DyhbP35HH8MVBQ+dZjAfDxk+A8NiR9KWaXiyQ=="
     },
-    "eventsource@4.1.0": {
-      "integrity": "sha512-2GuF51iuHX6A9xdTccMTsNb7VO0lHZihApxhvQzJB5A03DvHDd2FQepodbMaztPBmBcE/ox7o2gqaxGhYB9LhQ==",
+    "eventsource@4.1.1": {
+      "integrity": "sha512-D6bTRWh6KahHTK/m4WnjPQyEinNPf9eFLEZSEoj7d6fTibspnAVYfzHvirL7u/aoX5d9YYfIkBVAhmigUELk9w==",
       "dependencies": [
         "eventsource-parser"
+      ]
+    },
+    "fast-png@8.0.0": {
+      "integrity": "sha512-gCysNasJ8KEMgfdYIKd/wTDo6ENK1PWT0RJO7O+0pgmuHPw2O6tA1WvdxFRJoLf9V8yFYpG0FA1YgI8X97OhJA==",
+      "dependencies": [
+        "fflate",
+        "iobuffer"
       ]
     },
     "feaxios@0.0.23": {
@@ -330,6 +350,9 @@
       "dependencies": [
         "is-retry-allowed"
       ]
+    },
+    "fflate@0.8.3": {
+      "integrity": "sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA=="
     },
     "follow-redirects@1.16.0": {
       "integrity": "sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw=="
@@ -403,6 +426,9 @@
     "inherits@2.0.4": {
       "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="
     },
+    "iobuffer@6.0.1": {
+      "integrity": "sha512-SZWYkWNfjIXIBYSDpXDYIgshqtbOPsi4lviawAEceR1Kqk+sHDlcQjWrzNQsii80AyBY0q5c8HCTNjqo74ul+Q=="
+    },
     "is-retry-allowed@3.0.0": {
       "integrity": "sha512-9xH0xvoggby+u0uGF7cZXdrutWiBiaFG8ZT4YFPXL8NzkyAwX3AKGLeFQLvzDpM430+nDFBZ1LHkie/8ocL06A=="
     },
@@ -424,8 +450,8 @@
     "ms@2.1.3": {
       "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
     },
-    "nan@2.27.0": {
-      "integrity": "sha512-hC+0LidcL3XE4rp1C4H54KujgXKzbfyTngZTwBByQxsOxCEKZT0MPQ4hOKUH2jU1OYstqdDH4onyHPDzcV0XdQ=="
+    "nan@2.28.0": {
+      "integrity": "sha512-fTsDz99OTq2sVePhGdp4qQhggZFtKr64ZNVyVajRKtMOkJxYekplBh577PiJB12v/D3s2E5cGtOI45LWp6rnLQ=="
     },
     "once@1.4.0": {
       "integrity": "sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==",
@@ -457,8 +483,8 @@
     "safer-buffer@2.1.2": {
       "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg=="
     },
-    "smol-toml@1.7.0": {
-      "integrity": "sha512-aqVvWoyO21L23mb+drl4RmMXbf6N7FdHjAhTRA9ZBL7apWBgfWC16KjrASI+1p9GAroljyMHj6fK67i0UiTNvQ=="
+    "smol-toml@1.8.0": {
+      "integrity": "sha512-kCZr2V3ch9i00x8zXRhjUNVcjG9ijES5dDudkXvUVCT5QlJNQWElSJdZqyPemffHoLNUYwOcou0Fy+ojN0uHSQ=="
     },
     "split-ca@1.0.1": {
       "integrity": "sha512-Q5thBSxp5t8WPTTJQS59LrGqOZqOsrhDGDVm8azCqIBjSBd7nd9o2PM+mDulQQkh8h//4U6hFZnc/mul8t5pWQ=="
@@ -518,51 +544,52 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@colibri/core@0.25",
-      "jsr:@colibri/plugin-channel-accounts@~0.2.9",
-      "jsr:@colibri/plugin-fee-bump@0.10",
-      "jsr:@colibri/rpc-streamer@~0.2.13",
+      "jsr:@colibri/build-verification@~0.4.3",
+      "jsr:@colibri/core@0.30",
+      "jsr:@colibri/identicon@~0.1.3",
+      "jsr:@colibri/plugin-channel-accounts@~0.2.15",
+      "jsr:@colibri/plugin-fee-bump@~0.10.5",
+      "jsr:@colibri/plugin-sep29@~0.1.1",
+      "jsr:@colibri/rpc-streamer@0.4",
       "jsr:@colibri/test-tooling@~0.3.1",
-      "jsr:@colibri/webauth@~0.1.2",
+      "jsr:@colibri/webauth@~0.2.3",
       "jsr:@std/assert@1",
       "jsr:@std/testing@1",
-      "npm:@stellar/stellar-sdk@^16.0.1",
-      "npm:buffer@^6.0.3",
+      "npm:@stellar/stellar-sdk@^17.0.1",
       "npm:chalk@^5.3.0"
     ],
     "members": {
       "examples/build-verification": {
         "dependencies": [
-          "jsr:@colibri/build-verification@0.3",
+          "jsr:@colibri/build-verification@~0.4.3",
           "npm:chalk@^5.3.0"
         ]
       },
       "examples/delegated-signers": {
         "dependencies": [
-          "jsr:@colibri/core@0.25",
-          "npm:@stellar/stellar-sdk@^16.0.1",
+          "jsr:@colibri/core@0.30",
+          "npm:@stellar/stellar-sdk@^17.0.1",
           "npm:chalk@^5.3.0"
         ]
       },
       "examples/hash-x-signer": {
         "dependencies": [
-          "jsr:@colibri/core@0.25",
-          "npm:@stellar/stellar-sdk@^16.0.1",
+          "jsr:@colibri/core@0.30",
+          "npm:@stellar/stellar-sdk@^17.0.1",
           "npm:chalk@^5.3.0"
         ]
       },
       "examples/pre-authorized-transaction-signer": {
         "dependencies": [
-          "jsr:@colibri/core@0.25",
-          "npm:@stellar/stellar-sdk@^16.0.1",
+          "jsr:@colibri/core@0.30",
+          "npm:@stellar/stellar-sdk@^17.0.1",
           "npm:chalk@^5.3.0"
         ]
       },
       "examples/signed-payload-signer": {
         "dependencies": [
-          "jsr:@colibri/core@0.25",
-          "npm:@stellar/stellar-sdk@^16.0.1",
-          "npm:buffer@^6.0.3",
+          "jsr:@colibri/core@0.30",
+          "npm:@stellar/stellar-sdk@^17.0.1",
           "npm:chalk@^5.3.0"
         ]
       }

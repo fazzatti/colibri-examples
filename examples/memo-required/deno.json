@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "payment": "deno run -A ./payment-with-memo.ts",
+    "missing": "deno run -A ./missing-memo.ts"
+  }
+}

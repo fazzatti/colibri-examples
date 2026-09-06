@@ -1,0 +1,7 @@
+{
+  "tasks": {
+    "lifecycle": "deno run -A ./mint-transfer-burn.ts",
+    "authorization": "deno run -A ./authorization.ts",
+    "clawback": "deno run -A ./clawback.ts"
+  }
+}

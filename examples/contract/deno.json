@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "counter": "deno run -A ./counter.ts",
+    "raw": "deno run -A ./raw-invocation.ts",
+    "error": "deno run -A ./known-error.ts",
+    "contract:build": "stellar contract build --locked --manifest-path ./contract/Cargo.toml --out-dir ./contract && mv ./contract/colibri_example_counter.wasm ./contract/counter.wasm"
+  }
+}

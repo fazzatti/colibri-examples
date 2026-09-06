@@ -59,7 +59,7 @@ The script:
    account's thresholds to `1`;
 6. asks that signer to verify the exact prepared transaction without adding a
    decorated signature;
-7. submits the unchanged transaction and confirms through Horizon that Stellar
+7. submits the unchanged transaction and confirms through RPC that Stellar
    removed the consumed signer.
 
 The source account's master key signs only the setup. The future payment is

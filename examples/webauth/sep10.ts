@@ -8,16 +8,16 @@ import { WebAuthClient } from "@colibri/webauth";
 import chalk from "chalk";
 
 const anchorDomain = "testanchor.stellar.org";
-const wallet = LocalSigner.generateRandom();
+using wallet = LocalSigner.generateRandom();
 
 console.log(chalk.blue.bold("\n🔐 WebAuth: explicit SEP-10\n"));
 console.log(chalk.gray("Account:"), wallet.publicKey());
 console.log(chalk.gray("Home domain:"), anchorDomain);
 
 const anchorFetch: typeof globalThis.fetch = async (input, init) => {
-  const headers = new Headers(
-    init && typeof init === "object" ? Reflect.get(init, "headers") : undefined,
-  );
+  // This public demonstration anchor rejects the narrower TOML Accept header.
+  // Keep this interoperability override local to this anchor, not a global fetch.
+  const headers = new Headers(init?.headers);
   headers.set("Accept", "*/*");
   return await fetch(input, { ...init, headers });
 };
@@ -45,6 +45,5 @@ console.log(chalk.gray("Subject:"), jwt.subject);
 console.log(chalk.gray("Issuer:"), jwt.issuer);
 console.log(chalk.gray("Home domain:"), jwt.homeDomain);
 console.log(chalk.gray("Expires at:"), jwt.expiresAt?.toISOString());
-console.log(chalk.blue.bold("\nJWT:"));
-console.log(jwt.token);
+// jwt.token is the bearer JWT. Do not copy it into shared logs.
 console.log(chalk.green.bold("\n✅ Done!\n"));

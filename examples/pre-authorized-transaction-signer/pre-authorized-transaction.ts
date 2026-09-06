@@ -18,6 +18,7 @@ import {
   createClassicTransactionPipeline,
   envelopeSigningRequirements,
   initializeWithFriendbot,
+  LedgerEntries,
   LocalSigner,
   NetworkConfig,
   PreAuthorizedTransactionSigner,
@@ -25,7 +26,7 @@ import {
   signEnvelope,
   StrKey,
 } from "@colibri/core";
-import { Asset, Horizon, Operation, Transaction } from "stellar-sdk";
+import { Asset, Operation, Transaction } from "stellar-sdk";
 import { Server } from "stellar-sdk/rpc";
 import chalk from "chalk";
 
@@ -42,7 +43,7 @@ const networkConfig = NetworkConfig.TestNet();
 const rpc = new Server(networkConfig.rpcUrl, {
   allowHttp: networkConfig.allowHttp,
 });
-const classicPipeline = createClassicTransactionPipeline({
+const executeTransaction = createClassicTransactionPipeline({
   networkConfig,
   rpc,
 });
@@ -151,7 +152,7 @@ console.log(
 console.log(
   chalk.bold("\n2. Installing the future transaction hash as a signer..."),
 );
-const installPreAuthorization = await classicPipeline.run({
+const installPreAuthorization = await executeTransaction({
   operations: [
     Operation.setOptions({
       lowThreshold: 1,
@@ -235,15 +236,18 @@ console.log("Confirmed in ledger:", chalk.green(submitted.ledger));
  * A pre-authorized signer is one-shot account state. After the matching
  * transaction is applied, Stellar removes the `T...` signer automatically.
  *
- * We query Horizon after confirmation to make that protocol behavior visible.
+ * We query the account ledger entry through RPC after confirmation.
  * If the transaction were never submitted, the signer would remain installed
  * until another authorized transaction removed it.
  */
 console.log(chalk.bold("\n4. Confirming automatic signer removal..."));
-const horizon = new Horizon.Server(networkConfig.horizonUrl);
-const appliedAccount = await horizon.loadAccount(account.publicKey());
+const ledgerEntries = new LedgerEntries({ rpc });
+const appliedAccount = await ledgerEntries.account({
+  accountId: account.publicKey(),
+});
 const stillInstalled = appliedAccount.signers.some((signer) =>
-  signer.key === preAuthorized.signerKey()
+  signer.key.type === "preAuthTx" &&
+  signer.key.value === preAuthorized.signerKey()
 );
 
 console.log(

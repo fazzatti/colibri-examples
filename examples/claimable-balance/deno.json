@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "claim": "deno run -A ./claim-before-expiry.ts",
+    "refund": "deno run -A ./refund-after-expiry.ts"
+  }
+}

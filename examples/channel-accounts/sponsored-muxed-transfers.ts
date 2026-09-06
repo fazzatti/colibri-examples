@@ -8,7 +8,7 @@
  * 4. send 30 XLM payments through the Stellar Asset Contract
  * 5. wrap each payment in a fee bump paid by the sponsor account
  *
- * Run with: deno task parallel-mints
+ * Run with: deno task sponsored-muxed-transfers
  */
 import {
   initializeWithFriendbot,

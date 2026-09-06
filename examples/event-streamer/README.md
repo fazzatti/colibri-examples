@@ -16,7 +16,7 @@ The example includes two ingestion scripts:
 ## Usage
 
 Before proceeding, make sure to follow the setup described in the
-[workspace README](../README.md).
+[workspace README](../../README.md).
 
 ### Live Ingestion
 

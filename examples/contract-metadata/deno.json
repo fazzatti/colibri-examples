@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "claims": "deno run --allow-read ./claims.ts",
+    "interface": "deno run --allow-read ./interface.ts"
+  }
+}

@@ -1,17 +1,21 @@
 # Handling Errors Example
 
-This example demonstrates how to capture a Colibri error in a deterministic way, narrow it to a specific error class, and extract structured context from the error object (`code`, `domain`, `meta`, `diagnostic`).
+This example demonstrates how to capture a Colibri error in a deterministic way,
+narrow it to a specific error class, and extract structured context from the
+error object (`code`, `domain`, `meta`, `diagnostic`).
 
 ## Overview
 
 The example showcases:
+
 - Triggering a deterministic error with an invalid base fee
 - Checking a **specific error instance** with `instanceof`
 - Accessing error metadata to diagnose and respond
 
 ## Usage
 
-Before proceeding, make sure to follow the setup described in the [workspace README](../../README.md).
+Before proceeding, make sure to follow the setup described in the
+[workspace README](../../README.md).
 
 ### Run the Example
 
@@ -38,7 +42,8 @@ if (err instanceof BTX_ERRORS.BASE_FEE_TOO_LOW_ERROR) {
 }
 ```
 
-Colibri errors and error codes are unique and stable, so matching a specific error class (or its `code`) is safe and predictable.
+Colibri errors and error codes are unique and stable, so matching a specific
+error class (or its `code`) is safe and predictable.
 
 ### Metadata Access
 
@@ -50,7 +55,8 @@ console.log("meta:", err.meta);
 
 ### Handling Pattern
 
-Once the error is identified, the example shows a practical handling pattern you can reuse in apps:
+Once the error is identified, the example shows a practical handling pattern you
+can reuse in apps:
 
 - Classify by `code` and `domain` to decide the handling path
 - Use `meta` to extract the exact inputs that caused the failure

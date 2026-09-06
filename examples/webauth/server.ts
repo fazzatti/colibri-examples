@@ -1,4 +1,5 @@
-import { Buffer } from "buffer";
+// Local SEP-45 HTTP fixture, not a production server. Nonces and JWT keys
+// are in memory; restarting loses them. The client lesson is sep45.ts.
 import {
   Account,
   Address,
@@ -6,7 +7,6 @@ import {
   Keypair,
   Operation,
   StrKey,
-  type Transaction,
   TransactionBuilder,
   xdr,
 } from "stellar-sdk";
@@ -16,9 +16,9 @@ import {
   encodeSep45AuthorizationEntries,
   Sep45AuthorizedChallenge,
   simulateSep45Challenge,
-  verifySep10Challenge,
   verifySep45Challenge,
 } from "@colibri/webauth";
+import { getAddressCredentialsFromAuthEntry } from "@colibri/core";
 
 class NonceStore {
   readonly #issued = new Set<string>();
@@ -68,8 +68,7 @@ async function postedValue(
 }
 
 function base64Url(value: Uint8Array): string {
-  return Buffer.from(value)
-    .toString("base64")
+  return btoa(String.fromCharCode(...value))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replace(/=+$/u, "");
@@ -122,86 +121,6 @@ export function startLocalWebAuthServer(
   );
   let homeDomain = "";
 
-  function sep10Get(requestUrl: URL): Response {
-    const account = requestUrl.searchParams.get("account");
-    if (!account) return json({ error: "account required" }, 400);
-    const nonce = Buffer.from(
-      crypto.getRandomValues(new Uint8Array(48)),
-    ).toString("base64");
-    nonces.issue(nonce);
-    const now = Math.floor(Date.now() / 1_000);
-    const transaction = new TransactionBuilder(
-      new Account(config.server.publicKey(), "-1"),
-      {
-        fee: "100",
-        networkPassphrase: config.networkPassphrase,
-        timebounds: { minTime: now, maxTime: now + 300 },
-      },
-    )
-      .addOperation(
-        Operation.manageData({
-          source: account,
-          name: `${homeDomain} auth`,
-          value: nonce,
-        }),
-      )
-      .addOperation(
-        Operation.manageData({
-          source: config.server.publicKey(),
-          name: "web_auth_domain",
-          value: homeDomain,
-        }),
-      )
-      .build();
-    transaction.sign(config.server);
-    return json({
-      transaction: transaction.toXDR(),
-      network_passphrase: config.networkPassphrase,
-    });
-  }
-
-  async function sep10Post(request: Request): Promise<Response> {
-    const transactionXdr = await postedValue(request, "transaction");
-    if (!transactionXdr) return json({ error: "transaction required" }, 400);
-    try {
-      const transaction = TransactionBuilder.fromXDR(
-        transactionXdr,
-        config.networkPassphrase,
-      ) as Transaction;
-      const first = transaction.operations[0];
-      if (
-        first?.type !== "manageData" || !first.source || !first.value
-      ) {
-        throw new TypeError("invalid first operation");
-      }
-      verifySep10Challenge({
-        transactionXdr,
-        networkPassphrase: config.networkPassphrase,
-        serverAccount: config.server.publicKey(),
-        account: first.source,
-        homeDomain,
-        webAuthDomain: homeDomain,
-      });
-      const client = Keypair.fromPublicKey(first.source);
-      if (
-        !transaction.signatures.some((signature) =>
-          client.verify(transaction.hash(), signature.signature())
-        )
-      ) {
-        throw new TypeError("missing client signature");
-      }
-      if (!nonces.consume(Buffer.from(first.value).toString())) {
-        return json({ error: "challenge already used" }, 409);
-      }
-      const jwt = await issueJwt(first.source, tokenSigningKey);
-      return json({ token: jwt });
-    } catch (cause) {
-      return json({
-        error: cause instanceof Error ? cause.message : String(cause),
-      }, 400);
-    }
-  }
-
   async function sep45Get(requestUrl: URL): Promise<Response> {
     const account = requestUrl.searchParams.get("account");
     if (!account) return json({ error: "account required" }, 400);
@@ -217,7 +136,7 @@ export function startLocalWebAuthServer(
       nonce,
     };
     const recordingTransaction = new TransactionBuilder(
-      new Account(StrKey.encodeEd25519PublicKey(Buffer.alloc(32)), "-1"),
+      new Account(StrKey.encodeEd25519PublicKey(new Uint8Array(32)), "-1"),
       {
         fee: "100",
         networkPassphrase: config.networkPassphrase,
@@ -246,12 +165,26 @@ export function startLocalWebAuthServer(
         }`,
       );
     }
-    const entries = recording.result.auth;
-    const serverIndex = entries.findIndex((entry) =>
-      entry.credentials().switch().name === "sorobanCredentialsAddress" &&
-      Address.fromScAddress(entry.credentials().address().address())
-          .toString() === config.server.publicKey()
+    // Recording discovers requirements, not a signed SEP-45 challenge.
+    // Current RPC records V2; SEP-45 v0.1.1 requires legacy address credentials.
+    // Choose the protocol's format BEFORE producing any signature, because the
+    // credential version changes the signing preimage. Never convert signed entries.
+    const entries = recording.result.auth.map((entry) =>
+      entry.credentials.type === "sorobanCredentialsAddressV2"
+        ? new xdr.SorobanAuthorizationEntry({
+          rootInvocation: entry.rootInvocation,
+          credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(
+            entry.credentials.addressV2,
+          ),
+        })
+        : entry
     );
+    const serverIndex = entries.findIndex((entry) => {
+      const credentials = getAddressCredentialsFromAuthEntry(entry);
+      return credentials !== null &&
+        Address.fromScAddress(credentials.address).toString() ===
+          config.server.publicKey();
+    });
     if (serverIndex === -1) {
       throw new TypeError("Recording simulation omitted the server entry");
     }
@@ -279,16 +212,21 @@ export function startLocalWebAuthServer(
       const entries = decodeSep45AuthorizationEntries(
         authorizationEntriesXdr,
       );
-      const map = entries[0].rootInvocation()
-        .function()
-        .contractFn()
-        .args()[0]
-        .map();
+      const root = entries[0].rootInvocation.function;
+      if (root.type !== "sorobanAuthorizedFunctionTypeContractFn") {
+        throw new TypeError("Expected contract invocation");
+      }
+      const argument = root.value.args[0];
+      if (argument.type !== "scvMap") {
+        throw new TypeError("Expected argument map");
+      }
       const argumentsMap = Object.fromEntries(
-        (map ?? []).map((entry) => [
-          entry.key().sym().toString(),
-          entry.val().str().toString(),
-        ]),
+        (argument.value ?? []).map((entry) => {
+          if (
+            entry.key.type !== "scvSymbol" || entry.val.type !== "scvString"
+          ) throw new TypeError("Expected string argument");
+          return [entry.key.value, entry.val.value];
+        }),
       );
       const latest = await config.rpc.getLatestLedger();
       const verified = verifySep45Challenge({
@@ -301,10 +239,13 @@ export function startLocalWebAuthServer(
         webAuthDomain: homeDomain,
         latestLedger: latest.sequence,
       });
-      const clientExpiration = entries[verified.clientEntryIndex]
-        .credentials()
-        .address()
-        .signatureExpirationLedger();
+      const clientCredentials = getAddressCredentialsFromAuthEntry(
+        entries[verified.clientEntryIndex],
+      );
+      if (!clientCredentials) {
+        throw new TypeError("Expected client address credentials");
+      }
+      const clientExpiration = clientCredentials.signatureExpirationLedger;
       await simulateSep45Challenge(
         new Sep45AuthorizedChallenge(
           verified,
@@ -341,18 +282,11 @@ export function startLocalWebAuthServer(
           [
             `SIGNING_KEY = "${config.server.publicKey()}"`,
             `NETWORK_PASSPHRASE = "${config.networkPassphrase}"`,
-            `WEB_AUTH_ENDPOINT = "http://${homeDomain}/sep10"`,
             `WEB_AUTH_FOR_CONTRACTS_ENDPOINT = "http://${homeDomain}/sep45"`,
             `WEB_AUTH_CONTRACT_ID = "${config.webAuthContractId}"`,
           ].join("\n"),
           { headers: { "content-type": "text/plain" } },
         );
-      }
-      if (request.method === "GET" && url.pathname === "/sep10") {
-        return sep10Get(url);
-      }
-      if (request.method === "POST" && url.pathname === "/sep10") {
-        return await sep10Post(request);
       }
       if (request.method === "GET" && url.pathname === "/sep45") {
         return await sep45Get(url);

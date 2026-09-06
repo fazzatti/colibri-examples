@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "message": "deno run -A ./sign-and-verify.ts"
+  }
+}

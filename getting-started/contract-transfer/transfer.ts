@@ -1,22 +1,20 @@
 /**
  * Getting Started Example: Contract Transfer
- * 
+ *
  * This example demonstrates how to perform a simple transfer
  * of 50 XLM from one account to another on TestNet
  * using the Stellar Asset Contract (SAC) helper.
- * 
-
  */
 import {
-  NetworkConfig,
-  LocalSigner,
-  StellarAssetContract,
   initializeWithFriendbot,
+  LocalSigner,
+  NetworkConfig,
+  StellarAssetContract,
 } from "@colibri/core";
 import chalk from "chalk";
 
 console.log(
-  chalk.bgBlue(`Starting Getting started -> Contract Transfer example...`)
+  chalk.bgBlue(`Starting Getting started -> Contract Transfer example...`),
 );
 
 /**
@@ -78,9 +76,11 @@ const receiverBalanceBefore = await XLM.balance({
   id: receiver.publicKey(),
 });
 console.log(
-  `Receiver balance before transfer: ${chalk.green(
-    receiverBalanceBefore
-  )} stroops`
+  `Receiver balance before transfer: ${
+    chalk.green(
+      receiverBalanceBefore,
+    )
+  } stroops`,
 );
 
 /**
@@ -132,9 +132,11 @@ const receiverBalanceAfter = await XLM.balance({
   id: receiver.publicKey(),
 });
 console.log(
-  `Receiver balance after transfer: ${chalk.green(
-    receiverBalanceAfter
-  )} stroops`
+  `Receiver balance after transfer: ${
+    chalk.green(
+      receiverBalanceAfter,
+    )
+  } stroops`,
 );
 
 console.log("✅ Transaction successful!");

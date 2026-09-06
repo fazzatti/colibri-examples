@@ -1,118 +1,88 @@
-# Unified WebAuth Example
+# WebAuth: SEP-10 and SEP-45
 
-This example demonstrates the two explicit authentication paths exposed by
-[`@colibri/webauth`](https://jsr.io/@colibri/webauth):
+[Colibri documentation](https://fifo-docs.gitbook.io/colibri/packages/webauth) ·
+[Example index](../../README.md)
 
-- SEP-10 for classic `G...` accounts
-- SEP-45 for Soroban contract `C...` accounts
+Two explicit login paths through WebAuthClient. These authenticate ownership or
+authorization of an account; they do not mint assets or submit a payment.
 
-Both paths use `WebAuthClient`, but their challenges and authorization
-mechanisms remain intentionally separate.
+## SEP-10: a keypair account
 
-## Setup
-
-Follow the installation instructions in the [workspace README](../../README.md),
-then enter this directory:
-
-```bash
+```sh
 cd examples/webauth
-```
-
-The SEP-45 example also requires:
-
-- Rust with the `wasm32v1-none` target
-- Stellar CLI `26.1.0`
-- Internet access to Stellar Testnet and Friendbot
-
-## SEP-10
-
-Run:
-
-```bash
 deno task sep10
 ```
 
-The script creates an unfunded random classic account, discovers the Stellar
-Test Anchor configuration, explicitly selects `client.sep10`, signs its
-transaction challenge, and prints the resulting JWT claims.
+Read `sep10.ts`. It generates an unfunded signer, discovers the public
+testanchor.stellar.org TOML, requests and validates a challenge for that
+account, signs it, and exchanges it for a JWT. The script prints JWT claims, not
+the bearer credential itself.
 
-SEP-10 proves control of a classic account through transaction signatures. The
-account does not need to be funded for this authentication flow.
+The public test anchor currently needs an Accept: _/_ override for TOML
+retrieval. That compatibility adapter is local to this domain. Other servers
+should use the default client behavior unless they require an explicit
+adjustment. Availability and authentication policy belong to that external
+anchor.
 
-## SEP-45
+## SEP-45: a custom contract account
 
-Run:
-
-```bash
+```sh
 deno task sep45
 ```
 
-The command:
+Read `sep45.ts`. All client and authorization steps are in this file:
 
-1. Builds the example contracts and their TypeScript specs.
-2. Creates and funds a temporary deployer through Testnet Friendbot.
-3. Deploys the SEP-45 WebAuth verification contract to Stellar Testnet.
-4. Generates an in-memory P-256 credential.
-5. Deploys a custom account initialized with that credential's public key to
-   Testnet.
-6. Starts a local server advertising SEP-45 in its `stellar.toml`.
-7. Explicitly authenticates through `client.sep45`.
-8. Uses a full-entry authorization handler to attach a WebAuthn-shaped
-   assertion.
-9. Performs enforcing RPC simulation before submitting the challenge.
+1. Generate a software P-256 credential.
+2. Deploy the demonstration verification/account contracts to Testnet using
+   `deploy-testnet.ts`, then start a localhost HTTP fixture.
+3. Construct WebAuthClient from the fixture's TOML.
+4. Call client.sep45.authenticate with the contract account and an explicit
+   authorization callback.
+5. Build the account-specific signing preimage, construct the WebAuthn-shaped
+   assertion, sign it, and return the complete immutable authorization entry.
+6. Receive JWT claims and always stop the local server.
 
-The custom account is deliberately small and educational. It mirrors Colibri's
-internal passkey fixture by checking:
+The callback preserves the credential version, nonce, and invocation tree.
+SEP-45 v0.1.1 requires legacy address credentials. Current RPC may record V2, so
+the server fixture chooses the required legacy format BEFORE any signatures are
+made. Never convert an already signed entry: the version changes its preimage.
+Colibri checks the known SEP-45 challenge shape, while the contract's custom
+__check_auth validates this particular assertion format.
 
-- the relying-party ID hash
-- user-presence and user-verification flags
-- the WebAuthn client-data type, origin, and authorization-entry challenge
-- a low-S P-256 signature over the authenticator and client data
+### What is fixture setup?
 
-It is not a production passkey wallet. Production contracts need credential
-registration, rotation and recovery policies, replay considerations, origin
-management, auditing, and a carefully designed upgrade strategy.
+- `deploy-testnet.ts`: deployer funding, Wasm upload/instance creation, server
+  startup.
+- `server.ts`: local SEP-45-only HTTP counterpart, challenge nonce tracking,
+  verification simulation, and short-lived JWT issuance.
+- `contracts/`: checked-in Rust sources, Wasm artifacts, and specifications.
 
-The local server signs its educational JWTs with an ephemeral in-memory HMAC key
-so the example can show the complete client flow without introducing persistent
-server-key management. Production WebAuth services need durable key management
-and JWT validation appropriate to their deployment.
+No Docker is needed. Normal runs use the committed Wasm and do not rebuild it.
+Both contracts are on Testnet; only the HTTP service is local.
 
-Each run deploys fresh example contracts to Testnet. The local WebAuth server
-stops when the script finishes, while the deployed contracts remain on the
-public test network.
+### Not a browser passkey implementation
 
-## Automatic Routing
+The P-256 key and WebAuthn assertion are synthesized with WebCrypto to make the
+custom account flow inspectable in one terminal script. There is no hardware
+authenticator, browser-origin ceremony, secure credential storage, or production
+replay database here. A real wallet delegates to its authenticator and
+implements its own account policy. The localhost HTTP exception must not be
+copied to a production service.
 
-The unified façade can select the correct protocol from the account type:
+## Routing and artifacts
 
-```ts
-const classicJwt = await client.authenticate({
-  account: classicAccount.publicKey(),
-  signer: classicAccount,
-});
+`client.authenticate(...)` can route by account type; the lessons intentionally
+use `client.sep10` and `client.sep45` so the chosen protocol is obvious.
+Unsupported options are not silently sent through a fallback protocol.
 
-const contractJwt = await client.authenticate({
-  account: contractAccount,
-  authorize: credential.authorize,
-});
-```
+Optional rebuild/byte check:
 
-`WebAuthClient` routes `G...` accounts only to SEP-10 and `C...` accounts only
-to SEP-45. It never falls back to the other protocol after choosing a route.
-
-## Reproducible Contract Artifacts
-
-```bash
+```sh
+deno task contract:build
 deno task contract:check
 ```
 
-This rebuilds both contracts with the pinned toolchain and verifies that their
-WASM artifacts and generated TypeScript specs match the checked-in files.
-
-## Learn More
-
-- [WebAuth package](https://jsr.io/@colibri/webauth)
-- [SEP-10 specification](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
-- [SEP-45 specification](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0045.md)
-- [Colibri repository](https://github.com/fazzatti/colibri)
+These need Rust + wasm32v1-none and a compatible Stellar CLI. Cargo dependencies
+are pinned; an exact-byte check can also depend on the original compiler/CLI
+build metadata. This does not restrict the globally installed CLI for running
+the authentication scripts. Rebuilding refreshes artifacts/specs together.
