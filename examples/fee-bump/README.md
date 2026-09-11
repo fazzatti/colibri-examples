@@ -1,42 +1,50 @@
-# A separate transaction fee payer
+# Let a sponsor pay the transaction fee
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+A fee-bump transaction wraps an already authorized transaction in an outer
+envelope with a separate fee payer. The sender still authorizes the payment; the
+sponsor authorizes paying its fee.
 
-Attach `createFeeBumpPlugin` to an ordinary payment pipeline. The sender
-authorizes the payment, while a sponsor authorizes the outer fee-bump envelope.
+This example attaches `createFeeBumpPlugin` to Colibri's native payment
+pipeline, then inspects the inner and outer envelopes of a confirmed 1-XLM
+payment.
 
-## Run
+## Usage
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then run:
 
 ```sh
 cd examples/fee-bump
 deno task payment
 ```
 
-- `payment`: Pay 1 XLM and inspect the confirmed inner and outer envelope
-  sources and fees.
+The script generates and funds a sender, recipient, and sponsor on Testnet with
+Friendbot. Open [`sponsored-payment.ts`](./sponsored-payment.ts) as it runs.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## Follow the two roles
 
-## Follow the code
+1. Configure the sender's transaction and create the callable payment pipeline.
+2. Create the fee-bump plugin with the sponsor's signer and fee settings.
+3. Attach it with `sendPayment.use(...)`, then call the same pipeline with the
+   sender's payment operation and configuration.
+4. Decode the confirmed `FeeBumpTransaction` and inspect the inner source, outer
+   fee source, outer bid, and charged fee.
 
-1. Fund sender, recipient, and fee sponsor.
-2. Construct a callable payment pipeline and attach the plugin without replacing
-   the pipeline variable.
-3. Pass the sender's original operations/configuration to the pipeline.
-4. Decode the confirmed envelope and distinguish the business source from the
-   fee source.
+Expect a confirmed hash, with the sender as the inner transaction source and the
+sponsor as the outer fee source. The sponsor's signature does not grant
+permission to spend the sender's payment funds.
 
-## Important details
+## Fees versus reserves
 
-This example does not use channel accounts or reserve sponsorship. A fee-bump
-fee must cover the inner transaction plus the outer fee-bump operation. The fee
-is a bid; the ledger can charge less. The plugin is attached to a real process
-in the pipeline, not an application-side wrapper.
+The outer bid must cover the inner transaction and the additional fee-bump
+operation. Its configured bid can differ from the ledger's actual charge.
 
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+Paying a transaction fee does not sponsor an account's minimum balance. The
+[reserve sponsorship lesson](../reserve-sponsorship/README.md) covers that
+separate obligation. After this example, see
+[channel accounts](../channel-accounts/README.md) for combining fee sponsorship
+with independent transaction sequences.
+
+## Learn more
+
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)
+- [Compare fee policies](../fees/README.md)

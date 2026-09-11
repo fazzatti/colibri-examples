@@ -1,3 +1,12 @@
+/**
+ * Example: Issuer Authorization
+ *
+ * An issuer can require approval before a holder receives its asset. Create
+ * a trustline under that policy, authorize it, issue tokens and then revoke
+ * transfer permission.
+ *
+ * Run: deno task authorization
+ */
 import {
   createClassicTransactionPipeline,
   initializeWithFriendbot,
@@ -13,7 +22,11 @@ import {
   Operation,
 } from "stellar-sdk";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * The issuer sets the asset policy and signs authorization changes. The
+ * holder signs its own trustline creation. Friendbot funds both Testnet
+ * accounts and the RPC option waits until their ledger entries are visible.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using issuer = LocalSigner.generateRandom();
 using holder = LocalSigner.generateRandom();
@@ -29,6 +42,12 @@ for (const signer of [issuer, holder]) {
   );
 }
 
+/**
+ * The transaction configuration names its source account and the signers
+ * allowed to satisfy its requirements. base is an inclusion bid per
+ * operation in stroops. The transaction source pays the ordinary fee.
+ * timeout sets transaction validity in seconds, not an RPC request deadline.
+ */
 const issuerConfig: TransactionConfig = {
   source: issuer.publicKey(),
   signers: [issuer],
@@ -42,8 +61,11 @@ const holderConfig: TransactionConfig = {
   timeout: 120,
 };
 
-// Authorization-required is an ACCOUNT policy. Set it before creating trustlines.
-// Revocable lets the issuer change an existing holder's authorization later.
+/**
+ * Authorization-required is an ACCOUNT policy. Set it before creating
+ * trustlines. Revocable lets the issuer change an existing holder's
+ * authorization later.
+ */
 const configureIssuer = createClassicTransactionPipeline({ networkConfig });
 
 await configureIssuer({
@@ -65,14 +87,22 @@ const initiallyAuthorized = await asset.authorized({ id: holder.publicKey() });
 
 console.log("Initially authorized:", initiallyAuthorized);
 
-// Creating a trustline expresses willingness to hold the asset. It does NOT
-// grant issuer permission. The issuer must authorize this trustline explicitly.
+/**
+ * Creating a trustline expresses willingness to hold the asset. It does NOT
+ * grant issuer permission. The issuer must authorize this trustline
+ * explicitly.
+ */
 await asset.setAuthorized({
   id: holder.publicKey(),
   authorize: true,
   config: issuerConfig,
 });
 
+/**
+ * With the trustline authorized, the issuer can send 10 PERMIT to the
+ * holder. This issuance is a native payment from the issuer; the holder does
+ * not sign this receipt.
+ */
 await asset.mint({
   destination: holder.publicKey(),
   amount: "10",
@@ -86,8 +116,11 @@ const formattedBalance = asset.formatAmount(balance);
 
 console.log("Balance:", formattedBalance);
 
-// This convenience revokes transfer authorization while allowing maintenance
-// of existing liabilities. It is NOT the same as clearing every trustline flag.
+/**
+ * This convenience revokes transfer authorization while allowing maintenance
+ * of existing liabilities. It is NOT the same as clearing every trustline
+ * flag.
+ */
 await asset.setAuthorized({
   id: holder.publicKey(),
   authorize: false,

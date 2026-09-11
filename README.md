@@ -29,20 +29,21 @@ CLI. Rebuild commands are optional and require Rust, the wasm32v1-none target,
 and a compatible Stellar CLI. Docker is needed only for the local-ledger and
 build-verification lessons, not for delegated signers or SEP-45.
 
-Dependencies are shared by the Deno workspace and locked in deno.lock. The
-current examples target Colibri Core 0.30 and Stellar JS SDK 17. Keep native SDK
-objects such as Operation, Asset, Memo, Spec, and XDR values visible at the
-integration boundary.
+Dependencies are declared by the Deno workspace and locked in deno.lock. Each
+lesson records its required Colibri versions; generated bindings use Core 1.1.
+The examples use Stellar JS SDK 17. Keep native SDK objects such as Operation,
+Asset, Memo, Spec, and XDR values visible at the integration boundary.
 
 ## Start here
 
-| Lesson                                                       | What you learn                                                                                         |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| [Native payment](getting-started/native-payment/README.md)   | Native operations, a callable pipeline, configuration, confirmed outcomes                              |
-| [Generic contract](examples/contract/README.md)              | Wasm versus instances, spec loading, simulated reads, committed writes, raw XDR, named contract errors |
-| [SAC transfer](getting-started/contract-transfer/README.md)  | Transfer XLM through its Stellar Asset Contract                                                        |
-| [SAC asset issuance](getting-started/issue-asset/README.md)  | Native trustline setup plus contract-backed minting                                                    |
-| [Handling errors](getting-started/handling-errors/README.md) | Identify a Colibri error and inspect diagnostic metadata                                               |
+| Lesson                                                              | What you learn                                                                                         |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [Native payment](getting-started/native-payment/README.md)          | Native operations, a callable pipeline, configuration, confirmed outcomes                              |
+| [Generic contract](examples/contract/README.md)                     | Wasm versus instances, spec loading, simulated reads, committed writes, raw XDR, named contract errors |
+| [Generated contract bindings](examples/contract-bindings/README.md) | Generate and inspect a package, then use typed calls, custom values, errors and events                 |
+| [SAC transfer](getting-started/contract-transfer/README.md)         | Transfer XLM through its Stellar Asset Contract                                                        |
+| [SAC asset issuance](getting-started/issue-asset/README.md)         | Native trustline setup plus contract-backed minting                                                    |
+| [Handling errors](getting-started/handling-errors/README.md)        | Identify a Colibri error and inspect diagnostic metadata                                               |
 
 ## Assets and native markets
 
@@ -105,11 +106,17 @@ deno task lint
 deno task fmt:check
 ```
 
-These commands validate source files; they do not submit transactions. To
-exercise behavior, run the individual lessons. Only the local-test-ledger
-subproject has tests because that lesson is explicitly about testing.
+The check task first generates the ignored package for the bindings lesson, then
+type-checks the examples. These commands do not submit transactions. To exercise
+behavior, run the individual lessons. Only the local-test-ledger subproject has
+tests because that lesson is explicitly about testing.
 
 ## Contributing a lesson
+
+Start each README with what the lesson teaches and the Stellar concept behind
+it. Explain setup, give each independent path its own command, link the source,
+and tell the reader what output to expect. Keep optional rebuilds separate from
+the normal walkthrough and link to the SDK docs for wider API details.
 
 Keep one learning objective per file. Declare ordinary configuration and signer
 values in the lesson, call Colibri directly, and comment on both **what

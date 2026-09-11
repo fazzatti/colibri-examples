@@ -22,7 +22,12 @@ import {
 } from "stellar-sdk";
 import { Server } from "stellar-sdk/rpc";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * Alice and Bob each own a different transaction source, so submitting
+ * Alice's transaction D does not consume Bob's planned sequence for C.
+ * Friendbot funds both disposable Testnet accounts before either transaction
+ * is prepared.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using alice = LocalSigner.generateRandom();
 using bob = LocalSigner.generateRandom();
@@ -38,6 +43,12 @@ for (const signer of [alice, bob]) {
   );
 }
 
+/**
+ * This is Alice's ordinary source/signature configuration for D. Its base
+ * bid is in stroops per operation; timeout is the validity window. Bob's
+ * signature over C will later be added as D's extra signed-payload
+ * requirement.
+ */
 const aliceConfig: TransactionConfig = {
   source: alice.publicKey(),
   signers: [alice],
@@ -47,13 +58,18 @@ const aliceConfig: TransactionConfig = {
 
 const rpc = new Server(networkConfig.rpcUrl);
 
-// 1. Agree on C: Bob pays Alice 2 XLM. Freeze every hash-affecting field now.
-// Bob's next sequence is unused. D uses Alice's sequence, not Bob's.
+/**
+ * 1. Agree on C: Bob pays Alice 2 XLM. Freeze every hash-affecting field
+ * now. Bob's next sequence is unused. D uses Alice's sequence, not Bob's.
+ */
 const bobState = await rpc.getAccount(bob.publicKey());
 
-// Disclosure is not a trustless exchange protocol. C can still fail if Bob
-// spends its balance/sequence or C expires. Real protocols need additional
-// account-state and timing constraints; never infer atomicity from this demo.
+/**
+ * Disclosure is not a trustless exchange protocol. C can still fail if Bob
+ * spends its balance/sequence or C expires. Real protocols need additional
+ * account-state and timing constraints; never infer atomicity from this
+ * demo.
+ */
 const transactionC = await buildTransaction({
   source: bob.publicKey(),
   sequence: bobState.sequenceNumber(),
@@ -69,8 +85,10 @@ const transactionC = await buildTransaction({
   ],
 });
 
-// 2. A P key means "Bob's signature over exactly these payload bytes".
-// Here they are hash(C), so the same signature can later authorize C.
+/**
+ * 2. A P key means "Bob's signature over exactly these payload bytes". Here
+ * they are hash(C), so the same signature can later authorize C.
+ */
 const discloseSignatureForC = Ed25519SignedPayloadSigner.forTransaction({
   signer: bob,
   transaction: transactionC,
@@ -81,9 +99,11 @@ console.log(
   discloseSignatureForC.signerKey(),
 );
 
-// 3. D pays Bob 1 XLM, but also requires the payload signature.
-// Alice signs D normally. Bob supplies the extra signature over hash(C).
-// The P key is NOT installed on an account: there is no persistent grant.
+/**
+ * 3. D pays Bob 1 XLM, but also requires the payload signature. Alice signs
+ * D normally. Bob supplies the extra signature over hash(C). The P key is
+ * NOT installed on an account: there is no persistent grant.
+ */
 const sendDisclosurePayment = createClassicTransactionPipeline({
   networkConfig,
   rpc,
@@ -106,8 +126,10 @@ const transactionD = await sendDisclosurePayment({
 
 console.log("D confirmed:", transactionD.hash);
 
-// 4. Read the confirmed envelope. Do not sign C again using Bob's local key:
-// the point is recovering the signature that D made public.
+/**
+ * 4. Read the confirmed envelope. Do not sign C again using Bob's local key:
+ * the point is recovering the signature that D made public.
+ */
 const confirmedEnvelopeD = transactionD.response.envelopeXdr.toXdr("base64");
 const confirmedD = TransactionBuilder.fromXdr(
   confirmedEnvelopeD,
@@ -128,8 +150,10 @@ const disclosed = confirmedD.signatures.find((decorated) =>
 
 if (!disclosed) throw new Error("D did not disclose Bob's signature over C");
 
-// 5. A P-key signature has a different hint from a G-key signature.
-// Preserve the signature bytes and replace only the four-byte lookup hint.
+/**
+ * 5. A P-key signature has a different hint from a G-key signature. Preserve
+ * the signature bytes and replace only the four-byte lookup hint.
+ */
 const signatureForC = new xdr.DecoratedSignature({
   hint: bobVerifier.signatureHint(),
   signature: disclosed.signature,

@@ -1,43 +1,55 @@
-# SEP-29 memo-presence guard
+# Check a recipient's memo requirement
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+A service can use the SEP-29 account data entry `config.memo_required` to tell
+clients it expects a memo. Colibri's `createSep29Plugin` checks that convention
+before a payment is submitted.
 
-Show the success and rejection paths of `@colibri/plugin-sep29` against a
-disposable destination that advertises `config.memo_required`.
+These two lessons create a recipient that advertises the requirement, then show
+the accepted and rejected paths. Each script sets up its own accounts, so either
+can run first.
 
-## Run
+## Setup
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then enter this directory:
 
 ```sh
 cd examples/memo-required
+```
+
+The scripts generate and fund disposable Testnet accounts through Friendbot.
+They do not depend on an exchange's account or configuration.
+
+## Send a payment with a memo
+
+```sh
 deno task payment
+```
+
+Follow [`payment-with-memo.ts`](./payment-with-memo.ts):
+
+1. Have the recipient set `config.memo_required` on its account.
+2. Create the payment pipeline and attach the SEP-29 plugin.
+3. Send 1 XLM with a native Stellar SDK `Memo.id("12345")`.
+4. Read the confirmed payment hash.
+
+## Handle a missing memo
+
+```sh
 deno task missing
 ```
 
-- `payment`: Configure the recipient, then send a payment with native `Memo.id`.
-- `missing`: Configure a different recipient, then catch the unique missing-memo
-  error before submission.
+[`missing-memo.ts`](./missing-memo.ts) repeats the setup with a new recipient,
+then deliberately omits the memo. It catches the specific
+`Sep29Errors.MEMO_REQUIRED` error and prints its code and details. An expected
+rejection is the successful result of this lesson; no payment is submitted.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## What the guard checks
 
-## Follow the code
+SEP-29 is a client convention, not a consensus rule requiring a memo. The plugin
+checks presence. It cannot establish whether a supplied memo identifies the
+intended customer. A muxed destination carries its routing ID separately.
 
-1. Set the destination's account data explicitly.
-2. Attach `createSep29Plugin` to the callable payment pipeline.
-3. Supply a native Stellar SDK Memo, or deliberately omit it in the rejection
-   lesson.
-4. Print the confirmed hash or inspect the specific Colibri error.
+## Learn more
 
-## Important details
-
-SEP-29 is a client convention, not a consensus memo requirement. The plugin
-checks presence; it does not prove that a supplied memo identifies the correct
-exchange customer. Muxed destinations carry their routing ID separately. No
-external exchange account or real funds are used.
-
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+- [Handle structured errors](../../getting-started/handling-errors/README.md)
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)

@@ -36,8 +36,11 @@ for (const signer of [sender, recipient]) {
   );
 }
 
-// Each configuration states who pays the ordinary fee and signs that account.
-// A string fee is the per-operation bid in stroops, not the actual fee charged.
+/**
+ * Each configuration states who pays the ordinary fee and signs that
+ * account. A string fee is the per-operation bid in stroops, not the actual
+ * fee charged.
+ */
 const senderConfig: TransactionConfig = {
   source: sender.publicKey(),
   signers: [sender],
@@ -45,6 +48,11 @@ const senderConfig: TransactionConfig = {
   timeout: 60,
 };
 
+/**
+ * Create the callable pipeline for classic transactions. Calling it below
+ * obtains the source sequence, builds and signs the envelope, submits
+ * through RPC and waits for a confirmed result.
+ */
 const sendPayment = createClassicTransactionPipeline({ networkConfig });
 
 // Native payment amounts are decimal asset units. "1" means one XLM.
@@ -61,8 +69,10 @@ console.log("Confirmed payment:", result.hash);
 console.log("Ledger:", result.ledger);
 console.log("Actual fee charged (stroops):", result.feeCharged);
 
-// The operations are native SDK values, so results narrow by a runtime tag,
-// rather than by a special Colibri operation builder or a TypeScript cast.
+/**
+ * The operations are native SDK values, so results narrow by a runtime tag,
+ * rather than by a special Colibri operation builder or a TypeScript cast.
+ */
 const outcome = result.operations[0];
 
 if (outcome.type !== "payment") throw new Error("Expected a payment outcome.");

@@ -7,12 +7,18 @@ This standalone Testnet lesson requires **both** an ordinary Ed25519 transaction
 signature and a Hash-X preimage. It uses the transaction's `extraSigners`
 precondition, not an account-wide signer installation.
 
+## Usage
+
+Follow the [workspace setup](../../README.md), then run:
+
 ```sh
 cd examples/hash-x-signer
 deno task hash-x
 ```
 
-## Follow hash-x.ts
+## Follow the additional condition
+
+Open [`hash-x.ts`](./hash-x.ts):
 
 1. Create and fund a sender and recipient.
 2. Create a random HashXSigner; its X key exposes the SHA-256 digest, not the
@@ -21,6 +27,9 @@ deno task hash-x
 4. Call the payment pipeline. Colibri supplies the ordinary signature and the
    preimage, then confirms the payment.
 5. Dispose the signer and best-effort zeroize its retained preimage.
+
+Expect a confirmed payment hash. The envelope satisfies both the sender's
+ordinary signature requirement and the extra Hash-X condition.
 
 The X key needs no account or funding. No setOptions setup or cleanup
 transaction is needed because the condition belongs to this transaction.

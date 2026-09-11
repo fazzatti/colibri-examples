@@ -28,6 +28,11 @@ describe({
   sanitizeOps: false,
   sanitizeResources: false,
 }, () => {
+  /**
+   * Start one disposable ledger for this suite and construct its network
+   * client only after startup. Each test creates fresh accounts, so it does
+   * not depend on balances or settings from the other test.
+   */
   beforeAll(async () => {
     await ledger.start();
 
@@ -62,6 +67,11 @@ describe({
       );
     }
 
+    /**
+     * Submit a 25-XLM native payment through the actual Colibri pipeline.
+     * Assert the confirmed status, operation type and ledger instead of
+     * treating a returned hash alone as proof of successful execution.
+     */
     const paid = await sendTransaction({
       operations: [
         Operation.payment({
@@ -96,6 +106,11 @@ describe({
       },
     );
 
+    /**
+     * Use a separate account to show the same pipeline can change account
+     * settings. This checks the operation result independently of the
+     * payment test above.
+     */
     const updated = await sendTransaction({
       operations: [Operation.setOptions({ homeDomain: "colibri.test" })],
       config: {

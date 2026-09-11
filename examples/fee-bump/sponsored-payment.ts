@@ -42,8 +42,11 @@ for (const signer of [sender, recipient, sponsor]) {
   );
 }
 
-// Each configuration states who pays the ordinary fee and signs that account.
-// A string fee is the per-operation bid in stroops, not the actual fee charged.
+/**
+ * Each configuration states who pays the ordinary fee and signs that
+ * account. A string fee is the per-operation bid in stroops, not the actual
+ * fee charged.
+ */
 const senderConfig: TransactionConfig = {
   source: sender.publicKey(),
   signers: [sender],
@@ -67,6 +70,12 @@ sendPayment.use(createFeeBumpPlugin({
   },
 }));
 
+/**
+ * Build the payment with the sender as its source and keep the original
+ * payment amount. The attached plugin supplies the separate fee payer by
+ * wrapping this signed inner transaction; it does not replace the sender's
+ * authorization.
+ */
 const result = await sendPayment({
   operations: [Operation.payment({
     destination: recipient.publicKey(),
@@ -91,8 +100,10 @@ if (!(envelope instanceof FeeBumpTransaction)) {
   throw new Error("Expected the confirmed fee-bump envelope.");
 }
 
-// The inner transaction identifies the payment source. The outer envelope
-// identifies the fee payer; these two accounts have separate signing roles.
+/**
+ * The inner transaction identifies the payment source. The outer envelope
+ * identifies the fee payer; these two accounts have separate signing roles.
+ */
 const paymentTransaction = envelope.innerTransaction;
 
 console.log("Payment source:", paymentTransaction.source);

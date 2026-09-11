@@ -20,12 +20,17 @@ Before proceeding, make sure to follow the setup described in the
 ### Run the Example
 
 ```bash
+cd getting-started/handling-errors
 deno task handling-errors
 ```
 
+Follow [`handling-errors.ts`](./handling-errors.ts). The zero base fee fails
+local transaction validation before any RPC submission, so this lesson needs no
+funded accounts.
+
 Expected outcome:
 
-- The transfer fails immediately due to the invalid base fee
+- Transaction construction fails immediately due to the invalid base fee
 - The script detects the specific error class
 - The script prints error code, domain, and metadata
 - The script prints the SDK-provided suggestion
@@ -45,12 +50,14 @@ const input = err.meta.data.input;
 console.log("Rejected base fee:", input.baseFee);
 ```
 
-Colibri errors and error codes are unique and stable, so matching a specific
-error class (or its `code`) is safe and predictable.
+Match the specific SDK error class or its code instead of comparing
+human-readable message text. The guard lets unrelated failures propagate rather
+than treating every failure as the expected outcome.
 
 ### Metadata Access
 
-Each Colibri error includes structured metadata. For example:
+This error exposes the rejected input in structured metadata. Inspect it
+alongside the code and domain:
 
 ```ts
 console.log("meta:", err.meta);

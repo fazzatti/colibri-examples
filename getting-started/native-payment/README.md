@@ -1,39 +1,49 @@
-# Native XLM payment
+# Send a native XLM payment
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+This example sends 1 XLM between two Testnet accounts using a native Stellar
+`Operation.payment` and Colibri's transaction pipeline. Start here to learn how
+an operation, transaction configuration, and signer fit together.
 
-Build a native Stellar payment with an ordinary Stellar SDK `Operation`, then
-call Colibri's transaction pipeline as a function.
+A native payment moves an account's XLM directly. The
+[SAC transfer lesson](../contract-transfer/README.md) performs a transfer
+through a smart contract instead.
 
-## Run
+## Usage
 
-From the repository root:
+Follow the setup in the [workspace README](../../README.md), then run:
 
 ```sh
 cd getting-started/native-payment
 deno task payment
 ```
 
-- `payment`: Send 1 XLM between fresh Testnet accounts.
+The script creates and funds disposable Testnet accounts with Friendbot. It
+needs internet access; you do not need an existing account or contract.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## Follow the payment
 
-## Follow the code
+Open [`payment.ts`](./payment.ts) alongside the terminal:
 
-1. Create two local signers and fund their Testnet accounts with Friendbot.
-2. Set source, signers, fee policy, and transaction validity explicitly.
-3. Pass the native operation to `sendPayment(...)`.
-4. Read the confirmed transaction hash, ledger, fee charged, and runtime
-   operation outcome.
+1. Create local signers for the sender and recipient, then fund both accounts.
+2. Set the sender as transaction source and provide its signer. The recipient
+   receives the payment without signing it.
+3. Create a callable pipeline with `createClassicTransactionPipeline` and pass
+   an ordinary `Operation.payment` to it.
+4. Read the confirmed hash, ledger, charged fee, and payment outcome.
 
-## Important details
+A successful run prints a confirmed transaction and a successful payment result.
 
-An XLM payment needs no trustline. This path does not invoke Soroban or require
-a Wasm. `fee` is in stroops; payment `amount` is in decimal XLM. A transaction
-timeout controls validity, not the HTTP request duration.
+## Amounts, fees, and validity
 
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+The payment's `amount: "1"` is decimal XLM. The base fee of `"100"` is in
+stroops per operation; one XLM is 10,000,000 stroops. These fields describe
+separate quantities. The transaction timeout limits when the network can include
+it, rather than how long an HTTP request may take.
+
+XLM needs no trustline. For an issued asset, see the
+[asset issuance lesson](../issue-asset/README.md).
+
+## Learn more
+
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)
+- [@colibri/core on JSR](https://jsr.io/@colibri/core)

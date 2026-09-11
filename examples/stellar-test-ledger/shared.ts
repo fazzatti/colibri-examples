@@ -203,7 +203,10 @@ export const completeStreamingLogCommand = async (
 };
 
 /**
- * Decodes Docker's multiplexed stdout/stderr log stream format.
+ * Docker can multiplex stdout and stderr into frames with an eight-byte
+ * header. Retain incomplete chunks until a complete frame arrives, then
+ * decode only its payload. This keeps log transport details out of the
+ * lifecycle lessons.
  */
 const createDockerLogDecoder = () => {
   const textDecoder = new TextDecoder();

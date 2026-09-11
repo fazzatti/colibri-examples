@@ -35,8 +35,11 @@ for (const signer of [sender, recipient]) {
   );
 }
 
-// Each configuration states who pays the ordinary fee and signs that account.
-// A string fee is the per-operation bid in stroops, not the actual fee charged.
+/**
+ * Each configuration states who pays the ordinary fee and signs that
+ * account. A string fee is the per-operation bid in stroops, not the actual
+ * fee charged.
+ */
 const senderConfig: TransactionConfig = {
   source: sender.publicKey(),
   signers: [sender],
@@ -50,8 +53,10 @@ const recipientConfig: TransactionConfig = {
   timeout: 60,
 };
 
-// The recipient publishes its memo requirement as account data. This is a
-// real ledger write; the following client plugin reads this convention.
+/**
+ * The recipient publishes its memo requirement as account data. This is a
+ * real ledger write; the following client plugin reads this convention.
+ */
 const configureRecipient = createClassicTransactionPipeline({ networkConfig });
 
 await configureRecipient({
@@ -71,8 +76,11 @@ const sendPayment = createClassicTransactionPipeline({ networkConfig });
  */
 sendPayment.use(createSep29Plugin());
 
-// This lesson deliberately omits the memo. Catch only that expected failure;
-// the catch must not turn unrelated network errors into a successful example.
+/**
+ * This lesson deliberately omits the memo. Catch only that expected failure;
+ * the catch must not turn unrelated network errors into a successful
+ * example.
+ */
 try {
   await sendPayment({
     operations: [Operation.payment({

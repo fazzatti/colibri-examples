@@ -1,3 +1,12 @@
+/**
+ * Example: Exact Inclusion Bid
+ *
+ * Send two native payments with one exact total inclusion bid of 205
+ * stroops. Inspect the confirmed envelope to distinguish a total bid from a
+ * per-operation base fee.
+ *
+ * Run: deno task inclusion
+ */
 import {
   createClassicTransactionPipeline,
   initializeWithFriendbot,
@@ -7,7 +16,11 @@ import {
 } from "@colibri/core";
 import { Asset, Operation, TransactionBuilder } from "stellar-sdk";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * The sender pays and signs for both operations; the recipient receives
+ * their combined 3 XLM. Friendbot funds the Testnet accounts before we build
+ * the transaction.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using sender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
@@ -23,6 +36,12 @@ for (const signer of [sender, recipient]) {
   );
 }
 
+/**
+ * The transaction configuration names its source account and the signers
+ * allowed to satisfy its requirements. base is an inclusion bid per
+ * operation in stroops. The transaction source pays the ordinary fee.
+ * timeout sets transaction validity in seconds, not an RPC request deadline.
+ */
 const senderConfig: TransactionConfig = {
   source: sender.publicKey(),
   signers: [sender],
@@ -30,8 +49,11 @@ const senderConfig: TransactionConfig = {
   timeout: 120,
 };
 
-// Both operations are in ONE transaction. 205 stroops is the exact total inclusion bid, not 205 per operation.
-// Confirmed feeCharged can be lower than that bid when there is no congestion.
+/**
+ * Both operations are in ONE transaction. 205 stroops is the exact total
+ * inclusion bid, not 205 per operation. Confirmed feeCharged can be lower
+ * than that bid when there is no congestion.
+ */
 const sendTwoPayments = createClassicTransactionPipeline({ networkConfig });
 
 const result = await sendTwoPayments({
@@ -50,8 +72,10 @@ const result = await sendTwoPayments({
   config: { ...senderConfig, fee: { inclusion: "205" } },
 });
 
-// Decode the envelope returned by RPC after confirmation. Its fee is the bid;
-// the transaction result reports what the network actually charged.
+/**
+ * Decode the envelope returned by RPC after confirmation. Its fee is the
+ * bid; the transaction result reports what the network actually charged.
+ */
 const confirmedEnvelope = result.response.envelopeXdr.toXdr("base64");
 const confirmed = TransactionBuilder.fromXdr(
   confirmedEnvelope,

@@ -63,9 +63,10 @@ Before running this use case, make sure:
 
 The first run may take a little longer while Docker pulls the Quickstart image.
 
-Run it with:
+From the repository root, enter the lesson and run:
 
 ```bash
+cd examples/stellar-test-ledger
 deno task test
 ```
 
@@ -78,8 +79,9 @@ This task:
 4. Uses Colibri's RPC-backed classic transaction pipeline to submit transactions
 5. Stops and destroys the container when the suite finishes
 
-This is the best mode when you want deterministic, isolated, disposable ledgers
-for automated testing.
+Expect two passing tests and cleanup of the container. The tests check confirmed
+transaction status and operation types; the payment test also checks the
+returned hash and ledger. They do not read back balances or account settings.
 
 ## Use Case: Reusable Ledger
 
@@ -96,14 +98,10 @@ This use case shows how to:
 - stop the running container
 - expose links for Stellar Lab, the transaction explorer, and local ledger meta
 
-Before running this use case, make sure:
-
-- Docker Desktop, OrbStack, or another reachable Docker daemon is installed and
-  running
-- you have permission to pull the `stellar/quickstart` image
-- you completed the setup described in the [workspace README](../../README.md)
-
-The first run may take a little longer while Docker pulls the Quickstart image.
+Use the same Deno and Docker prerequisites as the test above, and run these
+commands from `examples/stellar-test-ledger`. Unlike the independent lessons,
+these lifecycle steps intentionally share one named container: start it before
+sending transactions, then stop it when finished.
 
 The reusable ledger is configured like this:
 
@@ -200,7 +198,8 @@ deno task ledger:stop
 ```
 
 This command attaches to the named reusable ledger container and stops it when
-you are done exploring locally.
+you are done exploring locally. Stopping retains the container; it does not
+destroy it as the integration test's cleanup does.
 
 If you want to see the container output while it shuts down, use
 `deno task ledger:stop:log`. That variant streams the shutdown logs and then

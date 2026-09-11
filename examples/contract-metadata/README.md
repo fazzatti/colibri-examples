@@ -1,40 +1,55 @@
-# Contract claims versus interface analysis
+# Inspect contract claims and interfaces
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+A contract can declare that it follows a standard. Its specification also lets
+you inspect whether its methods have the required names and types. These answer
+different questions, so this example keeps the two inspections separate.
 
-Two offline scripts read the checked-in SEP-41 token Wasm. They deliberately
-keep author claims separate from Colibri's structural interface analysis.
+Both scripts read the [SEP-41 token Wasm](../sep41-token/contract/token.wasm)
+already included in the repository. You do not need to deploy it or run the
+token lesson first. After dependencies are installed, inspection is entirely
+offline.
 
-## Run
+## Setup
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then enter this directory:
 
 ```sh
 cd examples/contract-metadata
+```
+
+## Read the author's claims
+
+```sh
 deno task claims
+```
+
+[`claims.ts`](./claims.ts) extracts SEP-46 metadata from the Wasm, reads its
+SEP-47 declarations, and asks whether the author declares SEP-41. Expect that
+claim to be **true**. This reports what the artifact says about itself.
+
+## Check the interface
+
+```sh
 deno task interface
 ```
 
-- `claims`: Extract SEP-46 metadata and interpret the SEP-47 declarations.
-- `interface`: Compare the embedded native SDK Spec against the bundled SEP-41
-  definition.
+[`interface.ts`](./interface.ts) extracts the embedded specification and
+compares it with Colibri's bundled SEP-41 definition. Read the overall match
+alongside the lists of missing, incompatible, and extra functions.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+The fixture **matches**, with no missing or incompatible methods. Its
+constructor and `mint_with_reference` extension appear as additional methods.
+Here, `latest` selects the standard version bundled in the installed Colibri
+package; it does not fetch a definition from the internet.
 
-## Follow the code
+## What these results establish
 
-1. Read Wasm bytes without RPC or deployment.
-2. For claims, inspect the author's metadata and ask whether it declares SEP-41.
-3. For interface analysis, inspect missing, incompatible, and extra functions
-   independently.
+A claim records author intent, and a match establishes the inspected ABI shape.
+Neither establishes how authorization or accounting behaves when the methods
+run. For a separate source-to-Wasm comparison, see
+[build verification](../build-verification/README.md).
 
-## Important details
+## Learn more
 
-The fixture claims SEP-41 and structurally matches it. Its constructor and
-mint_with_reference extension remain visible as additional methods. Neither
-result proves authorization behavior, security, economic correctness, or source
-reproducibility. `latest` is the version bundled in the installed Colibri
-package, not an online lookup. These files reuse an artifact, not a workflow
-helper.
+- [Use the SEP-41 interface](../sep41-token/README.md)
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)

@@ -32,14 +32,14 @@ console.log(
 );
 
 /**
- * In this example we'll use the public network infrastructre
- * provided by Lightsail. You can replace this with your own
- * NetworkConfig or other predefined setups.
+ * Use the Lightsail Mainnet endpoints for observation only. This script has
+ * no signer or payment operation and submits no transactions. Archive access
+ * depends on the provider exposing the required historical ledgers.
  */
 const networkConfig = NetworkProviders.Lightsail.MainNet();
 
 /**
- * We setup a Event Filter to capture only `transfer` events
+ * We set up an EventFilter to capture only `transfer` events
  * emitted by the XLM contract on Mainnet.
  *
  * These can have any number and combination of topic segments

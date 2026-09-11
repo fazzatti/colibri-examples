@@ -62,6 +62,9 @@ The script:
 7. submits the unchanged transaction and confirms through RPC that Stellar
    removed the consumed signer.
 
+Expect a confirmed future-payment hash, **zero decorated signatures**, and an
+RPC read showing that the consumed T signer was removed.
+
 The source account's master key signs only the setup. The future payment is
 accepted because the transaction itself matches the installed `T...` signer.
 

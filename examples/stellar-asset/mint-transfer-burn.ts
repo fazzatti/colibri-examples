@@ -37,8 +37,11 @@ for (const signer of [issuer, alice, bob]) {
   );
 }
 
-// Each configuration states who pays the ordinary fee and signs that account.
-// A string fee is the per-operation bid in stroops, not the actual fee charged.
+/**
+ * Each configuration states who pays the ordinary fee and signs that
+ * account. A string fee is the per-operation bid in stroops, not the actual
+ * fee charged.
+ */
 const issuerConfig: TransactionConfig = {
   source: issuer.publicKey(),
   signers: [issuer],
@@ -58,6 +61,11 @@ const bobConfig: TransactionConfig = {
   timeout: 60,
 };
 
+/**
+ * Create a client for the DEMO code and this issuer address. StellarAsset
+ * keeps that asset identity and network together so subsequent calls can
+ * focus on the operation amount and the account authorizing it.
+ */
 const credits = new StellarAsset({
   asset: new Asset("DEMO", issuer.publicKey()),
   networkConfig,

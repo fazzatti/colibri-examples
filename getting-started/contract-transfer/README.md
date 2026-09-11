@@ -24,6 +24,7 @@ Before proceeding, make sure to follow the setup described in the
 Execute the transfer script:
 
 ```bash
+cd getting-started/contract-transfer
 deno task transfer
 ```
 
@@ -34,6 +35,10 @@ This script:
 3. Checks the receiver's initial balance
 4. Transfers 50 XLM from sender to receiver via the SAC contract
 5. Confirms the transfer by checking the receiver's updated balance
+
+Follow [`transfer.ts`](./transfer.ts) as it runs. The receiver's balance should
+increase by **50 XLM**, displayed as **500,000,000 stroops**. The sender pays
+the transaction fee, so that fee does not reduce the receiver's increase.
 
 ## Key Concepts
 

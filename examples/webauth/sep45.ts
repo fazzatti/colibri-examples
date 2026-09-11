@@ -6,9 +6,11 @@ import { WebAuthClient } from "@colibri/webauth";
 import { buildAuthorizationEntryPreimage, hash, xdr } from "stellar-sdk";
 import { deployTestnetContracts } from "./deploy-testnet.ts";
 
-// A software P-256 key simulates an authenticator for this terminal lesson.
-// A real browser wallet uses navigator.credentials.get(), origin/RP validation,
-// user presence/verification and protected key storage instead.
+/**
+ * A software P-256 key simulates an authenticator for this terminal lesson.
+ * A real browser wallet uses navigator.credentials.get(), origin/RP
+ * validation, user presence/verification and protected key storage instead.
+ */
 const keyPair = await crypto.subtle.generateKey(
   { name: "ECDSA", namedCurve: "P-256" },
   false,
@@ -19,10 +21,12 @@ const publicKey = new Uint8Array(
   await crypto.subtle.exportKey("raw", keyPair.publicKey),
 );
 
-// Only deployment and the local HTTP fixture are setup helpers. All Colibri
-// discovery/authentication and account-specific authorization remain here.
-// The contract is deployed on Testnet; the HTTP fixture runs locally.
-// Nothing here creates a production WebAuth server or hardware passkey.
+/**
+ * Only deployment and the local HTTP fixture are setup helpers. All Colibri
+ * discovery/authentication and account-specific authorization remain here.
+ * The contract is deployed on Testnet; the HTTP fixture runs locally.
+ * Nothing here creates a production WebAuth server or hardware passkey.
+ */
 const { contractAccount, network, server, close } =
   await deployTestnetContracts(publicKey);
 
@@ -35,11 +39,20 @@ try {
 
   console.log("Contract account:", contractAccount);
 
+  /**
+   * Request authentication for the deployed C-address. Colibri validates the
+   * SEP-45 challenge and passes its account authorization entry to our
+   * callback. The callback below implements this particular account's
+   * assertion format; the server then enforces it through simulation.
+   */
   const jwt = await client.sep45.authenticate({
     account: contractAccount,
     authorize: async (entry, context) => {
-      // Bind the assertion to this invocation tree, nonce, network, and expiry.
-      // The account's custom __check_auth expects a WebAuthn-shaped assertion.
+      /**
+       * Bind the assertion to this invocation tree, nonce, network, and
+       * expiry. The account's custom __check_auth expects a WebAuthn-shaped
+       * assertion.
+       */
       const preimage = buildAuthorizationEntryPreimage(
         entry,
         context.validUntilLedgerSeq,
@@ -54,8 +67,11 @@ try {
         .replaceAll("/", "_")
         .replace(/=+$/u, "");
 
-      // These JSON bytes bind the challenge to this demonstration's origin.
-      // The contract checks the exact fixture layout, not arbitrary browser JSON.
+      /**
+       * These JSON bytes bind the challenge to this demonstration's origin.
+       * The contract checks the exact fixture layout, not arbitrary browser
+       * JSON.
+       */
       const clientDataJSON = new TextEncoder().encode(JSON.stringify({
         type: "webauthn.get",
         challenge,
@@ -63,8 +79,11 @@ try {
         crossOrigin: false,
       }));
 
-      // Authenticator data starts with SHA-256 of the relying-party ID, followed
-      // by flags and a counter. These are simulated bytes for this local fixture.
+      /**
+       * Authenticator data starts with SHA-256 of the relying-party ID,
+       * followed by flags and a counter. These are simulated bytes for this
+       * local fixture.
+       */
       const rpIdHash = new Uint8Array(
         await crypto.subtle.digest(
           "SHA-256",
@@ -94,8 +113,11 @@ try {
         ),
       );
 
-      // Deno WebCrypto returns raw r || s. Soroban requires low-S ECDSA.
-      // This is signature encoding, not an extra Colibri authorization policy.
+      /**
+       * Deno WebCrypto returns raw r || s. Soroban requires low-S ECDSA.
+       * This is signature encoding, not an extra Colibri authorization
+       * policy.
+       */
       const order =
         0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551n;
       const sBytes = signature.subarray(32);
@@ -114,8 +136,11 @@ try {
         }
       }
 
-      // This SEP-45 fixture uses address credentials. Narrow the native SDK
-      // union before reading the original address, nonce, and signature fields.
+      /**
+       * This SEP-45 fixture uses address credentials. Narrow the native SDK
+       * union before reading the original address, nonce, and signature
+       * fields.
+       */
       if (entry.credentials.type !== "sorobanCredentialsAddress") {
         throw new Error("This passkey example expects address credentials");
       }
@@ -136,8 +161,11 @@ try {
         }),
       ]);
 
-      // SDK 17 XDR objects are immutable. Preserve the original credentials and
-      // build a new entry carrying this assertion and its ledger expiration.
+      /**
+       * SDK 17 XDR objects are immutable. Preserve the original credentials
+       * and build a new entry carrying this assertion and its ledger
+       * expiration.
+       */
       const addressCredentials = entry.credentials.value;
       const signedCredentials = new xdr.SorobanAddressCredentials({
         ...addressCredentials,

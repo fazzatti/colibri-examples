@@ -18,6 +18,11 @@ import {
   printReusableLedgerLinks,
 } from "./shared.ts";
 
+/**
+ * The optional --logs flag changes terminal output, not the ledger workflow.
+ * The shared helpers keep Docker log forwarding and the reusable container
+ * name consistent across these lifecycle commands.
+ */
 const streamingLogs = logsRequested();
 const scope = streamingLogs ? "ledger:restart:log" : "ledger:restart";
 const containerLog = createContainerLog(scope);
@@ -50,6 +55,11 @@ if (streamingLogs) {
 
 containerLog("Waiting for the restarted container to become ready again...");
 
+/**
+ * Attach again after Docker restarts the container. This lets the ledger
+ * manager wait for ready services and return current URLs before we tell the
+ * reader the restart is complete.
+ */
 const refreshedLedger = createReusableLedger({ useRunningLedger: true });
 
 await refreshedLedger.start();

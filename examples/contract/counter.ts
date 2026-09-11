@@ -1,3 +1,12 @@
+/**
+ * Example: Generic Contract Calls
+ *
+ * Load a counter specification, upload its Wasm and deploy a new instance.
+ * Read the initial state, invoke an increment and read again to observe the
+ * committed change.
+ *
+ * Run: deno task counter
+ */
 import {
   Contract,
   initializeWithFriendbot,
@@ -6,7 +15,11 @@ import {
   type TransactionConfig,
 } from "@colibri/core";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * The deployer pays for uploading code, creating an instance and invoking
+ * it. Friendbot supplies disposable Testnet XLM; waiting for RPC visibility
+ * makes that funded source ready for the next step.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using deployer = LocalSigner.generateRandom();
 
@@ -19,6 +32,12 @@ await initializeWithFriendbot(
   },
 );
 
+/**
+ * The transaction configuration names its source account and the signers
+ * allowed to satisfy its requirements. base is an inclusion bid per
+ * operation in stroops; Soroban simulation adds resource fees when needed.
+ * timeout sets transaction validity in seconds, not an RPC request deadline.
+ */
 const deployerConfig: TransactionConfig = {
   source: deployer.publicKey(),
   signers: [deployer],
@@ -26,8 +45,11 @@ const deployerConfig: TransactionConfig = {
   timeout: 120,
 };
 
-// Loading the ABI from the checked-in Wasm keeps method argument names tied to
-// the actual contract. Upload stores code; deploy creates a separate instance.
+/**
+ * Loading the ABI from the checked-in Wasm keeps method argument names tied
+ * to the actual contract. Upload stores code; deploy creates a separate
+ * instance.
+ */
 const wasm = await Deno.readFile(
   new URL("./contract/counter.wasm", import.meta.url),
 );
@@ -53,9 +75,12 @@ const countBefore = await counter.read({ method: "count" });
 
 console.log("Before:", countBefore);
 
-// This counter is deliberately public and unprotected, for learning only.
-// Writes use the owned invoke pipeline: simulate, authorize, assemble, sign,
-// submit, confirm. The return includes the confirmed transaction information.
+/**
+ * This counter is deliberately public and unprotected, for learning only.
+ * Writes use the owned invoke pipeline: simulate, authorize, assemble, sign,
+ * submit, confirm. The return includes the confirmed transaction
+ * information.
+ */
 const incremented = await counter.invoke({
   method: "increment",
   methodArgs: { by: 3 },

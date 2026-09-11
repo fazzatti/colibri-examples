@@ -5,16 +5,17 @@
 import { LocalSigner } from "@colibri/core";
 import { Keypair } from "stellar-sdk";
 
-// No Friendbot or RPC: a key can sign a message without an on-chain account.
-// 'using' disposes the secret handle when this module finishes.
+/**
+ * No Friendbot or RPC: a key can sign a message without an on-chain account.
+ * 'using' disposes the secret handle when this module finishes.
+ */
 using signer = LocalSigner.generateRandom();
 const message = "Colibri example: I approve document revision 42.";
 
 /**
  * signMessage uses SEP-53 domain separation. It is not the raw sign(bytes)
  * primitive, a transaction signature, or a P-address signed-payload signer.
- */
-/**
+ *
  * Keep the message, signature and public key together for verification.
  * A valid signature only proves control of that key over those bytes.
  * For a login protocol, use WebAuth or explicitly define and validate an

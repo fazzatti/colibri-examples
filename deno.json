@@ -18,11 +18,17 @@
   },
 
   "tasks": {
-    "check": "deno check examples/**/*.ts getting-started/**/*.ts",
-    "lint": "deno lint examples/**/*.ts getting-started/**/*.ts",
+    "check": "deno task --cwd examples/contract-bindings generate && deno check examples/**/*.ts getting-started/**/*.ts",
+    "lint": "deno lint --config deno.json examples/**/*.ts getting-started/**/*.ts",
     "fmt:check": "deno fmt --check"
   },
-  "exclude": ["**/target", "**/artifacts", "**/.verification", "**/.output"],
+  "exclude": [
+    "**/target",
+    "**/artifacts",
+    "**/.verification",
+    "**/.output",
+    "./examples/contract-bindings/package"
+  ],
   "lint": {
     "plugins": [],
     "rules": {

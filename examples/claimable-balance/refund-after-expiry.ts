@@ -1,3 +1,12 @@
+/**
+ * Example: Refund After Expiry
+ *
+ * Create a claimable balance, let the recipient window close, then reclaim
+ * it as the sender. Ledger close time determines eligibility; expiration
+ * does not move funds automatically.
+ *
+ * Run: deno task refund
+ */
 import {
   ClaimableBalancePredicates,
   createClassicTransactionPipeline,
@@ -10,7 +19,11 @@ import {
 import { Claimant, Operation } from "stellar-sdk";
 import { Server } from "stellar-sdk/rpc";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * The sender will create and later reclaim this balance; the recipient
+ * deliberately makes no claim. Fund fresh Testnet accounts so this example
+ * has its own state and does not depend on the claim lesson.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using sender = LocalSigner.generateRandom();
 using recipient = LocalSigner.generateRandom();
@@ -26,6 +39,12 @@ for (const signer of [sender, recipient]) {
   );
 }
 
+/**
+ * The transaction configuration names its source account and the signers
+ * allowed to satisfy its requirements. base is an inclusion bid per
+ * operation in stroops. The transaction source pays the ordinary fee.
+ * timeout sets transaction validity in seconds, not an RPC request deadline.
+ */
 const senderConfig: TransactionConfig = {
   source: sender.publicKey(),
   signers: [sender],
@@ -33,8 +52,11 @@ const senderConfig: TransactionConfig = {
   timeout: 120,
 };
 
-// Use an explicit absolute deadline for this short demonstration. The ledger's
-// close time is the authority; a wall-clock wait alone does not prove expiry.
+/**
+ * Use an explicit absolute deadline for this short demonstration. The
+ * ledger's close time is the authority; a wall-clock wait alone does not
+ * prove expiry.
+ */
 const deadline = Math.floor(Date.now() / 1000) + 30;
 const beforeDeadline = ClaimableBalancePredicates.beforeAbsoluteTime(deadline);
 const asset = StellarAsset.NativeXLM({ networkConfig });
@@ -51,8 +73,10 @@ const created = await asset.createClaimableBalance({
   config: senderConfig,
 });
 
-// Read the balance ID from the confirmed create operation, not from the
-// transaction hash. A later claim refers to this specific ledger entry.
+/**
+ * Read the balance ID from the confirmed create operation, not from the
+ * transaction hash. A later claim refers to this specific ledger entry.
+ */
 const outcome = created.operations[0];
 
 if (
@@ -69,8 +93,10 @@ console.log(
   new Date(deadline * 1000),
 );
 
-// Poll only to observe ledger time, not to repeatedly submit failing claims.
-// The overall timeout keeps an unavailable network from hanging the example.
+/**
+ * Poll only to observe ledger time, not to repeatedly submit failing claims.
+ * The overall timeout keeps an unavailable network from hanging the example.
+ */
 const rpc = new Server(networkConfig.rpcUrl);
 const stopWaitingAt = Date.now() + 120_000;
 
@@ -96,8 +122,10 @@ while (true) {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 }
 
-// Nobody claimed the balance in this independent example. The sender must now
-// submit a claim too: expiration makes a refund possible, not automatic.
+/**
+ * Nobody claimed the balance in this independent example. The sender must
+ * now submit a claim too: expiration makes a refund possible, not automatic.
+ */
 const refundBalance = createClassicTransactionPipeline({ networkConfig });
 
 const refunded = await refundBalance({

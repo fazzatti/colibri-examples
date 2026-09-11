@@ -16,11 +16,20 @@ The example includes two ingestion scripts:
 ## Usage
 
 Before proceeding, make sure to follow the setup described in the
-[workspace README](../../README.md).
+[workspace README](../../README.md), then enter this directory:
+
+```sh
+cd examples/event-streamer
+```
+
+Both scripts only read public Mainnet data. They create no signers or accounts
+and submit no transactions. The archive lesson also needs a provider that serves
+the selected historical ledger.
 
 ### Live Ingestion
 
-Streams XLM transfer events from the Stellar Mainnet for the next 5 ledgers:
+Follow [`ingest-live.ts`](./ingest-live.ts) to stream XLM transfer events from
+five Mainnet ledgers, beginning at the latest ledger observed at startup:
 
 ```bash
 deno task ingest:live
@@ -30,12 +39,13 @@ This script:
 
 1. Connects to the Stellar Mainnet via Lightsail's public RPC
 2. Sets up a filter for `transfer` events from the XLM contract
-3. Ingests events from the latest ledger until 5 ledgers have passed
+3. Ingests from that ledger through `latest + 4`, including both endpoints
 4. Logs each event's details (ledger, transaction hash, topics, and value)
 
 ### Archive Ingestion
 
-Fetches historical KALE mint events from a specific past ledger:
+Follow [`ingest-archive.ts`](./ingest-archive.ts) to fetch historical KALE mint
+events from a specific past ledger:
 
 ```bash
 deno task ingest:archive
@@ -49,8 +59,13 @@ This script:
 3. Ingests events from ledger `59895694` (contains 9 KALE mint events)
 4. Logs each event's details
 
-**Other Configuration:** If you'd like to try some other event types try
-ingesting one of the ledgers below:
+The live window may contain no matching transfers. The archive example selects a
+known ledger with nine KALE mint events; successful retrieval depends on the
+provider retaining and serving that history. Both scripts stop after their
+bounded range.
+
+To explore another historical event shape, adjust the contract/topic filter as
+well as the ledger:
 
 - `60044284`: Contains events for the native XLM involving Liquidity pool
   transfers and receivers with muxed addresses.
@@ -99,7 +114,8 @@ const eventStreamer = RPCStreamer.event({
 - **Archive mode** - Automatically used when `startLedger` is outside the
   retention window
 
-The `start()` method intelligently switches between modes as needed.
+The `start()` method switches between modes as needed using the configured RPC
+and archive endpoints.
 
 ## Learn More
 
