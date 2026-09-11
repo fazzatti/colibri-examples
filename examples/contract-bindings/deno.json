@@ -1,0 +1,17 @@
+{
+  "imports": {
+    "@colibri/core": "jsr:@colibri/core@^1.1.0",
+    "@colibri/contract-bindings": "jsr:@colibri/contract-bindings@0.1.0",
+    "@colibri/contract-bindings/cli": "jsr:@colibri/contract-bindings@0.1.0/cli"
+  },
+  "tasks": {
+    "generate": "deno run --allow-read --allow-write jsr:@colibri/contract-bindings@0.1.0/cli --wasm ./contract/counter.wasm --class-name Counter --output files --out ./generated --force --non-interactive && deno fmt ./generated",
+    "generate:package": "deno run --allow-read --allow-write ./generate-package.ts",
+    "calls": "deno run -A ./calls.ts",
+    "values": "deno run ./values.ts",
+    "errors": "deno run -A ./errors.ts",
+    "events": "deno run -A ./events.ts",
+    "contract:build": "stellar contract build --locked --manifest-path ./contract/Cargo.toml --out-dir ./contract && mv ./contract/colibri_bindings_counter.wasm ./contract/counter.wasm",
+    "generate:npm": "deno run --allow-read --allow-write jsr:@colibri/contract-bindings@0.1.0/cli --wasm ./contract/counter.wasm --class-name Counter --output package --target npm --package-name @example/counter --out ../../.output/contract-bindings/npm-counter --force --non-interactive"
+  }
+}

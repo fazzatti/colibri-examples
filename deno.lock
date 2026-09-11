@@ -1,8 +1,14 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@cliffy/ansi@1.0.0-rc.8": "1.0.0-rc.8",
+    "jsr:@cliffy/internal@1.0.0-rc.8": "1.0.0-rc.8",
+    "jsr:@cliffy/keycode@1.0.0-rc.8": "1.0.0-rc.8",
+    "jsr:@cliffy/prompt@1.0.0-rc.8": "1.0.0-rc.8",
     "jsr:@colibri/build-verification@~0.4.3": "0.4.3",
+    "jsr:@colibri/contract-bindings@0.1.0": "0.1.0",
     "jsr:@colibri/core@0.30": "0.30.0",
+    "jsr:@colibri/core@^1.1.0": "1.1.0",
     "jsr:@colibri/identicon@~0.1.3": "0.1.3",
     "jsr:@colibri/plugin-channel-accounts@~0.2.15": "0.2.15",
     "jsr:@colibri/plugin-fee-bump@~0.10.5": "0.10.5",
@@ -11,15 +17,22 @@
     "jsr:@colibri/test-tooling@~0.3.1": "0.3.1",
     "jsr:@colibri/webauth@~0.2.3": "0.2.3",
     "jsr:@fifo/convee@1.0.0": "1.0.0",
+    "jsr:@fifo/convee@2.1.0": "2.1.0",
     "jsr:@std/assert@*": "1.0.19",
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.17": "1.0.19",
+    "jsr:@std/assert@~1.0.6": "1.0.19",
     "jsr:@std/collections@^1.1.3": "1.3.0",
     "jsr:@std/encoding@^1.0.10": "1.0.11",
+    "jsr:@std/encoding@~1.0.5": "1.0.11",
+    "jsr:@std/fmt@~1.0.2": "1.0.10",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
+    "jsr:@std/io@~0.224.9": "0.224.9",
     "jsr:@std/path@*": "1.1.6",
+    "jsr:@std/path@~1.0.6": "1.0.9",
     "jsr:@std/testing@1": "1.0.17",
+    "jsr:@std/text@~1.0.7": "1.0.19",
     "jsr:@std/toml@^1.0.11": "1.0.11",
     "npm:@stellar/stellar-sdk@^17.0.1": "17.0.1",
     "npm:@types/node@*": "24.2.0",
@@ -28,19 +41,62 @@
     "npm:fast-png@8.0.0": "8.0.0"
   },
   "jsr": {
+    "@cliffy/ansi@1.0.0-rc.8": {
+      "integrity": "ba37f10ce55bbfbdd8ddd987f91f029b17bce88385b98ba3058870f3b007b80c",
+      "dependencies": [
+        "jsr:@cliffy/internal",
+        "jsr:@std/encoding@~1.0.5",
+        "jsr:@std/io"
+      ]
+    },
+    "@cliffy/internal@1.0.0-rc.8": {
+      "integrity": "34cdf2fad9b084b5aed493b138d573f52d4e988767215f7460daf0b918ff43d8"
+    },
+    "@cliffy/keycode@1.0.0-rc.8": {
+      "integrity": "76dbf85a67ec0aea2e29ca049b8507b6b3f62a2a971bd744d8d3fc447c177cd9"
+    },
+    "@cliffy/prompt@1.0.0-rc.8": {
+      "integrity": "eba403ea1d47b9971bf2210fa35f4dc7ebd2aba87beec9540ae47552806e2f25",
+      "dependencies": [
+        "jsr:@cliffy/ansi",
+        "jsr:@cliffy/internal",
+        "jsr:@cliffy/keycode",
+        "jsr:@std/assert@~1.0.6",
+        "jsr:@std/fmt",
+        "jsr:@std/io",
+        "jsr:@std/path@~1.0.6",
+        "jsr:@std/text"
+      ]
+    },
     "@colibri/build-verification@0.4.3": {
       "integrity": "e50879d20d5094abfa92a7db02384cd974f14bfed196f0122909ba392f52bc95",
       "dependencies": [
-        "jsr:@colibri/core",
-        "jsr:@fifo/convee",
+        "jsr:@colibri/core@0.30",
+        "jsr:@fifo/convee@1.0.0",
         "npm:@stellar/stellar-sdk",
         "npm:dockerode"
+      ]
+    },
+    "@colibri/contract-bindings@0.1.0": {
+      "integrity": "db15b3a64e9502fc2ef3c23dd359633163555c11c52070ada9733f1af8fc057d",
+      "dependencies": [
+        "jsr:@cliffy/prompt",
+        "jsr:@colibri/core@^1.1.0",
+        "npm:@stellar/stellar-sdk"
       ]
     },
     "@colibri/core@0.30.0": {
       "integrity": "94f99c1870aceb2f0f0a5fd1981ae6793a521f196635d56f524423ac24b58fc0",
       "dependencies": [
-        "jsr:@fifo/convee",
+        "jsr:@fifo/convee@1.0.0",
+        "jsr:@std/toml",
+        "npm:@stellar/stellar-sdk"
+      ]
+    },
+    "@colibri/core@1.1.0": {
+      "integrity": "8355f689818941572039f5deeb0cf7b8518ea2046658be2eaea7771c08b86dc7",
+      "dependencies": [
+        "jsr:@fifo/convee@2.1.0",
         "jsr:@std/toml",
         "npm:@stellar/stellar-sdk"
       ]
@@ -48,8 +104,8 @@
     "@colibri/identicon@0.1.3": {
       "integrity": "3de1cc475119631b3238aef125abca05562b7cfaf8bd25e2e17c546617b058ad",
       "dependencies": [
-        "jsr:@colibri/core",
-        "jsr:@std/encoding",
+        "jsr:@colibri/core@0.30",
+        "jsr:@std/encoding@^1.0.10",
         "npm:@stellar/stellar-sdk",
         "npm:fast-png"
       ]
@@ -57,31 +113,31 @@
     "@colibri/plugin-channel-accounts@0.2.15": {
       "integrity": "af7ebf00d9e257299122d478feeb481d52021df52422fefbbed8459967de696f",
       "dependencies": [
-        "jsr:@colibri/core",
-        "jsr:@fifo/convee",
+        "jsr:@colibri/core@0.30",
+        "jsr:@fifo/convee@1.0.0",
         "npm:@stellar/stellar-sdk"
       ]
     },
     "@colibri/plugin-fee-bump@0.10.5": {
       "integrity": "3d57a86633dd4d191e25315bd60715c8fd46ba07417bc480b4da1af4bca0b5d8",
       "dependencies": [
-        "jsr:@colibri/core",
-        "jsr:@fifo/convee",
+        "jsr:@colibri/core@0.30",
+        "jsr:@fifo/convee@1.0.0",
         "npm:@stellar/stellar-sdk"
       ]
     },
     "@colibri/plugin-sep29@0.1.1": {
       "integrity": "c18c92b97c76cbb2b47c54c2ed52ecb03dc86cf384a4e1b11120c568ed5cb394",
       "dependencies": [
-        "jsr:@colibri/core",
-        "jsr:@fifo/convee",
+        "jsr:@colibri/core@0.30",
+        "jsr:@fifo/convee@1.0.0",
         "npm:@stellar/stellar-sdk"
       ]
     },
     "@colibri/rpc-streamer@0.4.0": {
       "integrity": "05c5271188c1d779135e9b9eda8f1260704c2b92aa75751b494d3ccfa345f1c8",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.30",
         "npm:@stellar/stellar-sdk"
       ]
     },
@@ -94,12 +150,15 @@
     "@colibri/webauth@0.2.3": {
       "integrity": "007b6779c203f2e14d7248fdfe38bb06fda3dd16772975ef14614faef8516a25",
       "dependencies": [
-        "jsr:@colibri/core",
+        "jsr:@colibri/core@0.30",
         "npm:@stellar/stellar-sdk"
       ]
     },
     "@fifo/convee@1.0.0": {
       "integrity": "b61bfa222b9b8a53f0f2af1f35148fd54d86afc2fc3d6b5d073d56aaa369d9a3"
+    },
+    "@fifo/convee@2.1.0": {
+      "integrity": "02f0943f43087b30c1c6cdf767ead95e099549dde070dd3486d51311b36ff88b"
     },
     "@std/assert@1.0.19": {
       "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
@@ -113,11 +172,20 @@
     "@std/encoding@1.0.11": {
       "integrity": "e7cef2f0b3153bccc17431e7c864a1de03a4b6d9647389c43e08aaa775d37385"
     },
+    "@std/fmt@1.0.10": {
+      "integrity": "90dfba288802ac6de82fb31d0917eb9e4450b9925b954d5e51fc29ac07419db5"
+    },
     "@std/internal@1.0.12": {
       "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
     },
     "@std/internal@1.0.14": {
       "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    },
+    "@std/io@0.224.9": {
+      "integrity": "4414664b6926f665102e73c969cfda06d2c4c59bd5d0c603fd4f1b1c840d6ee3"
+    },
+    "@std/path@1.0.9": {
+      "integrity": "260a49f11edd3db93dd38350bf9cd1b4d1366afa98e81b86167b4e3dd750129e"
     },
     "@std/path@1.1.6": {
       "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
@@ -131,6 +199,9 @@
         "jsr:@std/assert@^1.0.17",
         "jsr:@std/internal@^1.0.12"
       ]
+    },
+    "@std/text@1.0.19": {
+      "integrity": "003a0e032d360e8c3a4e0410fb792c77a66bd6553fee9d60c6ec1bce30d29223"
     },
     "@std/toml@1.0.11": {
       "integrity": "e084988b872ca4bad6aedfb7350f6eeed0e8ba88e9ee5e1590621c5b5bb8f715",
@@ -563,6 +634,12 @@
         "dependencies": [
           "jsr:@colibri/build-verification@~0.4.3",
           "npm:chalk@^5.3.0"
+        ]
+      },
+      "examples/contract-bindings": {
+        "dependencies": [
+          "jsr:@colibri/contract-bindings@0.1.0",
+          "jsr:@colibri/core@^1.1.0"
         ]
       },
       "examples/delegated-signers": {
