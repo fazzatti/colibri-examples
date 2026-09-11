@@ -1,51 +1,81 @@
-# Generic Contract: Wasm, instances, calls, and errors
+# Load and call a contract
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+These examples introduce Colibri's generic `Contract` class using a small
+counter. The [Rust source](./contract/src/lib.rs) defines a count, an increment
+method, and an intentional error. Its compiled [Wasm](./contract/counter.wasm)
+is included so you can start with TypeScript.
 
-Three independent scripts use a tiny public counter contract. Each uploads the
-checked-in Wasm, deploys a fresh Testnet instance, and shows one Colibri
-feature.
+Uploading Wasm stores executable code on the network. Deploying creates a
+contract instance with its own identity and state. Each lesson performs both
+steps and uses a fresh Testnet instance.
 
-## Run
+## Setup
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then enter this directory:
 
 ```sh
 cd examples/contract
+```
+
+Normal runs need Deno and Testnet access. Each script generates a deployer and
+funds it with Friendbot; Rust and the Stellar CLI are only needed for
+rebuilding.
+
+## 1. Read and invoke with the specification
+
+```sh
 deno task counter
+```
+
+Follow [`counter.ts`](./counter.ts):
+
+1. Read the Wasm and load its embedded specification, which describes the
+   contract's methods and argument types.
+2. Upload the code and deploy an instance.
+3. Call `read` to simulate `count` without committing a transaction.
+4. Call `invoke` with `increment` and `by: 3`, then read the count again.
+
+Expect **0 before** and **3 after**, plus the confirmed invocation hash. The
+specification supplies encoding information; the caller chooses read or invoke.
+
+## 2. Work directly with XDR
+
+```sh
 deno task raw
+```
+
+[`raw-invocation.ts`](./raw-invocation.ts) supplies a native `ScVal` containing
+a U32 to `invokeRaw`. It then decodes the `ScVal` returned by `readRaw`. This
+path makes encoding explicit and finishes with a count of **2**.
+
+## 3. Recognize a contract error
+
+```sh
 deno task error
+```
+
+[`known-error.ts`](./known-error.ts) loads error definitions from the Wasm and
+calls the method that deliberately rejects. It catches and prints the named
+contract error. The expected rejection is the lesson's successful outcome.
+
+Errors are registered for this contract ID. Error number 1 in a different
+contract can have a different meaning. The counter itself is permissionless; it
+is a call/encoding fixture, not an authorization design.
+
+## Optional: rebuild the contract
+
+After changing the Rust source, rebuild the artifact with:
+
+```sh
 deno task contract:build
 ```
 
-- `counter`: Read count=0, invoke increment(by=3), then read count=3.
-- `raw`: Use native ScVal arguments with invokeRaw and decode readRaw's result.
-- `error`: Load error names from the Wasm and catch the intentionally returned
-  contract error.
-- `contract:build`: Optional: rebuild the checked-in counter Wasm from the
-  included Rust source.
+This needs Rust, the `wasm32v1-none` target, and a compatible Stellar CLI.
+`Cargo.lock` pins dependencies, but compiler and build metadata can still change
+the Wasm bytes. See [build verification](../build-verification/README.md) for
+reproducing a specific artifact.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## Learn more
 
-## Follow the code
-
-1. Read Wasm bytes and load its embedded contract specification.
-2. Upload code, then deploy an instance. These are different operations.
-3. Use read for simulation only and invoke for confirmed state changes.
-4. Use native SDK XDR directly when choosing the raw path.
-
-## Important details
-
-Running the TypeScript lessons needs Deno and Testnet access, not Rust or
-Stellar CLI. Optional rebuilding needs a Rust toolchain with wasm32v1-none and a
-compatible Stellar CLI (`stellar contract build`), not one exact global CLI
-version. Cargo.lock pins dependencies. Build metadata/bytes can change with
-toolchain versions; this is not the reproducible-build lesson. The counter is
-deliberately permissionless. Error matching is scoped to its contract ID; it
-does not globally assign every error #1 the same meaning.
-
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+- [Generate a typed client](../contract-bindings/README.md)
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)

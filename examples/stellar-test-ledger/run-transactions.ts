@@ -22,6 +22,11 @@ import {
   printReusableLedgerLinks,
 } from "./shared.ts";
 
+/**
+ * The optional --logs flag changes terminal output, not the ledger workflow.
+ * The shared helpers keep Docker log forwarding and the reusable container
+ * name consistent across these lifecycle commands.
+ */
 const streamingLogs = logsRequested();
 const scope = streamingLogs ? "ledger:transactions:log" : "ledger:transactions";
 const containerLog = createContainerLog(scope);
@@ -41,6 +46,11 @@ if (streamingLogs) {
 
 const details = await ledger.getNetworkDetails();
 
+/**
+ * Use the local ledger's endpoints and passphrase together. A public Testnet
+ * preset would point transactions at a different network from the container
+ * started in the previous step.
+ */
 const networkConfig = NetworkConfig.CustomNet(details);
 
 printReusableLedgerLinks(details, containerLog);
@@ -67,6 +77,11 @@ containerLog(
   "Sending a payment transaction from the sender to the receiver...",
 );
 
+/**
+ * Send 25 XLM from the newly funded sender. The native payment amount is
+ * decimal XLM, while fee is a per-operation inclusion bid in stroops. The
+ * source signer authorizes the transaction.
+ */
 const paymentOne = await executeTransaction({
   operations: [
     Operation.payment({
@@ -86,6 +101,11 @@ const paymentOne = await executeTransaction({
 containerLog(`Payment one confirmed with hash ${paymentOne.hash}.`);
 containerLog("Sending a second payment back to the sender...");
 
+/**
+ * Reverse the direction for a second transaction: the receiver now pays 5
+ * XLM back and signs as its source. Each transaction gets its own sequence
+ * and confirmation.
+ */
 const paymentTwo = await executeTransaction({
   operations: [
     Operation.payment({
@@ -108,6 +128,11 @@ containerLog(
   "Sending a setOptions transaction to update the receiver account...",
 );
 
+/**
+ * Update the receiver's homeDomain with a native account-settings operation.
+ * This demonstrates that the same callable pipeline accepts different
+ * Stellar SDK operations without a new wrapper.
+ */
 const setOptions = await executeTransaction({
   operations: [
     Operation.setOptions({

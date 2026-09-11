@@ -16,6 +16,11 @@ import {
   logsRequested,
 } from "./shared.ts";
 
+/**
+ * The optional --logs flag changes terminal output, not the ledger workflow.
+ * The shared helpers keep Docker log forwarding and the reusable container
+ * name consistent across these lifecycle commands.
+ */
 const streamingLogs = logsRequested();
 const scope = streamingLogs ? "ledger:stop:log" : "ledger:stop";
 const containerLog = createContainerLog(scope);
@@ -35,6 +40,11 @@ if (streamingLogs) {
 
 containerLog("Stopping the running container...");
 
+/**
+ * This ledger object is attached rather than owning the container, so use
+ * the exposed Docker handle to stop it explicitly. Stopping leaves the
+ * container present; it is not the destroy step used by the disposable test.
+ */
 await ledger.getContainer().stop();
 
 containerLog("Container stopped.");

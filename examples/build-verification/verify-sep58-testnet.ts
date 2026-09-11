@@ -1,3 +1,12 @@
+/**
+ * Example: Embedded Build Recipe
+ *
+ * Deploy a public fixture on Testnet and verify its current executable using
+ * the SEP-58 recipe embedded in its Wasm. Docker rebuilds the source and
+ * Colibri compares the resulting bytes.
+ *
+ * Run: deno task verify:sep58
+ */
 import {
   Contract,
   initializeWithFriendbot,
@@ -10,7 +19,11 @@ import {
   writeVerificationEvidence,
 } from "@colibri/build-verification";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * A disposable deployer pays for uploading and deploying the verification
+ * target on Testnet. Friendbot funds it before setup; the later rebuild
+ * happens in Docker, independently of transaction signing.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using deployer = LocalSigner.generateRandom();
 
@@ -20,6 +33,12 @@ await initializeWithFriendbot(
   { rpcUrl: networkConfig.rpcUrl, allowHttp: networkConfig.allowHttp },
 );
 
+/**
+ * The transaction configuration names its source account and the signers
+ * allowed to satisfy its requirements. base is an inclusion bid per
+ * operation in stroops; Soroban simulation adds resource fees when needed.
+ * timeout sets transaction validity in seconds, not an RPC request deadline.
+ */
 const deployerConfig: TransactionConfig = {
   source: deployer.publicKey(),
   signers: [deployer],
@@ -27,9 +46,12 @@ const deployerConfig: TransactionConfig = {
   timeout: 120,
 };
 
-// These PUBLIC, purpose-built Colibri fixtures are pinned to an immutable
-// release commit. Unlike the older Hello World lesson, this Wasm embeds SEP-58
-// build metadata. No caller-supplied recipe or outOfBand mode is used.
+/**
+ * These PUBLIC, purpose-built Colibri fixtures are pinned to an immutable
+ * release commit. Unlike the older Hello World lesson, this Wasm embeds
+ * SEP-58 build metadata. No caller-supplied recipe or outOfBand mode is
+ * used.
+ */
 const revision = "0b8225d3bcd8925f762b915fa5dc7a9d78572365";
 const base =
   `https://raw.githubusercontent.com/fazzatti/colibri/${revision}/_internal/build-verification/fixtures`;
@@ -50,11 +72,14 @@ if (!archiveResponse.ok) {
 
 const sourceBytes = new Uint8Array(await archiveResponse.arrayBuffer());
 
-// Deploy an ephemeral Testnet instance, then ask the verifier to resolve its
-// CURRENT executable through RPC. A contract ID is not an immutable code hash:
-// an upgradeable contract could point to another Wasm in a later observation.
-// The fixture has an intentionally unprotected upgrade method. It is not an
-// example of production access control. Reproducibility is not a security audit.
+/**
+ * Deploy an ephemeral Testnet instance, then ask the verifier to resolve its
+ * CURRENT executable through RPC. A contract ID is not an immutable code
+ * hash: an upgradeable contract could point to another Wasm in a later
+ * observation. The fixture has an intentionally unprotected upgrade method.
+ * It is not an example of production access control. Reproducibility is not
+ * a security audit.
+ */
 const contract = new Contract({ networkConfig, contractConfig: { wasm } });
 
 await contract.uploadWasm(deployerConfig);
@@ -63,9 +88,12 @@ await contract.deploy({ config: deployerConfig });
 
 console.log("Testnet fixture:", contract.getContractId());
 
-// The embedded recipe selects a digest-pinned SDF build image. Docker executes
-// source code; only use trusted inputs locally. Build networking is an explicit
-// opt-in here for toolchain bootstrap, even though source dependencies are vendored.
+/**
+ * The embedded recipe selects a digest-pinned SDF build image. Docker
+ * executes source code; only use trusted inputs locally. Build networking is
+ * an explicit opt-in here for toolchain bootstrap, even though source
+ * dependencies are vendored.
+ */
 const verifier = new ContractBuildVerifier({
   network: { networkConfig },
   allowBuildNetwork: true,
@@ -74,8 +102,12 @@ const verifier = new ContractBuildVerifier({
 
 const result = await verifier.verify({
   target: { contractId: contract.getContractId() },
-  // "archive" accepts bytes already obtained by the caller. Colibri validates
-  // them against the source digest EMBEDDED in this Wasm's SEP-58 metadata.
+
+  /**
+   * "archive" accepts bytes already obtained by the caller. Colibri
+   * validates them against the source digest EMBEDDED in this Wasm's SEP-58
+   * metadata.
+   */
   source: {
     type: "archive",
     name: "upgradeable-source.tar.gz",

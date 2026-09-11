@@ -24,7 +24,7 @@ console.log(
  *
  * This configuration object can be used within the Colibri SDK
  * as a standardized way of sharing predefined network setups. One
- * can leverage the existing setups provided by the SDK as well as
+ * can use the existing setups provided by the SDK as well as
  * define their own custom configurations.
  */
 const networkConfig = NetworkConfig.TestNet();
@@ -63,7 +63,7 @@ console.log("Receiver Account funded!");
  *
  * This tool provides a high-level abstraction for interacting with
  * Stellar Assets through their SAC smart contracts. This client
- * provides core functionality as well a the standardized interface
+ * provides core functionality as well as the standardized interface
  * defined by the SAC specification.
  *
  * Here, we create an instance of the SAC client for the native XLM asset.

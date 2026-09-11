@@ -5,8 +5,10 @@
 import { Identicon } from "@colibri/identicon";
 import { LocalSigner } from "@colibri/core";
 
-// A valid public G-address is enough; the account need not exist on-chain.
-// Never pass a secret key, contract address or muxed address to this example.
+/**
+ * A public G address is enough to render an account identicon. The account
+ * need not exist on-chain, and rendering never requires its secret key.
+ */
 using account = LocalSigner.generateRandom();
 const icon = new Identicon(account.publicKey());
 

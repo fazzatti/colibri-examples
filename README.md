@@ -106,11 +106,17 @@ deno task lint
 deno task fmt:check
 ```
 
-These commands validate source files; they do not submit transactions. To
-exercise behavior, run the individual lessons. Only the local-test-ledger
-subproject has tests because that lesson is explicitly about testing.
+The check task first generates the ignored package for the bindings lesson, then
+type-checks the examples. These commands do not submit transactions. To exercise
+behavior, run the individual lessons. Only the local-test-ledger subproject has
+tests because that lesson is explicitly about testing.
 
 ## Contributing a lesson
+
+Start each README with what the lesson teaches and the Stellar concept behind
+it. Explain setup, give each independent path its own command, link the source,
+and tell the reader what output to expect. Keep optional rebuilds separate from
+the normal walkthrough and link to the SDK docs for wider API details.
 
 Keep one learning objective per file. Declare ordinary configuration and signer
 values in the lesson, call Colibri directly, and comment on both **what

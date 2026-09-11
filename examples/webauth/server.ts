@@ -1,5 +1,10 @@
-// Local SEP-45 HTTP fixture, not a production server. Nonces and JWT keys
-// are in memory; restarting loses them. The client lesson is sep45.ts.
+/**
+ * Example: Local SEP-45 Server Fixture
+ *
+ * Provide discovery, challenge creation, authorization verification and a
+ * short-lived JWT for sep45.ts. Keys and nonce history live in memory; this
+ * is the local counterpart used to explain the client flow.
+ */
 import {
   Account,
   Address,
@@ -20,6 +25,11 @@ import {
 } from "@colibri/webauth";
 import { getAddressCredentialsFromAuthEntry } from "@colibri/core";
 
+/**
+ * Keep the issued challenge nonces and reject a second successful use. This
+ * in-memory store explains the replay boundary for one process; restarting
+ * the fixture discards its history.
+ */
 class NonceStore {
   readonly #issued = new Set<string>();
   readonly #used = new Set<string>();
@@ -78,6 +88,11 @@ function base64Url(value: Uint8Array): string {
     .replace(/=+$/u, "");
 }
 
+/**
+ * Issue a five-minute bearer token only after the submitted challenge has
+ * been verified. This fixture signs with its process-local HMAC key; the
+ * client example prints the claims rather than the bearer token.
+ */
 async function issueJwt(
   subject: string,
   signingKey: Promise<CryptoKey>,
@@ -148,6 +163,13 @@ export function startLocalWebAuthServer(
       web_auth_domain_account: config.server.publicKey(),
       nonce,
     };
+
+    /**
+     * Build a simulation-only call to discover which accounts must authorize
+     * web_auth_verify. The placeholder transaction source does not submit a
+     * ledger transaction or need funding; the authorization entries are the
+     * challenge material.
+     */
     const recordingTransaction = new TransactionBuilder(
       new Account(StrKey.encodeEd25519PublicKey(new Uint8Array(32)), "-1"),
       {
@@ -181,10 +203,13 @@ export function startLocalWebAuthServer(
       );
     }
 
-    // Recording discovers requirements, not a signed SEP-45 challenge.
-    // Current RPC records V2; SEP-45 v0.1.1 requires legacy address credentials.
-    // Choose the protocol's format BEFORE producing any signature, because the
-    // credential version changes the signing preimage. Never convert signed entries.
+    /**
+     * Recording discovers requirements, not a signed SEP-45 challenge.
+     * Current RPC records V2; SEP-45 v0.1.1 requires legacy address
+     * credentials. Choose the protocol's format BEFORE producing any
+     * signature, because the credential version changes the signing
+     * preimage. Never convert signed entries.
+     */
     const entries = recording.result.auth.map((entry) => {
       if (entry.credentials.type !== "sorobanCredentialsAddressV2") {
         return entry;
@@ -200,8 +225,11 @@ export function startLocalWebAuthServer(
       });
     });
 
-    // The server signs its own requirement before returning the challenge.
-    // The client contract entry remains for the client's authorization callback.
+    /**
+     * The server signs its own requirement before returning the challenge.
+     * The client contract entry remains for the client's authorization
+     * callback.
+     */
     const serverIndex = entries.findIndex((entry) => {
       const credentials = getAddressCredentialsFromAuthEntry(entry);
 
@@ -237,8 +265,11 @@ export function startLocalWebAuthServer(
       return json({ error: "authorization_entries required" }, 400);
     }
 
-    // One HTTP error boundary keeps verification failures as rejected responses.
-    // Decode, verify the challenge shape, enforce authorization, then issue a JWT.
+    /**
+     * One HTTP error boundary keeps verification failures as rejected
+     * responses. Decode, verify the challenge shape, enforce authorization,
+     * then issue a JWT.
+     */
     try {
       const entries = decodeSep45AuthorizationEntries(
         authorizationEntriesXdr,
@@ -322,6 +353,11 @@ export function startLocalWebAuthServer(
     }
   }
 
+  /**
+   * Expose three local routes: discovery TOML, GET for a fresh challenge and
+   * POST for the signed response. Bind to loopback on an available port so
+   * the lesson needs no public HTTP service.
+   */
   const server = Deno.serve(
     { hostname: "127.0.0.1", port: 0 },
     async (request) => {

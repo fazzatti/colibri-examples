@@ -1,41 +1,48 @@
-# Sponsor a trustline reserve
+# Sponsor a trustline's reserve
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+A trustline increases an account's minimum-balance requirement. Reserve
+sponsorship lets another account take on that obligation while the holder keeps
+ownership of the trustline.
 
-Use `wrapSponsorship` to compose the native begin/changeTrust/end operations
-while keeping both account roles visible.
+This example uses `wrapSponsorship` to place an ordinary `changeTrust` operation
+between the native begin/end sponsorship operations. Both account roles and
+signatures remain visible in the transaction.
 
-## Run
+## Usage
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then run:
 
 ```sh
 cd examples/reserve-sponsorship
 deno task trustline
 ```
 
-- `trustline`: Create a holder trustline whose reserve is paid by a sponsor.
+The script funds a sponsor and holder on Testnet through Friendbot. Here the
+sponsor also acts as the asset's issuer and the transaction source.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## Follow the sponsorship block
 
-## Follow the code
+Open [`sponsored-trustline.ts`](./sponsored-trustline.ts):
 
-1. Fund a sponsor/issuer and a holder.
-2. Set the trustline operation source to the holder.
-3. Wrap only that operation inside a sponsorship block.
-4. Include both signers and submit through a normal callable pipeline.
-5. Read the resulting trustline through RPC.
+1. Define the issued asset and a `changeTrust` operation with the **holder** as
+   its operation source.
+2. Wrap that operation in a sponsorship block for the sponsor and holder.
+3. Submit the resulting three operations with both signers. The sponsor accepts
+   the reserve obligation; the holder authorizes its trustline.
+4. Read the new trustline through RPC.
 
-## Important details
+Expect a confirmed transaction and a trustline with **limit 1,000** and
+**balance 0**, printed in smallest units. Creating the trustline does not issue
+tokens to the holder.
 
-Reserve sponsorship and fee sponsorship solve different problems. The sponsor
-assumes the trustline's minimum-balance reserve obligation; this example also
-happens to use it as transaction source. The holder must still authorize
-creation of its trustline. See [fee bumps](../fee-bump/README.md) for a distinct
-outer fee payer.
+## Reserve and fee sponsorship
 
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+The sponsor assumes a minimum-balance obligation; it does not transfer custody
+of the holder's assets. This script also uses the sponsor as transaction source,
+so it pays the fee in the ordinary way. A separate outer fee payer is covered by
+[the fee-bump lesson](../fee-bump/README.md).
+
+## Learn more
+
+- [Issue and transfer an asset](../stellar-asset/README.md)
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)

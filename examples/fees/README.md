@@ -1,47 +1,65 @@
-# Three explicit transaction fee policies
+# Choose a transaction fee policy
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+Colibri supports a per-operation base fee, an exact inclusion bid, and a total
+Soroban fee cap. These examples submit small Testnet transfers and inspect the
+confirmed transaction so you can compare **the bid** with **the actual charge**.
 
-Separate scripts compare per-operation base fees, exact inclusion bids, and
-Soroban total fee caps. They read the confirmed envelope instead of assuming
-that configuration equals the charged fee.
+All fee values are in stroops: 10,000,000 stroops equal 1 XLM. Payment amounts
+and fees are separate fields with separate units.
 
-## Run
+## Setup
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then enter this directory:
 
 ```sh
 cd examples/fees
+```
+
+Each script funds its own sender and recipient with Friendbot. The commands are
+independent; choose the policy you want to inspect.
+
+## Per-operation base fee
+
+```sh
 deno task base
+```
+
+In [`base.ts`](./base.ts), two native payment operations use `base: "100"`.
+Colibri multiplies the per-operation bid by the operation count, producing an
+envelope fee of **200 stroops**. The original string form, `fee: "100"`, is the
+same per-operation shorthand.
+
+## Exact inclusion bid
+
+```sh
 deno task inclusion
+```
+
+In [`inclusion.ts`](./inclusion.ts), the same two-operation shape uses
+`inclusion: "205"`. The envelope bid is **205 stroops total**, rather than 205
+for each operation.
+
+## Total Soroban cap
+
+```sh
 deno task max
 ```
 
-- `base`: Two payments, base 100 stroops per operation: envelope bid 200.
-- `inclusion`: Two payments, exact inclusion bid 205 stroops total.
-- `max`: One SAC transfer with a total Soroban fee cap of 1,000,000 stroops.
+[`soroban-max.ts`](./soroban-max.ts) transfers 1 XLM through its Stellar Asset
+Contract with `max: "1000000"`. Soroban adds resource fees determined through
+simulation. Colibri reserves those fees and uses the remainder of the cap as the
+inclusion bid, rejecting a cap without room for the minimum inclusion fee.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+A high cap therefore produces a high bid; it is not a request to find the lowest
+fee. This number is a demonstration setting, not a recommended fee policy.
 
-## Follow the code
+## Read the result
 
-1. Fund independent Testnet accounts in each script.
-2. Set exactly one structured fee mode.
-3. Submit and confirm through Colibri.
-4. Decode the confirmed envelope fee and print the actual ledger charge
-   separately.
+Each script prints the fee from the confirmed envelope and the ledger's charged
+fee separately. They can differ. Inspect both when learning how a configured
+policy becomes a submitted transaction.
 
-## Important details
+## Learn more
 
-For Soroban, max includes both resource and inclusion fees. Colibri subtracts
-resources and uses the remaining cap as the inclusion bid; it rejects
-insufficient room for the minimum inclusion. A high max is therefore a high bid,
-not a recommendation to spend that amount. The original string fee remains a
-per-operation base-fee shorthand. Timeout bounds transaction validity, not
-confirmation latency.
-
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+- [Use a separate fee payer](../fee-bump/README.md)
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)

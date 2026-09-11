@@ -1,35 +1,42 @@
-# SEP-53 message signatures
+# Sign and verify a message
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+A message signature lets someone with the public key verify that a signer
+approved particular message bytes. This example uses `LocalSigner.signMessage`
+and verifies the SEP-53 signature with an ordinary Stellar SDK public-key
+verifier.
 
-Sign a message with LocalSigner and verify it using only a native Stellar SDK
-public-key verifier.
+## Usage
 
-## Run
-
-From the repository root:
+Follow the [workspace setup](../../README.md), then run:
 
 ```sh
 cd examples/message-signing
 deno task message
 ```
 
-- `message`: Print true for the original message and false for a changed
-  message.
+After dependency installation, this runs offline. The generated signer needs no
+funded account, transaction, or RPC connection.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## Follow the signature
 
-## Follow the code
+Open [`sign-and-verify.ts`](./sign-and-verify.ts):
 
-1. Generate an unfunded signer.
-2. Use signMessage, not raw transaction signing.
-3. Verify the original and changed messages with the same public key.
+1. Create a local signer and sign the example message using `signMessage`.
+2. Create a verifier containing only that signer's public key.
+3. Verify the original message, then try the same signature against changed
+   text.
 
-## Important details
+Expect **true** for the original message and **false** for the changed message.
+The verifier never receives the secret key.
 
-No transaction, account creation, or RPC request is involved. Message signing is
-not a complete authentication flow: applications still need audience, nonce,
-expiry, and replay policies. Use [WebAuth](../webauth/README.md) for
-SEP-10/SEP-45 login protocols.
+## Message signing and login
+
+SEP-53 uses a message-signing format distinct from transaction signing. A valid
+message signature alone does not implement login: an application must also
+define the audience, nonce, expiry, and replay rules. For complete protocol
+flows, continue with the [SEP-10 and SEP-45 lessons](../webauth/README.md).
+
+## Learn more
+
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)
+- [@colibri/core on JSR](https://jsr.io/@colibri/core)

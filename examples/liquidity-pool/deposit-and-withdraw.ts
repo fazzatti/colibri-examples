@@ -1,3 +1,12 @@
+/**
+ * Example: Native Liquidity Pool
+ *
+ * Create an issued-asset/XLM pool position, inspect the provider share
+ * balance and withdraw it. Follow the distinction between asset trustlines,
+ * pool shares and asset-labelled price bounds.
+ *
+ * Run: deno task liquidity
+ */
 import {
   initializeWithFriendbot,
   LocalSigner,
@@ -9,7 +18,11 @@ import {
 } from "@colibri/core";
 import { Asset } from "stellar-sdk";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * The issuer creates POOL units and the provider deposits them together with
+ * XLM. Friendbot funds both disposable Testnet accounts, including the XLM
+ * needed for fees and trustline reserves.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using issuer = LocalSigner.generateRandom();
 using provider = LocalSigner.generateRandom();
@@ -25,6 +38,12 @@ for (const signer of [issuer, provider]) {
   );
 }
 
+/**
+ * The transaction configuration names its source account and the signers
+ * allowed to satisfy its requirements. base is an inclusion bid per
+ * operation in stroops. The transaction source pays the ordinary fee.
+ * timeout sets transaction validity in seconds, not an RPC request deadline.
+ */
 const issuerConfig: TransactionConfig = {
   source: issuer.publicKey(),
   signers: [issuer],
@@ -51,14 +70,19 @@ await asset.mint({
   config: issuerConfig,
 });
 
-// Asset trustlines and the pool-SHARE trustline are different ledger entries.
-// Colibri sorts the pair canonically; labelled amounts avoid assuming A/B order.
+/**
+ * Asset trustlines and the pool-SHARE trustline are different ledger
+ * entries. Colibri sorts the pair canonically; labelled amounts avoid
+ * assuming A/B order.
+ */
 const pool = new NativeLiquidityPool({ assets: [demo, xlm], networkConfig });
 
 await pool.changeTrust({ config: providerConfig });
 
-// State the acceptable XLM-per-POOL range in human terms. Colibri translates
-// that range into the protocol's canonically ordered A/B price bounds.
+/**
+ * State the acceptable XLM-per-POOL range in human terms. Colibri translates
+ * that range into the protocol's canonically ordered A/B price bounds.
+ */
 const priceBounds = pool.priceBounds({
   baseAsset: demo,
   quoteAsset: xlm,
@@ -66,14 +90,22 @@ const priceBounds = pool.priceBounds({
   maximum: "2.1",
 });
 
+/**
+ * Deposit with a maximum of 10 POOL and 20 XLM. The labelled assets keep
+ * amounts aligned with the pair even when canonical A/B ordering differs.
+ * The price bounds above constrain the acceptable deposit ratio.
+ */
 await pool.depositByAsset({
   maximumAmounts: [{ asset: demo, amount: "10" }, { asset: xlm, amount: "20" }],
   ...priceBounds,
   config: providerConfig,
 });
 
-// Read the pool and holder position in one RPC observation. Shares / totalShares
-// is an ownership fraction, NOT a promise of future withdrawal amounts.
+/**
+ * Read the pool and holder position in one RPC observation. Shares /
+ * totalShares is an ownership fraction, NOT a promise of future withdrawal
+ * amounts.
+ */
 const position = await pool.getPosition(provider.publicKey());
 
 if (!position.ownership) throw new Error("Expected a funded pool position");
@@ -83,9 +115,12 @@ console.log("Ownership:", position.ownership);
 
 const shares = toDecimals(position.ownership.shares, 7);
 
-// This fresh, isolated pool has no other trades. Withdraw our full share amount,
-// with explicit minimum outputs slightly below the initial 10/20 deposit.
-// Real applications must choose their own limits from fresh market information.
+/**
+ * This fresh, isolated pool has no other trades. Withdraw our full share
+ * amount, with explicit minimum outputs slightly below the initial 10/20
+ * deposit. Real applications must choose their own limits from fresh market
+ * information.
+ */
 await pool.withdrawByAsset({
   amount: shares,
   minimumAmounts: [{ asset: demo, amount: "9.9" }, {

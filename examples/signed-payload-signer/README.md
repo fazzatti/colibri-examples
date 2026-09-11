@@ -8,12 +8,18 @@ signature signs those bytes directly, not the hash of whichever transaction
 carries it. In this lesson the payload is the hash of one already-finalized
 transaction C.
 
+## Usage
+
+Follow the [workspace setup](../../README.md), then run:
+
 ```sh
 cd examples/signed-payload-signer
 deno task signed-payload
 ```
 
-## The timeline in signed-payload.ts
+## Follow the disclosure
+
+Open [`signed-payload.ts`](./signed-payload.ts) and follow the two transactions:
 
 1. Fund Alice and Bob with Testnet XLM.
 2. Finalize **C**, a 2-XLM payment from Bob to Alice. Its sequence, time bounds,
@@ -27,6 +33,9 @@ deno task signed-payload
 6. Read that envelope, find and verify the disclosed signature using only Bob's
    public key, replace the P-specific signature hint with Bob's ordinary G hint,
    and submit the unchanged C. Do not ask Bob to sign a second time.
+
+Expect the confirmed hash of D, then the confirmed hash of C. Between those
+outputs, the script verifies the disclosed signature before using it.
 
 C and D use different source accounts, so D does not consume C's sequence. The
 signature bytes are reusable for C because C's transaction hash was the payload.

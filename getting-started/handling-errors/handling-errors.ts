@@ -45,7 +45,7 @@ const XLM = StellarAssetContract.NativeXLM(networkConfig);
 
 try {
   /**
-   * Submit a transfer with an invalid base fee.
+   * Attempt to build a transfer with an invalid base fee.
    * Base fee must be > 0, so this always fails in BuildTransaction.
    */
   await XLM.transfer({
@@ -71,9 +71,8 @@ try {
 
   console.log(chalk.blue.bold("\n🧩 Error Anatomy"));
 
-  // Identity fields: stable, unique code + where it originated.
-  // Codes are unique and stable,
-  // which makes them safe to match on in logs or retry logic.
+  // Identity fields identify this error class and its origin. Use the
+  // diagnostic to decide whether correcting the input makes a retry appropriate.
   console.log(chalk.gray("name:"), err.name);
   console.log(chalk.gray("code (unique):"), err.code);
   console.log(chalk.gray("domain:"), err.domain);

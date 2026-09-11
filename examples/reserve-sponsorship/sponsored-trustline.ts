@@ -37,8 +37,11 @@ for (const signer of [sponsor, holder]) {
   );
 }
 
-// Each configuration states who pays the ordinary fee and signs that account.
-// A string fee is the per-operation bid in stroops, not the actual fee charged.
+/**
+ * Each configuration states who pays the ordinary fee and signs that
+ * account. A string fee is the per-operation bid in stroops, not the actual
+ * fee charged.
+ */
 const sponsorConfig: TransactionConfig = {
   source: sponsor.publicKey(),
   signers: [sponsor],

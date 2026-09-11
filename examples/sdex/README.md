@@ -1,47 +1,72 @@
-# SDEX offer lifecycles
+# Create, update, and cancel Stellar offers
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+These examples use `SDEX` to manage a known offer, and `StellarPrice` to express
+its price with explicit asset units. A sell offer specifies units to sell and a
+minimum price; a buy offer specifies units to buy and a maximum price.
 
-Create, read, update, and cancel known Stellar offers using `SDEX`. The two
-scripts are independent: neither requires running the other first.
+The networked scripts issue a fresh MARKET asset so the demonstration starts
+without existing counter-offers. They are independent workflows, not the two
+sides of a trade with each other.
 
-## Run
+## Setup
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then enter this directory:
 
 ```sh
 cd examples/sdex
-deno task sell
-deno task buy
+```
+
+The price lesson is offline after dependency installation. The offer lessons
+fund disposable Testnet accounts with Friendbot.
+
+## 1. Understand price units
+
+```sh
 deno task prices
 ```
 
-- `sell`: Sell MARKET for XLM with a minimum receive-per-unit limit.
-- `buy`: Buy MARKET using XLM with a maximum spend-per-unit limit.
-- `prices`: Offline exact-decimal, ratio, inverse, and unit-label examples.
+[`prices.ts`](./prices.ts) starts with the exact decimal `"1.25"`, represented
+as `5/4`, then constructs `2/3` from labelled amounts, describes its units,
+inverts it, and compares prices. Ratios stay exact without floating-point
+arithmetic. A displayed ratio such as `2/3` is not a decimal-string input.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## 2. Manage a sell offer
 
-## Follow the code
+```sh
+deno task sell
+```
 
-1. Fund issuer and trader, establish the trader's trustline, and mint the fresh
-   demo asset.
-2. Submit one limit offer using asset-labelled price terminology.
-3. Narrow the confirmed native operation result and obtain the created offer ID.
-4. Read/update that same offer, then cancel it to release liabilities.
+Follow [`sell-offer.ts`](./sell-offer.ts):
 
-## Important details
+1. Fund the issuer and trader, create the trader's trustline, and mint MARKET.
+2. Offer to sell **10 MARKET for at least 2 XLM each**.
+3. Inspect the confirmed operation's effect and extract the created offer ID.
+4. Read that known offer through RPC, then update it to sell **5 MARKET for at
+   least 2.5 XLM each**.
+5. Cancel the offer to release its remaining liabilities.
 
-The sell price '2' means at least 2 XLM per MARKET. The buy price '2' means at
-most 2 XLM spent per MARKET. These are limits, not market quotes. The fresh
-asset avoids pre-existing counter-orders; a real offer can instead be consumed
-immediately or partially filled. Always inspect the reported effect. RPC can
-look up a known offer; these examples do not discover an order book, trades, or
-paths. `StellarPrice` also supports exact ratio helpers; see `prices.ts` for an
-offline explanation without floating-point arithmetic.
+Expect a created offer ID, its stored amount and price, and the confirmed
+cancellation operation result. The update is awaited before cancellation.
 
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+## 3. Manage a buy offer
+
+```sh
+deno task buy
+```
+
+[`buy-offer.ts`](./buy-offer.ts) offers to buy **5 MARKET for at most 2 XLM
+each**. It obtains the created offer ID from the confirmed result, updates the
+remaining buy amount to **3 MARKET at a maximum of 1.5 XLM each**, then cancels
+it.
+
+## Read the effect before assuming an offer exists
+
+A successful operation can immediately fill an offer or leave only part of it on
+the ledger. These scripts explicitly require the creation effect before using
+its ID. The prices here are chosen limits, not discovered market quotes. RPC
+lookup of a known offer does not provide an order book or path discovery.
+
+## Learn more
+
+- [Native liquidity pool](../liquidity-pool/README.md)
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)

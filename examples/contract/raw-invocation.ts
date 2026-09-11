@@ -1,3 +1,12 @@
+/**
+ * Example: Raw Contract Values
+ *
+ * Call the counter with native Stellar SDK ScVal arguments, then decode a
+ * raw result. This exposes the encoding normally handled by the loaded
+ * contract specification.
+ *
+ * Run: deno task raw
+ */
 import {
   Contract,
   initializeWithFriendbot,
@@ -7,7 +16,11 @@ import {
 } from "@colibri/core";
 import { nativeToScVal, scValToNative } from "stellar-sdk";
 
-// Testnet accounts are disposable. Friendbot funds them and waits for RPC visibility.
+/**
+ * The deployer funds and signs this independent Testnet deployment and
+ * invocation. Friendbot creates its account; the RPC option waits for the
+ * funded source to become visible.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using deployer = LocalSigner.generateRandom();
 
@@ -20,6 +33,12 @@ await initializeWithFriendbot(
   },
 );
 
+/**
+ * The transaction configuration names its source account and the signers
+ * allowed to satisfy its requirements. base is an inclusion bid per
+ * operation in stroops; Soroban simulation adds resource fees when needed.
+ * timeout sets transaction validity in seconds, not an RPC request deadline.
+ */
 const deployerConfig: TransactionConfig = {
   source: deployer.publicKey(),
   signers: [deployer],
@@ -27,8 +46,11 @@ const deployerConfig: TransactionConfig = {
   timeout: 120,
 };
 
-// Loading the ABI from the checked-in Wasm keeps method argument names tied to
-// the actual contract. Upload stores code; deploy creates a separate instance.
+/**
+ * Loading the ABI from the checked-in Wasm keeps method argument names tied
+ * to the actual contract. Upload stores code; deploy creates a separate
+ * instance.
+ */
 const wasm = await Deno.readFile(
   new URL("./contract/counter.wasm", import.meta.url),
 );
@@ -49,8 +71,11 @@ await counter.deploy({ config: deployerConfig });
 
 console.log("Deployed counter:", counter.getContractId());
 
-// A raw invocation is the native SDK escape hatch. The function name and ScVal
-// arguments are supplied explicitly instead of encoded through the loaded ABI.
+/**
+ * A raw invocation is the native SDK escape hatch. The function name and
+ * ScVal arguments are supplied explicitly instead of encoded through the
+ * loaded ABI.
+ */
 await counter.invokeRaw({
   operationArgs: {
     function: "increment",

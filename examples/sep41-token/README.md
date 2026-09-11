@@ -1,51 +1,69 @@
-# SEP-41 allowance and delegated spending
+# Approve and spend a token allowance
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+SEP-41 defines a shared interface for Soroban tokens. `SEP41TokenContract` lets
+you call that interface by contract ID without creating a client for each token
+implementation.
 
-Deploy a custom token, then bind `SEP41TokenContract` to its standard interface.
-The implementation is adapted from Colibri's purpose-built SEP-41 fixture using
-Stellar's open-source token library.
+This lesson deploys the included [token contract](./contract/src/lib.rs), then
+shows how an owner authorizes a spender to move a limited amount on its behalf.
+The compiled [Wasm](./contract/token.wasm) is ready to use.
 
-## Run
+## Usage
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then run:
 
 ```sh
 cd examples/sep41-token
 deno task allowance
+```
+
+The script creates an owner, spender, and recipient on Testnet and funds them
+through Friendbot. Normal runs need Deno and network access, not a Rust build.
+
+## Follow the allowance
+
+Open [`allowance.ts`](./allowance.ts):
+
+1. Deploy the fixture with **100 tokens** assigned to the owner by its
+   constructor.
+2. Bind `SEP41TokenContract` to the deployed contract ID and read its metadata,
+   including decimal precision.
+3. Have the owner sign `approve` for **10 tokens**, with an expiry 100 ledgers
+   beyond the observed latest ledger.
+4. Have the spender sign `transferFrom` to move **3 tokens** to the recipient.
+5. Read the allowance and recipient balance again.
+
+Expect **7 tokens of allowance** remaining and **3 tokens** in the recipient's
+balance. The owner approves the limit; the spender authorizes using it. The
+recipient does not sign either action.
+
+## Units and contract policy
+
+SEP-41 amounts are integers in the token's smallest units. This fixture uses
+seven decimals, so one token is `1_0000000n`. The script reads the precision and
+uses matching integer amounts; check that precision when adapting it to another
+token. This custom contract token does not require a Stellar asset trustline.
+
+Minting is not a SEP-41 method. Constructor issuance and the deliberately public
+`mint_with_reference` extension belong to this demonstration contract. Its mint
+policy is not suitable for production. The artifact also declares SEP-41
+metadata, which you can inspect in the
+[claims and interface lesson](../contract-metadata/README.md).
+
+## Optional: rebuild the fixture
+
+After changing the Rust source:
+
+```sh
 deno task contract:build
 ```
 
-- `allowance`: Owner approves 10 tokens; spender transfers 3 to a recipient;
-  inspect the remaining allowance.
-- `contract:build`: Optional: rebuild token.wasm from contract/src/lib.rs.
+Rebuilding needs Rust, the `wasm32v1-none` target, and a compatible Stellar CLI.
+The implementation is adapted from Colibri's purpose-built fixture using
+Stellar's token library.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## Learn more
 
-## Follow the code
-
-1. Deploy with the owner as constructor recipient of the initial 100 tokens.
-2. Bind the generic SEP-41 client by contract ID.
-3. Read decimals and express amounts in that token's smallest units.
-4. Have owner sign approve with an explicit ledger expiry.
-5. Have spender sign transferFrom, then read allowance=7 tokens and recipient
-   balance=3 tokens.
-
-## Important details
-
-No recipient trustline is needed for this custom contract token. Mint is not a
-SEP-41 method: constructor issuance and the deliberately public
-mint_with_reference extension belong to this demonstration contract. Do not use
-its mint policy in production. The contract also declares SEP-41 metadata for
-the separate [claims/interface lesson](../contract-metadata/README.md).
-Rebuilding needs Rust + wasm32v1-none + a compatible Stellar CLI; running uses
-the checked-in Wasm.
-[Stellar token library](https://github.com/stellar/stellar-contracts) and
-[Colibri fixture](https://github.com/fazzatti/colibri/tree/0b8225d3bcd8925f762b915fa5dc7a9d78572365/_internal/contracts/sep41-token)
-are the source references.
-
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)
+- [Stellar token library](https://github.com/stellar/stellar-contracts)
+- [Original Colibri fixture](https://github.com/fazzatti/colibri/tree/0b8225d3bcd8925f762b915fa5dc7a9d78572365/_internal/contracts/sep41-token)

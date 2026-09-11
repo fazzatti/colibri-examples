@@ -33,8 +33,11 @@ for (const signer of [sender, recipient]) {
   );
 }
 
-// Each configuration states who pays the ordinary fee and signs that account.
-// A string fee is the per-operation bid in stroops, not the actual fee charged.
+/**
+ * Each configuration states who pays the ordinary fee and signs that
+ * account. A string fee is the per-operation bid in stroops, not the actual
+ * fee charged.
+ */
 const senderConfig: TransactionConfig = {
   source: sender.publicKey(),
   signers: [sender],
@@ -63,6 +66,11 @@ await configureRecipient({
 
 const sendPayment = createClassicTransactionPipeline({ networkConfig });
 
+/**
+ * Attach the memo-presence check before sending the payment. The plugin
+ * reads the destination's declared account-data policy and rejects a missing
+ * memo before transaction submission.
+ */
 sendPayment.use(createSep29Plugin());
 
 /**

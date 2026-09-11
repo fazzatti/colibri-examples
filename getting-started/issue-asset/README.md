@@ -26,10 +26,13 @@ Before proceeding, make sure to follow the setup described in the
 Run the example with:
 
 ```bash
+cd getting-started/issue-asset
 deno task issue-asset
 ```
 
-The example uses TestNet and Friendbot, so it requires internet access.
+Follow [`issue-asset.ts`](./issue-asset.ts). It creates disposable signers and
+uses Testnet Friendbot, so it requires internet access. Expect the holder's
+balance to move from **0 to 100 COLIBRI**, printed in smallest units.
 
 ## Custom Asset
 

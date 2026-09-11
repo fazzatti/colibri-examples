@@ -1,3 +1,12 @@
+/**
+ * Example: Exact Price Ratios
+ *
+ * Construct and compare prices as integer ratios. Decimal text preserves the
+ * chosen limit without JavaScript floating-point rounding; no account
+ * funding or market data is needed.
+ *
+ * Run: deno task prices
+ */
 import { LocalSigner, StellarPrice } from "@colibri/core";
 import { Asset } from "stellar-sdk";
 
@@ -11,11 +20,14 @@ const decimal = StellarPrice.fromDecimal("1.25");
 
 console.log("Exact ratio for 1.25:", decimal);
 
-// A native SDK operation accepts the { n, d } ratio directly. Colibri's
-// human-language sell/buy conveniences use decimal text; use the native-shaped
-// createSellOffer/createBuyOffer path when your exact limit is a fraction.
-// Do NOT pass format(ratio)'s display text "2/3" as a decimal input.
-// "3 PRICE for 2 XLM" is 2/3 XLM per PRICE, without JavaScript's rounding.
+/**
+ * A native SDK operation accepts the { n, d } ratio directly. Colibri's
+ * human-language sell/buy conveniences use decimal text; use the
+ * native-shaped createSellOffer/createBuyOffer path when your exact limit is
+ * a fraction. Do NOT pass format(ratio)'s display text "2/3" as a decimal
+ * input. "3 PRICE for 2 XLM" is 2/3 XLM per PRICE, without JavaScript's
+ * rounding.
+ */
 const ratio = StellarPrice.fromAmounts({ baseAmount: "3", quoteAmount: "2" });
 
 const description = StellarPrice.describe({

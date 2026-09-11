@@ -18,6 +18,11 @@ import {
   reusableLogLevel,
 } from "./shared.ts";
 
+/**
+ * The optional --logs flag changes terminal output, not the ledger workflow.
+ * The shared helpers keep Docker log forwarding and the reusable container
+ * name consistent across these lifecycle commands.
+ */
 const streamingLogs = logsRequested();
 const scope = streamingLogs ? "ledger:start:log" : "ledger:start";
 const containerLog = createContainerLog(scope);
@@ -37,6 +42,11 @@ containerLog(
   "Starting the reusable Stellar Test Ledger container...",
 );
 
+/**
+ * Start the named Quickstart container and wait for its services. Unlike the
+ * disposable test, this command deliberately leaves the ledger running after
+ * it prints the URLs so later commands can attach to it.
+ */
 await ledger.start();
 
 const details = await ledger.getNetworkDetails();

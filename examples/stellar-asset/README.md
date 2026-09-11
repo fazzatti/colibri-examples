@@ -1,53 +1,75 @@
-# StellarAsset: native asset operations
+# Work with a Stellar asset
 
-[Colibri documentation](https://fifo-docs.gitbook.io/colibri/) ·
-[Example index](../../README.md)
+These examples use `StellarAsset` to issue and move a native Stellar asset, then
+explore two issuer policies: authorization and clawback. An asset is identified
+by its code **and issuer**, so each script creates a fresh asset of its own.
 
-Use the `StellarAsset` class to submit native asset operations through its owned
-transaction pipeline. This complements the SAC and SEP-41 examples; it does not
-turn a native asset into a token contract.
+Colibri submits the native asset operations through its transaction pipeline.
+The [SAC issuance lesson](../../getting-started/issue-asset/README.md) shows how
+to work with the same asset model through a contract interface.
 
-## Run
+## Setup
 
-From the repository root:
+Follow the [workspace setup](../../README.md), then enter this directory:
 
 ```sh
 cd examples/stellar-asset
+```
+
+Each command is independent and funds its own disposable Testnet accounts with
+Friendbot. Choose a workflow and open the corresponding TypeScript file.
+
+## 1. Issue, transfer, and burn
+
+```sh
 deno task lifecycle
+```
+
+In [`mint-transfer-burn.ts`](./mint-transfer-burn.ts), the issuer creates the
+asset client, and Alice and Bob establish trustlines before receiving it. The
+issuer then mints 100 DEMO to Alice, Alice transfers 25 to Bob, and Bob burns 5.
+
+Minting sends units from the issuer; burning sends them back. The signer changes
+with the source of each payment. The final balances are **75 DEMO for Alice**
+and **20 DEMO for Bob**.
+
+## 2. Require issuer authorization
+
+```sh
 deno task authorization
+```
+
+In [`authorization.ts`](./authorization.ts), the issuer enables authorization
+requirements before the holder creates a trustline. The script reads its initial
+unauthorized state, authorizes it, mints 10 PERMIT, then revokes transfer
+authorization.
+
+`setAuthorized(false)` preserves authorization to maintain liabilities. Read the
+reported authorization state to understand the resulting state; this operation
+is not a universal freeze.
+
+## 3. Claw back issued units
+
+```sh
 deno task clawback
 ```
 
-- `lifecycle`: Create trustlines, mint 100 DEMO to Alice, transfer 25 to Bob,
-  and burn 5 from Bob.
-- `authorization`: Enable issuer authorization policy, create an initially
-  unauthorized trustline, authorize it, mint, and revoke transfer authorization.
-- `clawback`: Enable clawback before trustline creation, mint 10 units, and claw
-  back 3 as the issuer.
+In [`clawback.ts`](./clawback.ts), the issuer enables the required flags
+**before trustline creation**, mints 10 RECALL, then claws back 3. The holder
+ends with **7 RECALL**. Unlike a voluntary burn, this removal is authorized by
+the issuer.
 
-Run one command at a time. Each runnable path is independent; it does not reuse
-an account or transaction from another lesson.
+## Units and account policy
 
-## Follow the code
+Native operation amounts are decimal strings with up to seven fractional digits.
+The balance reads in these lessons return `bigint` smallest units. Keep that
+conversion visible when displaying amounts.
 
-1. Every script creates its own disposable accounts and issuer+code asset
-   identity.
-2. Trustline creation is explicit, not hidden in mint or transfer.
-3. Issuer-signed mint and holder-signed burn are payments with different
-   sources/destinations.
-4. Read confirmed balances or authorization state through the class.
+Issuer flags affect the issuer account's asset policy. The separate scripts let
+you inspect each policy without carrying flags or balances over from another
+run.
 
-## Important details
+## Learn more
 
-`lifecycle` finishes with Alice holding 75 DEMO and Bob 20. `clawback` finishes
-with 7 RECALL. Native asset decimal amounts have seven decimal places; raw
-balances are bigint smallest units. Policy flags apply to the issuer account and
-have consequences beyond one transfer. `setAuthorized(false)` preserves
-authorization to maintain liabilities; it is not a universal freeze. Clawback is
-intentionally separate from voluntary burn. For SAC deployment and invocation,
-see
-[the existing SAC asset lesson](../../getting-started/issue-asset/README.md).
-
-Networked scripts use **Testnet only**, fresh disposable keys, and Friendbot
-test XLM. Do not substitute production keys or a Mainnet configuration. Public
-service availability and Testnet resets can affect runs.
+- [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)
+- [SEP-41 contract token](../sep41-token/README.md)
