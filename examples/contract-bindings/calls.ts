@@ -1,14 +1,25 @@
+/**
+ * Contract Bindings Example: Read and Invoke
+ *
+ * After `deno task generate`, use the generated counter package to deploy a
+ * contract on Testnet. Compare a simulated increment with a committed one,
+ * then pass a custom struct through the same typed client.
+ */
 import { initializeWithFriendbot } from "@colibri/core";
-import { ContractMethods, Counter, CounterSummary } from "./generated/index.ts";
+import { ContractMethods, Counter, CounterSummary } from "@example/counter";
 import {
   LocalSigner,
   NetworkConfig,
   SorobanType,
   type TransactionConfig,
-} from "./generated/colibri.ts";
+} from "@example/counter/colibri";
 
-// These are the original Core conveniences re-exported by the generated client.
-// Friendbot funds a disposable Testnet signer and waits for RPC visibility.
+/**
+ * Start with Testnet's RPC and Friendbot configuration and a disposable signer.
+ * These conveniences are re-exported by the generated package from Colibri.
+ * Friendbot supplies the test XLM needed for deployment and invocation fees;
+ * waiting for RPC visibility lets us use the new account immediately.
+ */
 const networkConfig = NetworkConfig.TestNet();
 using signer = LocalSigner.generateRandom();
 
@@ -16,6 +27,11 @@ await initializeWithFriendbot(networkConfig.friendbotUrl, signer.publicKey(), {
   rpcUrl: networkConfig.rpcUrl,
 });
 
+/**
+ * The source account pays fees and its signer signs the transaction envelope.
+ * base is the inclusion fee bid in stroops; simulation adds Soroban resource
+ * fees. timeout sets the transaction's validity window in seconds.
+ */
 const config: TransactionConfig = {
   source: signer.publicKey(),
   signers: [signer],
@@ -23,8 +39,12 @@ const config: TransactionConfig = {
   timeout: 120,
 };
 
-// The generated constructor already installs the embedded spec and error map.
-// Upload stores the code; deploy creates this script's separate counter instance.
+/**
+ * Generating a package creates local TypeScript files. Deployment is a separate
+ * step: uploadWasm stores executable code, and deploy creates a new instance
+ * with its own state and contract ID. Counter inherits these operations from
+ * Colibri's Contract class and already includes the generated specification.
+ */
 const wasm = await Deno.readFile(
   new URL("./contract/counter.wasm", import.meta.url),
 );
@@ -35,22 +55,33 @@ await counter.deploy({ config });
 
 console.log("Counter contract:", counter.getContractId());
 
-// get_count in the ABI becomes getCount in JavaScript. With no arguments,
-// read() needs no object and returns a typed number.
+/**
+ * Read the fresh counter. The ABI method get_count becomes getCount in
+ * JavaScript. It takes no arguments, so read() needs no object, and the client
+ * decodes its return value to a number using the embedded specification.
+ */
 const initialCount = await counter.getCount.read();
 
 console.log("Initial count:", initialCount);
 
-// Even a state-changing function has read(): this simulates increment but
-// commits nothing. Rust Result<u32, CounterError> decodes to an SDK Result.
+/**
+ * Every generated method offers read() and invoke(): the specification cannot
+ * tell us which methods change state. read() simulates without committing, so
+ * increment can return 3 while the stored count remains 0. Its Rust Result
+ * return type becomes a Result object; unwrap() gives us the successful value.
+ */
 const preview = await counter.increment.read({ by: 3 });
 const countAfterPreview = await counter.getCount.read();
 
 console.log("Simulated result:", preview.unwrap());
 console.log("Stored count after simulation:", countAfterPreview);
 
-// invoke takes ONE object: methodArgs, config and optional auth. Validated
-// Soroban values and ordinary numbers are accepted by the same method.
+/**
+ * Now commit the increment. invoke() accepts one object with methodArgs,
+ * transaction config and optional auth. SorobanType.U32 validates this value
+ * before encoding; the ordinary number 3 would also be accepted here.
+ * The confirmed result includes both the decoded value and transaction data.
+ */
 const incremented = await counter.increment.invoke({
   methodArgs: { by: SorobanType.U32.from(3) },
   config,
@@ -65,15 +96,21 @@ if (incremented.value === undefined) {
 console.log("Confirmed count:", incremented.value.unwrap());
 console.log("Transaction:", incremented.hash, "ledger:", incremented.ledger);
 
-// The generic API is still typed. The enum keeps the exact ABI value
-// "get_count", while its JavaScript identifier is GetCount.
+/**
+ * The generic read API remains typed too. ContractMethods.GetCount holds the
+ * exact ABI spelling, "get_count". Reading again confirms that invoke changed
+ * storage, and summary returns the contract's named CounterSummary struct.
+ */
 const storedCount = await counter.read({ method: ContractMethods.GetCount });
 const summary = await counter.summary.read();
 
 console.log("Stored count:", storedCount, "summary:", summary);
 
-// A generated custom-type factory also works directly as a method argument.
-// Passing the plain summary object here is valid too; the output stays plain.
+/**
+ * Generated custom-type factories can prepare method arguments as well.
+ * CounterSummary.from validates this struct against the contract declaration.
+ * A plain summary object is also valid input; either form returns plain data.
+ */
 const echoed = await counter.echoSummary.read({
   summary: CounterSummary.from(summary),
 });

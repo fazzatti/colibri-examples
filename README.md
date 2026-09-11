@@ -40,7 +40,7 @@ Asset, Memo, Spec, and XDR values visible at the integration boundary.
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [Native payment](getting-started/native-payment/README.md)          | Native operations, a callable pipeline, configuration, confirmed outcomes                              |
 | [Generic contract](examples/contract/README.md)                     | Wasm versus instances, spec loading, simulated reads, committed writes, raw XDR, named contract errors |
-| [Generated contract bindings](examples/contract-bindings/README.md) | Generate a client; typed reads/invokes, custom values, errors, events and JSR/npm packages             |
+| [Generated contract bindings](examples/contract-bindings/README.md) | Generate and inspect a package, then use typed calls, custom values, errors and events                 |
 | [SAC transfer](getting-started/contract-transfer/README.md)         | Transfer XLM through its Stellar Asset Contract                                                        |
 | [SAC asset issuance](getting-started/issue-asset/README.md)         | Native trustline setup plus contract-backed minting                                                    |
 | [Handling errors](getting-started/handling-errors/README.md)        | Identify a Colibri error and inspect diagnostic metadata                                               |

@@ -1,121 +1,197 @@
-# Generated contract bindings
+# Contract Bindings Example
 
-[Bindings guide](https://fifo-docs.gitbook.io/colibri/packages/contract-bindings)
-· [API reference](https://jsr.io/@colibri/contract-bindings/doc) ·
-[Example index](../../README.md)
+This example demonstrates how to turn a Soroban contract into a TypeScript
+package with
+[@colibri/contract-bindings](https://jsr.io/@colibri/contract-bindings), then
+use that package to interact with the contract on Testnet.
 
-Generate a typed client from a small Soroban counter, then use its methods,
-custom values, error map and event definitions. The compiled contract and
-generated client are checked in: you can read and run the examples immediately.
+A compiled contract contains a specification describing its methods, types,
+errors and events. Colibri reads this specification and generates a client that
+knows how to encode arguments and decode results. You get typed calls and
+contract-specific helpers without writing those definitions by hand.
 
-## Run
+## Overview
 
-Use Deno 2.7.11 or newer. From the repository root:
+We will:
+
+1. Explore the example counter contract.
+2. Generate a local package from its compiled Wasm.
+3. Inspect the package and its public exports.
+4. Use it to construct values, read and invoke methods, handle errors and decode
+   events.
+
+The repository includes the contract and consumer scripts. **The package is
+created by you during the lesson** and is ignored by Git.
+
+## Usage
+
+Follow the setup in the [workspace README](../../README.md), then open this
+lesson's directory:
 
 ```sh
-deno install
 cd examples/contract-bindings
-deno task values
-deno task calls
-deno task errors
-deno task events
 ```
 
-| Command  | What to look for                                                                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `values` | Offline struct/enum construction, mixed raw and validated inputs, and an XDR round trip.                                                         |
-| `calls`  | A simulated increment returns 3 while storage stays 0; invoking commits 3. Typed generic calls and a custom struct argument use the same client. |
-| `errors` | `increment(0)` fails in simulation with the generated name/category and a customized message; storage stays 0.                                   |
-| `events` | A confirmed increment emits `CountChanged`; an indexed filter retrieves it and typed decoding reports `0 -> 5`.                                  |
+Use Deno 2.7.11 or newer. The compiled contract is included, so the walkthrough
+needs no Rust, Docker or Stellar CLI. Package generation and value construction
+run locally; the networked examples use disposable Testnet accounts funded by
+Friendbot.
 
-Each networked script independently funds a disposable signer and deploys a
-fresh **Testnet** counter. They need neither environment variables nor a
-previous lesson's contract ID. No Mainnet transactions are submitted. Normal
-runs need no Docker, Rust or Stellar CLI.
+### 1. Explore the contract
 
-## Generate the client yourself
+Start with [contract/src/lib.rs](contract/src/lib.rs). The counter stores a
+number that starts at zero and cannot exceed 100. Its declarations give the
+generator several kinds of information to work with:
 
-The CLI task uses the checked-in Wasm and an explicit class name:
+- `get_count`, `increment`, `summary` and `echo_summary` declare the callable
+  methods and their inputs and outputs.
+- `CounterSummary` and `CounterStatus` describe a custom struct and numeric
+  enum.
+- `CounterError` names the failures for a zero increment or exceeding the limit.
+- `CountChanged` describes an event with an indexed `action` topic and the old
+  and new counts as payload fields.
+
+The compiled `contract/counter.wasm` contains these declarations in its embedded
+specification. We can generate the package before deploying anything to a
+network.
+
+### 2. Generate the package
+
+Read [generate-package.ts](generate-package.ts), then run:
 
 ```sh
 deno task generate
 ```
 
-This runs the released `@colibri/contract-bindings@0.1.0/cli` with
-`--wasm ./contract/counter.wasm --class-name Counter --output files`. `--force`
-regenerates the five files in `generated/`; keep handwritten lessons outside
-that directory. Without `--non-interactive`, the CLI can prompt for source,
-network and output choices.
+The script loads the Wasm specification with `loadBindingSource`, prepares a JSR
+package with `generateBindings`, and writes it with `writeBindings`. It chooses
+`Counter` as the client class name and `@example/counter` as the package name.
+The task formats the resulting files.
 
-| Generated file                         | Exports / purpose                                                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| [index.ts](generated/index.ts)         | `Counter`, with typed `.read()` / `.invoke()` properties and generic calls.                                         |
-| [constants.ts](generated/constants.ts) | `ContractMethods`, `CounterSpec` and `CounterErrors`.                                                               |
-| [types.ts](generated/types.ts)         | Method inputs/outputs, `CounterSummary` and `CounterStatus` types/factories, event fields and client configuration. |
-| [colibri.ts](generated/colibri.ts)     | Original Core conveniences such as `NetworkConfig`, `LocalSigner`, `SorobanType` and `TransactionConfig`.           |
-| [README.md](generated/README.md)       | Contract-specific method names and usage.                                                                           |
+You now have a `package/` directory beside the scripts. Nothing is published to
+JSR: this is a local package that you can inspect and use immediately.
 
-To generate from an existing deployment instead, set `CONTRACT_ID` to the
-address printed by `calls` and run:
+### 3. Inspect what was generated
 
-```sh
-deno run --allow-read --allow-write --allow-net \
-  jsr:@colibri/contract-bindings@0.1.0/cli \
-  --contract-id "$CONTRACT_ID" --network testnet --class-name Counter \
-  --output files --out ../../.output/contract-bindings/from-network --force --non-interactive
+Open the new directory in your editor:
+
+```text
+package/
+├── deno.json             Package name, exports and dependencies
+├── mod.ts                Public entrypoint for the counter client
+├── README.md             Contract-specific usage documentation
+└── generated/
+    ├── index.ts          Counter class and typed method conveniences
+    ├── types.ts          Method types, custom-type factories and event fields
+    ├── constants.ts      Method names, embedded specification and error map
+    └── colibri.ts        Re-exported network, signer and value conveniences
 ```
 
-A Wasm hash uses `--wasm-hash` instead of `--contract-id`, on the network where
-the code was uploaded. See the guide for custom RPCs and network passphrases.
+Start at `mod.ts` and follow its exports. In `generated/index.ts`, look for
+`getCount.read()` and `increment.invoke()`. In `generated/types.ts`, find the
+`CounterSummary` type and factory. The errors and event types come from the
+contract declarations you explored in step 1.
 
-## Generate a package
+The lesson's [deno.json](deno.json) maps `@example/counter` to `package/mod.ts`
+and `@example/counter/colibri` to its convenience exports. The consumer scripts
+therefore import the package by name:
 
-[generate-package.ts](generate-package.ts) shows the three separate API calls:
-`loadBindingSource`, `generateBindings`, then `writeBindings`. It opts into
-Wasm-hash provenance; the normal file-generation task leaves provenance out.
+```ts
+import { Counter, CounterSummary } from "@example/counter";
+import { LocalSigner, NetworkConfig } from "@example/counter/colibri";
+```
+
+Check the generated package independently, then check its consumers:
 
 ```sh
-# Programmatic JSR package generation, then type-check its exports.
-deno task generate:package
-deno task --cwd ../../.output/contract-bindings/jsr-counter check
+deno task --cwd package check
+deno task check
+```
 
-# CLI npm package generation, then compile JavaScript and declarations.
+Generate first: these local import paths do not exist in a fresh checkout. The
+repository-wide `deno task check` also performs generation before checking
+sources.
+
+### 4. Construct custom values
+
+Run the offline example first:
+
+```sh
+deno task values
+```
+
+[values.ts](values.ts) constructs a `CounterSummary`, encodes it to an ScVal and
+decodes it back. Look for count `7` and status `1` (`CounterStatus.Counting`).
+`CounterSummary` names both a plain TypeScript type and its runtime factory;
+`CounterSummaryArgs` describes what that factory accepts.
+
+### 5. Read and invoke methods
+
+```sh
+deno task calls
+```
+
+[calls.ts](calls.ts) funds a signer, uploads the Wasm and deploys a fresh
+counter. It reads the initial count, simulates an increment, then commits an
+increment. Compare the output: simulation returns `3` while storage stays `0`;
+invocation changes storage to `3`. The script also uses a typed generic call and
+passes a custom summary into `echoSummary`.
+
+Every method offers both `.read()` and `.invoke()` because the spec cannot
+identify which methods change state. Choose the behavior you need. Invocation
+keeps `methodArgs`, `config` and optional `auth` together in one object.
+
+### 6. Handle errors and decode events
+
+```sh
+deno task errors
+deno task events
+```
+
+[errors.ts](errors.ts) customizes an error message before constructing its
+client. Calling `increment(0)` fails during simulation: the match contains
+`InvalidIncrement`, its `CounterError` category and the custom message. Reading
+the count confirms that it remains `0`.
+
+[events.ts](events.ts) invokes an increment of five, filters for the indexed
+`action` topic, then decodes `CountChanged`. Look for `increment` and `0 -> 5`.
+Only indexed fields are filterable; the count fields are decoded from the
+payload. If indexing is delayed, retry the event query rather than submitting
+another increment.
+
+Each networked script deploys its own instance, so these examples can be run
+independently after package generation.
+
+## Try another generation target
+
+The CLI can generate an npm package from the same contract:
+
+```sh
 deno task generate:npm
 cd ../../.output/contract-bindings/npm-counter
 npm install
 npm run build
 ```
 
-The generated packages use the placeholder name `@example/counter`. These
-commands do not publish anything. Node 22.12 or newer is required for npm; its
-generated `.npmrc` configures the JSR npm registry. Outputs live in the ignored
-repository-level `.output/contract-bindings/` directory, outside the lesson's
-source paths. The JSR example declares its own workspace for independent
-checking. Regeneration preserves existing package scaffolds.
+This optional task uses a separate ignored output directory and requires Node
+22.12 or newer. Its `.npmrc` resolves Colibri through the JSR npm registry. The
+Deno consumers above continue to use the local `package/` from step 2.
 
-## Important details
+You can also generate from a contract ID or Wasm hash and a network, or use the
+CLI's interactive prompts. See the
+[bindings guide](https://fifo-docs.gitbook.io/colibri/packages/contract-bindings)
+for those options.
 
-- This lesson declares Bindings 0.1.0 and compatible **Core 1.1** dependencies
-  in its own workspace configuration. The lockfile fixes the versions used.
-- The spec does not identify reads versus writes. Every method offers both;
-  choose `.invoke({ methodArgs, config, auth? })` when state should be
-  committed. `get_count` becomes `getCount`, while generic method strings keep
-  ABI spelling.
-- `CounterSummary` is both a decoded-value type and a runtime factory.
-  `CounterSummaryArgs` describes factory inputs; `EchoSummaryInput` describes
-  the method's complete argument object. Decoded outputs remain ordinary values.
-- The counter is deliberately permissionless and capped at 100. Signing pays for
-  its transactions; this is not an access-control example. See the
-  [Rust source](contract/src/lib.rs) for the rules, errors and event
-  declaration.
-- Expected contract failures are handled explicitly. Network failures still stop
-  the script. If an event has not been indexed, retry the query rather than the
-  increment. A post-success `CONTR_021` decoding error likewise retains the
-  successful transaction; inspect it before deciding whether to submit again.
+## Learn more
 
-For optional Wasm rebuilding, install a compatible Stellar CLI, Rust and the
-`wasm32v1-none` target, then run `deno task contract:build` followed by
-`deno task generate`. Cargo.lock pins the Rust dependencies. The counter is
-adapted from Colibri's public
+- [Bindings guide](https://fifo-docs.gitbook.io/colibri/packages/contract-bindings)
+- [Bindings API reference](https://jsr.io/@colibri/contract-bindings/doc)
+- [Generic contract example](../contract/README.md)
+
+To rebuild after editing the Rust contract, install a compatible Stellar CLI,
+Rust and the `wasm32v1-none` target, then run `deno task contract:build` and
+`deno task generate`. Regeneration replaces client files and preserves package
+scaffolds such as `mod.ts`, `deno.json` and `README.md` for your customizations.
+The counter is adapted from Colibri's public
 [bindings fixture](https://github.com/fazzatti/colibri/blob/e3ad712845eb262815c4e6db13abdcd186dcec4d/_internal/contracts/bindings-demo/src/lib.rs)
 under the included [MIT license](contract/LICENSE).
