@@ -1,0 +1,19 @@
+{
+  "workspace": [],
+  "nodeModulesDir": "manual",
+  "tasks": {
+    "dev": "npm run dev",
+    "check": "npm run check && deno check scripts/generate.ts scripts/setup.ts auth-server/main.ts && deno lint src scripts auth-server && deno fmt --check",
+    "build": "npm run build",
+    "preview": "npm run preview",
+    "generate": "deno run --allow-read --allow-write scripts/generate.ts",
+    "setup": "deno task generate && deno run --allow-read --allow-write=.env.local --allow-net scripts/setup.ts",
+    "auth": "deno run --allow-net=127.0.0.1:8787,soroban-testnet.stellar.org auth-server/main.ts"
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "package-lock.json",
+    "src/generated"
+  ]
+}

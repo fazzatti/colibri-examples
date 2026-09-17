@@ -8,6 +8,22 @@ Runnable, commented lessons for Colibri and Stellar. Each script shows the
 actual SDK calls, account roles, and transaction steps. Start with one file and
 its README. Variants are separate commands, not branches in a large demo runner.
 
+## Web examples
+
+The [React web field guide](examples/web/README.md) runs 29 focused Testnet
+lessons covering Colibri's 33 React hooks, with Wallets Kit, live controls and
+commented source alongside each example. Requires Deno 2.9.6+, Node 22.12+ and
+npm.
+
+```sh
+deno task web:install
+deno task web
+```
+
+Optional `deno task web:setup` prepares Testnet fixtures; `deno task web:auth`
+starts the local authentication lesson. The web app uses its own dependency
+scope and lockfile; the CLI lessons below keep their existing versions.
+
 ## Run a lesson
 
 Install Deno 2.7.11 or newer, clone this repository, then:
