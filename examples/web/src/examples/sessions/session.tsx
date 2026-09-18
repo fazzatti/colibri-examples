@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  useColibriConfig,
-  useConnect,
-  useConnection,
-  useDisconnect,
-} from "@colibri/react";
+import { useColibriConfig, useConnection, useDisconnect } from "@colibri/react";
 import {
   createWebAuthSession,
   type WebAuthSession,
@@ -16,9 +11,9 @@ import {
 } from "@colibri/react/webauth";
 import { authDomain } from "../../setup/fixtures.ts";
 import {
-  PracticeProvider,
-  usePracticeIdentity,
-} from "../../setup/practice-provider.tsx";
+  SignerProvider,
+  useLessonSigner,
+} from "../../setup/signer-provider.tsx";
 import {
   Actions,
   Failure,
@@ -28,30 +23,20 @@ import {
 } from "../../components/lesson.tsx";
 
 function Authentication({ session }: { session: WebAuthSession }) {
-  const identity = usePracticeIdentity();
-  const connect = useConnect();
+  const identity = useLessonSigner();
   const disconnect = useDisconnect();
   const connection = useConnection();
   const state = useSession(session);
   const authentication = useWebAuth(session);
   const [error, setError] = useState<unknown>();
 
-  async function createIdentity() {
-    setError(undefined);
-    authentication.reset();
-    try {
-      await connect("practice-identity");
-    } catch (cause) {
-      setError(cause);
-    }
-  }
   function authenticate() {
     setError(undefined);
     try {
       // SEP-10 verifies the server challenge before signing and exchanging it.
       // This API currently requires a complete keypair signer; the Kit's
       // envelope capability alone is insufficient. No transaction is submitted.
-      const signer = identity.getSigner();
+      const signer = identity.getKeypairSigner();
       authentication.mutate({ account: signer.publicKey(), signer });
     } catch (cause) {
       setError(cause);
@@ -70,27 +55,13 @@ function Authentication({ session }: { session: WebAuthSession }) {
       <Actions>
         <button
           type="button"
-          className="secondary"
-          disabled={authentication.isPending ||
-            connection.status === "connecting"}
-          onClick={() => void createIdentity()}
-        >
-          Create practice identity
-        </button>
-        <button
-          type="button"
-          disabled={connection.connectorId !== "practice-identity" ||
-            connection.status !== "connected" || authentication.isPending}
+          disabled={connection.status !== "connected" ||
+            authentication.isPending}
           onClick={authenticate}
         >
           Authenticate with SEP-10
         </button>
       </Actions>
-      <Value label="Practice identity">
-        {connection.connectorId === "practice-identity"
-          ? connection.connection?.address ?? "—"
-          : "Create a practice identity above"}
-      </Value>
       <Failure error={error ?? authentication.error} />
       <div className="result" aria-live="polite">
         <Value label="Session">{state.status}</Value>
@@ -159,10 +130,10 @@ function SessionExample() {
     <>
       <Note>
         Run <code>deno task auth</code>{" "}
-        from examples/web in another terminal. Create this lesson's own unfunded
-        practice identity, then authenticate. The local server verifies the
-        signed challenge and issues a short-lived token. Your connected wallet
-        and the message lesson's identity are separate from this session.
+        from examples/web in another terminal. Choose a signer above, then
+        authenticate. The local server verifies the signed challenge and issues
+        a short-lived token. Your connected wallet is separate from this session
+        when using a local signer.
       </Note>
       <Actions>
         <button
@@ -182,8 +153,8 @@ function SessionExample() {
 
 export default function Session() {
   return (
-    <PracticeProvider>
+    <SignerProvider capability="keypair">
       <SessionExample />
-    </PracticeProvider>
+    </SignerProvider>
   );
 }

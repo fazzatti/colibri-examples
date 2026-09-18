@@ -1,12 +1,7 @@
-import { useState } from "react";
-import { initializeWithFriendbot } from "@colibri/core";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  useColibriConfig,
-  useConnect,
-  useConnection,
-  useNetwork,
-} from "@colibri/react";
+import { useColibriConfig, useConnection, useNetwork } from "@colibri/react";
+import { useAccount } from "@colibri/react/accounts";
+import { TestnetAccountSetup } from "../../components/testnet-account-setup.tsx";
 import { useSigners } from "@colibri/react/signers";
 import { useContract } from "@colibri/react/contracts";
 import {
@@ -16,14 +11,12 @@ import {
 import { useContractInvoke } from "@colibri/react/contracts/invoke";
 import { Counter } from "../../generated/counter/index.ts";
 import { accountId, contractId, exampleCounter } from "../../setup/fixtures.ts";
-import { PracticeProvider } from "../../setup/practice-provider.tsx";
+import { SignerProvider } from "../../setup/signer-provider.tsx";
 import {
   Actions,
-  Failure,
   MutationState,
   Note,
   QueryState,
-  Spinner,
   Value,
 } from "../../components/lesson.tsx";
 import { FixtureRequired } from "../../components/fixture-required.tsx";
@@ -32,14 +25,10 @@ function Invoke({ id }: { id: `C${string}` }) {
   const network = useNetwork();
   const config = useColibriConfig();
   const queryClient = useQueryClient();
-  const connect = useConnect();
   const { connection } = useConnection();
   const signers = useSigners();
   const source = accountId(connection?.address ?? "");
-  const [fundedSource, setFundedSource] = useState<string>();
-  const [preparing, setPreparing] = useState(false);
-  const [setupError, setSetupError] = useState<unknown>();
-  const ready = !!source && fundedSource === source;
+  const account = useAccount(source, { retry: false });
   const counter = useContract(() =>
     new Counter({
       networkConfig: network,
@@ -61,33 +50,8 @@ function Invoke({ id }: { id: `C${string}` }) {
       }),
   });
 
-  async function prepare() {
-    setPreparing(true);
-    setSetupError(undefined);
-    try {
-      // Generating a key does not create a ledger account. Keep this identity
-      // local to this lesson and reuse it if funding needs to be retried.
-      const identity = connection ?? await connect("practice-identity");
-      const address = accountId(identity?.address ?? "");
-      if (!address || !network.friendbotUrl) {
-        throw new Error("Testnet setup is unavailable.");
-      }
-
-      // BTX_003 means the pipeline could not load its source. Friendbot creates
-      // and funds it; rpcUrl makes this wait until our RPC can read it too.
-      await initializeWithFriendbot(network.friendbotUrl, address, {
-        rpcUrl: network.rpcUrl,
-      });
-      setFundedSource(address);
-    } catch (cause) {
-      setSetupError(cause);
-    } finally {
-      setPreparing(false);
-    }
-  }
-
   function invoke() {
-    if (!source || !ready) return;
+    if (!source || !account.isSuccess) return;
 
     // Explicit configuration keeps fee payer and signing capabilities visible.
     increment.mutate({
@@ -103,52 +67,28 @@ function Invoke({ id }: { id: `C${string}` }) {
   return (
     <>
       <Note>
-        Create and fund a signer here, then invoke the counter. This lesson owns
-        its key; it never replaces the wallet in the header or uses a key from
-        another lesson. Leaving the page destroys the key. The counter caps its
-        count at 100; run deno task setup in examples/web for a fresh counter.
+        Choose a local signer or the wallet above, then check or fund its
+        Testnet account here. A generated key alone cannot pay fees. The counter
+        caps its count at 100; run deno task setup in examples/web for a fresh
+        counter.
       </Note>
+      <TestnetAccountSetup
+        key={source ?? "unselected"}
+        address={source}
+        account={account}
+        label="Transaction source"
+      />
       <fieldset className="lesson-step">
-        <legend>1. Prepare a Testnet signer</legend>
+        <legend>Invoke with explicit signers</legend>
         <p>
-          Friendbot creates the account and supplies Testnet XLM for fees.
-          Invocation stays disabled until the account is visible through RPC.
+          This writes +1 and pays a Soroban resource fee from the selected
+          source. A local signer signs in memory; a wallet asks for approval.
         </p>
         <Actions>
           <button
             type="button"
-            className="secondary"
-            disabled={preparing || ready || increment.isPending}
-            onClick={() => void prepare()}
-          >
-            {preparing && <Spinner />}
-            {preparing
-              ? "Funding and waiting for RPC…"
-              : ready
-              ? "Signer ready"
-              : source
-              ? "Retry funding signer"
-              : "Create and fund signer"}
-          </button>
-        </Actions>
-        <Value label="Lesson fee payer">{source ?? "Not created"}</Value>
-        <p role="status">
-          {ready
-            ? "Account funded and visible through RPC."
-            : "Complete setup before invoking."}
-        </p>
-        <Failure error={setupError} />
-      </fieldset>
-      <fieldset className="lesson-step">
-        <legend>2. Invoke with explicit signers</legend>
-        <p>
-          The local signer signs without a wallet prompt. This writes +1 and
-          pays a Soroban resource fee from the lesson account.
-        </p>
-        <Actions>
-          <button
-            type="button"
-            disabled={!ready || !signers.length || increment.isPending}
+            disabled={!account.isSuccess || !signers.length ||
+              increment.isPending}
             onClick={invoke}
           >
             Invoke increment (+1)
@@ -173,9 +113,9 @@ export default function ContractInvoke() {
   const id = contractId(exampleCounter);
   return id
     ? (
-      <PracticeProvider>
+      <SignerProvider>
         <Invoke id={id} />
-      </PracticeProvider>
+      </SignerProvider>
     )
     : <FixtureRequired />;
 }

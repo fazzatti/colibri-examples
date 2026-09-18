@@ -1,20 +1,18 @@
 import { useState } from "react";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
-import { useConnect, useConnection } from "@colibri/react";
+import { useConnection } from "@colibri/react";
 import { useSignMessage } from "@colibri/react/signers";
-import { PracticeProvider } from "../../setup/practice-provider.tsx";
+import { SignerProvider } from "../../setup/signer-provider.tsx";
 import {
   Actions,
   Failure,
   Field,
   Note,
   Spinner,
-  Value,
 } from "../../components/lesson.tsx";
 
 function MessageExample() {
-  const connect = useConnect();
-  const { connection, connectorId, status } = useConnection();
+  const { connection } = useConnection();
   const signing = useSignMessage();
   const [message, setMessage] = useState("Approve document revision 42.");
   const [signedHex, setSignedHex] = useState("");
@@ -25,18 +23,6 @@ function MessageExample() {
   const [signError, setSignError] = useState<unknown>();
   const [verifyError, setVerifyError] = useState<unknown>();
   const [copyStatus, setCopyStatus] = useState("");
-
-  async function createIdentity() {
-    setSignError(undefined);
-    setSignedHex("");
-    setCopyStatus("");
-    signing.reset();
-    try {
-      await connect("practice-identity");
-    } catch (cause) {
-      setSignError(cause);
-    }
-  }
 
   async function sign() {
     if (!connection) return;
@@ -113,35 +99,13 @@ function MessageExample() {
   return (
     <>
       <Note>
-        This lesson owns its disposable practice identity. The wallet shown in
-        the header stays unchanged. The key stays in memory and is destroyed
-        when you leave this lesson or reload. Signing and verification need no
-        funding and submit no transaction.
+        Use the selected local signer or wallet to sign a SEP-53 message.
+        Signing needs no funded account and submits no transaction. A wallet
+        prompts for approval; a local signer signs in memory. Verification below
+        needs only public data, even without selecting a signer.
       </Note>
       <fieldset className="lesson-step">
-        <legend>1. Choose the signing identity</legend>
-        <p>
-          Create an identity with the messageSigner capability required by
-          useSignMessage.
-        </p>
-        <Actions>
-          <button
-            type="button"
-            className="secondary"
-            disabled={status === "connecting" || signing.isPending}
-            onClick={() => void createIdentity()}
-          >
-            Create practice identity
-          </button>
-        </Actions>
-        <Value label="Signing identity">
-          {connectorId === "practice-identity"
-            ? connection?.address
-            : "Create a practice identity first"}
-        </Value>
-      </fieldset>
-      <fieldset className="lesson-step">
-        <legend>2. Sign the message</legend>
+        <legend>Sign the message</legend>
         <label className="field">
           <span>Message to sign</span>
           <textarea
@@ -153,8 +117,7 @@ function MessageExample() {
         <Actions>
           <button
             type="button"
-            disabled={connectorId !== "practice-identity" ||
-              !connection?.messageSigner || signing.isPending}
+            disabled={!connection?.messageSigner || signing.isPending}
             onClick={() => void sign()}
           >
             {signing.isPending && <Spinner />}
@@ -189,7 +152,7 @@ function MessageExample() {
         )}
       </fieldset>
       <fieldset className="lesson-step" disabled={signing.isPending}>
-        <legend>3. Verify separately</legend>
+        <legend>Verify separately</legend>
         <p>
           Use the filled values or paste another message, public key and SEP-53
           signature. Changing a field clears the previous result.
@@ -250,8 +213,8 @@ function MessageExample() {
 
 export default function Message() {
   return (
-    <PracticeProvider>
+    <SignerProvider capability="message">
       <MessageExample />
-    </PracticeProvider>
+    </SignerProvider>
   );
 }

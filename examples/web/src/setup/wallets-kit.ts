@@ -5,6 +5,7 @@ import {
 } from "@creit.tech/stellar-wallets-kit/modules/freighter";
 import { Networks } from "@creit.tech/stellar-wallets-kit/types";
 import { createStellarWalletsKitConnector } from "@colibri/react/ecosystem/stellar-wallets-kit";
+import { createWalletMessageSigner } from "./wallet-message-signer.ts";
 import { createWalletSigner } from "@colibri/react/wallets/signer";
 
 // The application chooses modules and initializes the browser-only Kit once.
@@ -18,11 +19,14 @@ StellarWalletsKit.init({
 export const walletsKitConnector = createStellarWalletsKitConnector(
   StellarWalletsKit,
   {
-    capabilities: ({ module }) => ({
+    capabilities: (account) => ({
       // Freighter supports envelope and G-account authorization-entry signing.
       // Colibri adapts both; the Kit still owns wallet selection and prompts.
-      signer: module.productId === FREIGHTER_ID
+      signer: account.module.productId === FREIGHTER_ID
         ? createWalletSigner
+        : undefined,
+      messageSigner: account.module.productId === FREIGHTER_ID
+        ? createWalletMessageSigner(StellarWalletsKit, account)
         : undefined,
     }),
   },

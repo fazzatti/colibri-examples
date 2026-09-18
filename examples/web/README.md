@@ -81,12 +81,12 @@ those into a general connection and declared signer capabilities. The provider
 checks the actual wallet network passphrase and invalidates stale authority on
 identity changes.
 
-| Setup file                                             | Responsibility                                                                              |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| [wallets-kit.ts](src/setup/wallets-kit.ts)             | Kit initialization, selected modules, explicit envelope + G-account auth-entry capabilities |
-| [freighter.ts](src/setup/freighter.ts)                 | Independent direct Freighter adapter; envelope signing only                                 |
-| [practice-identity.ts](src/setup/practice-identity.ts) | Factory for separate, disposable lesson identities                                          |
-| [provider.tsx](src/app/provider.tsx)                   | Shared provider for real wallet connections across routes                                   |
+| Setup file                                             | Responsibility                                                                         |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| [wallets-kit.ts](src/setup/wallets-kit.ts)             | Kit initialization and explicit envelope, G-account auth-entry and SEP-53 capabilities |
+| [freighter.ts](src/setup/freighter.ts)                 | Independent direct Freighter adapter; envelope signing only                            |
+| [practice-identity.ts](src/setup/practice-identity.ts) | Factory for separate, disposable lesson identities                                     |
+| [provider.tsx](src/app/provider.tsx)                   | Shared provider for real wallet connections across routes                              |
 
 To support another Kit wallet, import its module, add it to `modules`, and
 review its signing support before adding a capability rule. Some modules need
@@ -101,37 +101,49 @@ and signing messages are different capabilities. Smart accounts require an
 explicit authorization implementation; this app does not imply universal
 contract-wallet support.
 
-### Independent lesson identities
+### Choose the signer on each page
 
-The header always describes the connected **wallet**. Message signing, SEP-10
-and explicit-signer invocation each mount their own
-[PracticeProvider](src/setup/practice-provider.tsx), connection and query cache.
-Their setup buttons create distinct disposable keys; they never overwrite the
-wallet or reuse a key from another lesson. Leaving a lesson, disconnecting its
-identity or reloading destroys its signing handle. Nothing persists in storage.
+Signer-dependent examples start with two buttons: **Create local signer** or
+**Use connected wallet**. Connect from the header to enable the wallet option.
+The selected address is shown before any signing action. The header always
+represents the external wallet; a local key never replaces it.
 
-A generated key is **not an account on the ledger**. Message signing and SEP-10
-need no funded account. **Invoke with signers** includes **Create and fund
-signer**: Friendbot creates the account and supplies Testnet XLM, then Colibri
-waits until RPC can read it. Invocation stays disabled until that finishes. If
-funding fails, retrying reuses the same lesson identity. This prevents the
-missing-source `BTX_003` caused by trying to submit with an unfunded practice
-key.
+[SignerProvider](src/setup/signer-provider.tsx) supplies the chosen
+configuration to the lesson's unmodified Colibri hooks. Wallet mode retains the
+original provider's connection-change guards. Local mode has a lesson-owned
+connector and key. Switching sources resets results/forms and destroys the local
+key when leaving local mode; leaving the page also destroys it. Choice buttons
+are disabled while signing/submission is pending. Nothing persists in storage.
+
+Capabilities remain explicit. Transactions need an envelope signer. SEP-53
+message signing is enabled for **Wallets Kit with Freighter**, whose base64
+signature is decoded and verified before returning bytes to the hook. The direct
+Freighter adapter remains envelope-only. Unsupported wallet options explain the
+missing capability; they never silently substitute a local signer.
+
+**SEP-10 limitation:** Colibri WebAuth currently calls synchronous raw-key
+`sign()`. Wallets Kit/direct Freighter expose asynchronous approval-based
+signing, so they cannot be selected for that lesson. Create its local signer
+instead; a wallet integration exposing a genuine complete Core keypair signer
+could use the same selector. See the
+[Freighter message API](https://docs.freighter.app/docs/playground/signmessage/)
+for the separate SEP-53 capability.
 
 ## Run a transaction example independently
 
-- **Invoke with signers:** open it directly, create and fund its local signer,
-  then invoke +1. No extension or prior message-signing step is needed.
-- **Invoke with a wallet / Submit Soroban:** connect from the header, check or
-  fund the wallet account on that page, then approve the transaction.
-- **Classic payment:** connect from the header and check/fund the source. Enter
-  an existing recipient, use the public fixture, or generate and fund a practice
-  recipient on that page. Its private key is discarded; it exists only to
-  receive this exercise's Testnet XLM. Send exactly **1 XLM** after both account
-  checks succeed.
-- Contract examples use the public counter configured by `deno task setup`
-  above; if it is missing, the page shows that command. No earlier UI lesson
-  prepares transaction authority for a later one.
+- **Invoke with signers**, **Invoke with a wallet**, **Submit Soroban** and
+  **Classic payment** support both signer choices. The first supplies authority
+  explicitly; the wallet convenience hook derives it from the selected
+  connection.
+- After choosing, use **Fund with Friendbot** on that page if the account does
+  not exist. A generated key alone is not a ledger account. Funding waits for
+  RPC visibility; submission is disabled until the source account check
+  succeeds. Funding retries retain the selected key.
+- Classic payment additionally checks the recipient. Enter an existing address,
+  use the public fixture, or generate/fund a practice recipient on the page. Its
+  key is discarded because the exercise only sends Testnet XLM to it.
+- Contract examples use the public counter from `deno task setup`; missing
+  fixtures show that command. No prior UI lesson prepares another lesson's key.
 
 After a submission, follow **Inspect transaction** to check the RPC result.
 **Simulate Soroban** can run independently too: simulation leaves the stored
@@ -145,9 +157,10 @@ not proof of failure and can also reflect limited RPC retention.
 
 ## Sign and verify a message
 
-Open **Sign and verify a message**. Create a practice identity, enter text and
-click **Sign message**. Copy the resulting signature as 128 hexadecimal
-characters (64 bytes). Signing fills the verification form but does not verify.
+Open **Sign and verify a message**. Choose a local signer or a supported
+connected wallet, enter text and click **Sign message**. Copy the resulting
+signature as 128 hexadecimal characters (64 bytes). Signing fills the
+verification form but does not verify.
 
 Click **Verify signature** to check the message, public key and signature with
 SEP-53. Edit any verification field to clear the previous result; change the
@@ -169,9 +182,9 @@ server/client signatures, expiry, single use, and existing account thresholds
 before issuing a signed, two-minute JWT. Server keys and pending challenges are
 memory-only. No challenge transaction is submitted to the ledger.
 
-Open **Authenticate & log out** directly; it discovers its own client. Create
-its local practice identity and authenticate. **Discover stellar.toml** and
-**Discover WebAuth** are separate examples, not prerequisites. Expect
+Open **Authenticate & log out** directly; it discovers its own client. Create a
+local signer and authenticate. **Discover stellar.toml** and **Discover
+WebAuth** are separate examples, not prerequisites. Expect
 `anonymous →
 authenticating → authenticated`; local logout, disconnect, identity
 change, expiry, or leaving this lesson clears the session. No JWT is shown in

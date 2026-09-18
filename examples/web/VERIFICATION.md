@@ -66,40 +66,44 @@ without an extension. Its local signer cannot validate wallet-derived
 invocation, extension prompts, rejection or wallet network-change notifications.
 Record those checks separately.
 
-## Independent setup and identity isolation
+## Signer choices, setup and isolation
 
-- Open Invoke with signers directly in a fresh page. Its invoke button must be
-  disabled. Create and fund the signer; show pending while Friendbot and RPC
-  propagation complete. Then invoke successfully and observe count +1, without
-  BTX_003 and without ever visiting the message or wallet lesson.
-- Interrupt funding connectivity and retry: the public key must remain the same,
-  and invocation stays disabled until setup succeeds.
-- Create a message identity while disconnected: the header must remain Connect
-  wallet. Repeat with a real wallet connected: its header address and wallet
-  signing capabilities must stay unchanged.
-- Leave and revisit each practice lesson: it starts without an identity. The
-  message, invocation and session identities must all be different. Leave while
-  funding is pending and return: the old result must not enable the new lesson.
-- Open authentication directly with the local server running; create its own
-  identity and authenticate without first visiting discovery or message signing.
-- Open Classic payment directly. Generate and fund a recipient on the page;
-  source and recipient existence must both gate Send. A missing or invalid
-  address must not enable submission. Changing either address must require its
-  own account check.
-- With an actual wallet connected, visit all practice lessons and return to a
-  wallet transaction: only the original wallet may supply source/signers.
+- Open each signer-dependent page directly. Both source choices are visible;
+  wallet choice is disabled without a compatible connection. There is no default
+  hidden signer and no automatic wallet prompt.
+- Create local signer. The selected address differs from the header wallet, and
+  transaction submission stays disabled until funding/account checks succeed.
+  Fund with Friendbot, then invoke successfully; the read increases by one.
+- With an extension connected, choose Use connected wallet. The displayed source
+  must match the header. Complete the same operation with a wallet approval.
+  Switch back to local and verify that the wallet stays connected.
+- Change source after a result: the previous receipt/signature/session and form
+  clear. Choice buttons are disabled during signing/submission. Disconnect or
+  change the wallet account/network: old authority must not remain usable.
+- Leave/revisit: no local key survives. Navigate while funding is pending and
+  return: old completion must not enable the new instance. Retry failed funding:
+  the selected address must be retained.
+- Wallets Kit with Freighter can sign a SEP-53 message. Direct Freighter remains
+  envelope-only and shows why message signing is unavailable. Missing
+  capability, wrong returned account, invalid signature and
+  account/network/module changes must fail without claiming success.
+- SEP-10 explains its synchronous raw-key requirement and disables Kit/direct
+  Freighter selection. Create a local signer and authenticate directly without
+  first visiting discovery/message signing. Header wallet remains unchanged.
+- Classic payment: generate/fund a recipient here; both source and recipient
+  checks gate Send. Invalid or missing addresses never enable submission.
 
 ## Messages and authentication
 
-- Create a practice identity and sign a message. The signature is 128 hex
-  characters and the separate verification fields fill automatically, with no
-  verification result yet. Copy/paste must preserve the signature.
+- Create a local signer and sign a message. The signature is 128 hex characters
+  and the separate verification fields fill automatically, with no verification
+  result yet. Copy/paste must preserve the signature.
 - Verify the filled values: valid. Change the verification message: the old
   result clears; Verify reports invalid. Malformed hex/public-key inputs show an
   error. Restore the original values: valid again. Verify an empty message and
   independently pasted values without a wallet connection too.
 - Discover local stellar.toml and WebAuth; both report Testnet.
-- Authenticate a practice identity through SEP-10: display account and expiry,
+- Authenticate a local signer through SEP-10: display account and expiry,
   without rendering a JWT or saving one in browser storage.
 - Logout, reconnect/change identity, disconnect and wait two minutes for expiry:
   each applicable transition returns the session to anonymous.

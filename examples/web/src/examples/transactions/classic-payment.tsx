@@ -1,3 +1,4 @@
+import { SignerProvider } from "../../setup/signer-provider.tsx";
 import { useState } from "react";
 import { LocalSigner } from "@colibri/core";
 import { Asset, Operation } from "@stellar/stellar-sdk";
@@ -14,7 +15,7 @@ import {
   Value,
 } from "../../components/lesson.tsx";
 
-export default function ClassicPayment() {
+function Payment() {
   const wallet = useWallet();
   const payment = useClassicTransaction();
   const [destination, setDestination] = useState(exampleAccount);
@@ -52,16 +53,17 @@ export default function ClassicPayment() {
   return (
     <>
       <Note>
-        Connect and fund a Testnet wallet first. This button requests a
-        signature and sends exactly 1 XLM to an existing Testnet account.
-        Colibri's Classic pipeline builds, signs and submits the operation.
+        Choose a local signer or wallet above and fund its source. This button
+        signs and sends exactly 1 XLM to an existing Testnet account. Colibri's
+        Classic pipeline builds, signs and submits the operation.
       </Note>
       <TestnetAccountSetup
         key={source ?? "disconnected"}
         address={source}
         account={sourceAccount}
+        label="Transaction source"
       />
-      <Value label="Source">{source ?? "Connect a wallet first"}</Value>
+      <Value label="Source">{source ?? "Choose a signer above"}</Value>
       <Field
         label="Recipient G-address"
         value={destination}
@@ -112,5 +114,13 @@ export default function ClassicPayment() {
         automatically.
       </p>
     </>
+  );
+}
+
+export default function ClassicPayment() {
+  return (
+    <SignerProvider>
+      <Payment />
+    </SignerProvider>
   );
 }

@@ -39,7 +39,7 @@ export function TestnetAccountSetup(
       <Value label="G-address">
         {address ?? (label === "Recipient"
           ? "Enter or generate a recipient above."
-          : "Connect a Testnet wallet using the header.")}
+          : "Choose a signer above.")}
       </Value>
       <p role="status">
         {account.isFetching

@@ -139,7 +139,7 @@ export const lessons = [
     id: "wallet-invoke",
     group: "Contracts",
     title: "Invoke with a wallet",
-    subtitle: "Let the connected wallet supply source and signers.",
+    subtitle: "Derive source and signers from the selected connection.",
     file: "contracts/wallet-invoke",
     hooks: ["useWalletContractInvoke"],
   },

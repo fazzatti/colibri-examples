@@ -1,7 +1,8 @@
+import { SignerProvider } from "../../setup/signer-provider.tsx";
 import { useSigners } from "@colibri/react/signers";
 import { Data, Note, Value } from "../../components/lesson.tsx";
 
-export default function Signers() {
+function Capabilities() {
   // The hook guards supported signing methods against connection changes.
   // An empty array while disconnected is expected, not a fabricated signer.
   const signers = useSigners();
@@ -13,9 +14,9 @@ export default function Signers() {
   return (
     <>
       <Note>
-        Connect through Wallets Kit, then compare the direct Freighter path. The
-        capability list changes because the integrations explicitly expose
-        different supported methods.
+        Choose a local signer or the connected wallet above. The capability list
+        changes because the integrations explicitly expose different supported
+        methods.
       </Note>
       <Value label="Configured signers">{signers.length}</Value>
       <Data value={capabilities} label="Signing capabilities" />
@@ -25,5 +26,13 @@ export default function Signers() {
       </p>
       <a href="#wallet">Open wallet connection →</a>
     </>
+  );
+}
+
+export default function Signers() {
+  return (
+    <SignerProvider>
+      <Capabilities />
+    </SignerProvider>
   );
 }

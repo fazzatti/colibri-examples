@@ -23,7 +23,8 @@ export default function WalletConnectivity() {
           contract. Here, <code>createWalletSigner</code>{" "}
           enables envelope and G-account authorization-entry signing for
           Freighter. A method existing on the Kit does not prove every module
-          supports it.
+          supports it. The app also explicitly adapts Freighter’s SEP-53 message
+          capability through Wallets Kit and verifies the returned signature.
         </p>
         <h3>Provide the connection</h3>
         <p>
@@ -69,9 +70,10 @@ export default function WalletConnectivity() {
             <td>Practice identity</td>
             <td>
               A general connector holding a disposable key in memory for SEP-53
-              and SEP-10 lessons, plus a funded signer in Invoke with signers.
-              Each lesson has its own provider and destroys its key on exit.
-              These identities never replace the header wallet.
+              and SEP-10 lessons, plus the transaction examples. Each signer
+              lesson lets you choose a local key or a compatible connected
+              wallet. Local keys are destroyed on exit or when switching to the
+              wallet.
             </td>
           </tr>
         </tbody>

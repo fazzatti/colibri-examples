@@ -1,3 +1,4 @@
+import { SignerProvider } from "../../setup/signer-provider.tsx";
 import { Contract, nativeToScVal } from "@stellar/stellar-sdk";
 import { useWallet } from "@colibri/react/wallet";
 import { useAccount } from "@colibri/react/accounts";
@@ -40,16 +41,18 @@ function Submit({ id }: { id: `C${string}` }) {
   return (
     <>
       <Note>
-        This commits increment(+1), unlike the simulation lesson. Connect a
-        funded Testnet wallet to pay the fee. The prepared simulation envelope
-        is not reused; the pipeline obtains current account state.
+        This commits increment(+1), unlike the simulation lesson. Choose a local
+        signer or wallet above, then fund its source below to pay the fee. The
+        prepared simulation envelope is not reused; the pipeline obtains current
+        account state.
       </Note>
       <TestnetAccountSetup
         key={source ?? "disconnected"}
         address={source}
         account={account}
+        label="Transaction source"
       />
-      <Value label="Fee payer">{source ?? "Connect a wallet first"}</Value>
+      <Value label="Fee payer">{source ?? "Choose a signer above"}</Value>
       <Actions>
         <button
           type="button"
@@ -71,5 +74,11 @@ function Submit({ id }: { id: `C${string}` }) {
 }
 export default function SorobanTransaction() {
   const id = contractId(exampleCounter);
-  return id ? <Submit id={id} /> : <FixtureRequired />;
+  return id
+    ? (
+      <SignerProvider>
+        <Submit id={id} />
+      </SignerProvider>
+    )
+    : <FixtureRequired />;
 }

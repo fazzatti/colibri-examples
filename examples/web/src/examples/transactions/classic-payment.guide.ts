@@ -4,9 +4,10 @@ export default {
   "purpose":
     "Submit a Classic payment of exactly 1 Testnet XLM using a native Stellar operation.",
   "steps": [
-    "Connect a Testnet wallet using the header. Check or fund the source on this page. Enter a recipient G-address, or generate a practice recipient and fund it here. Both accounts must exist before sending; confirm their addresses.",
-    "Click Send 1 Testnet XLM. useClassicTransaction receives the payment operation plus source, signers, fee and timeout.",
-    "Approve the wallet request, inspect the result, and follow the transaction link to look up its hash.",
+    "Choose a local signer or the connected wallet. Check or fund the selected source on this page.",
+    "Enter an existing recipient, use the public fixture, or generate and fund a practice recipient here. Confirm both G-addresses; both accounts must exist before sending.",
+    "Click Send 1 Testnet XLM. useClassicTransaction receives the operation, selected source/signers, fee and timeout. Only the wallet path asks for wallet approval.",
+    "Inspect the result and follow the hash. Switching signer source clears the previous receipt and form.",
   ],
   "outcome":
     "The recipient receives 1 XLM and the source pays the transaction fee. Pending covers the whole pipeline; check the transaction before retrying an ambiguous error.",

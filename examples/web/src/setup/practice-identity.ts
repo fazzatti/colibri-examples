@@ -33,7 +33,7 @@ export function createPracticeIdentity() {
     connector,
     getSigner() {
       if (!signer) {
-        throw new Error("Create a practice identity in this lesson first.");
+        throw new Error("Create a local signer in this lesson first.");
       }
       return signer;
     },

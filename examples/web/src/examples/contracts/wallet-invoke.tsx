@@ -1,3 +1,4 @@
+import { SignerProvider } from "../../setup/signer-provider.tsx";
 import { useNetwork } from "@colibri/react";
 import { useWallet } from "@colibri/react/wallet";
 import { useAccount } from "@colibri/react/accounts";
@@ -42,14 +43,15 @@ function Invoke({ id }: { id: `C${string}` }) {
   return (
     <>
       <Note>
-        This commits the same +1 operation as the explicit-signer lesson. A
-        wallet supplies authority only when the button is clicked; rendering
-        never opens a signing prompt.
+        This commits the same +1 operation as the explicit-signer lesson. The
+        selected local or wallet connection supplies authority only on action;
+        rendering never opens a signing prompt.
       </Note>
       <TestnetAccountSetup
         key={source ?? "disconnected"}
         address={source}
         account={account}
+        label="Transaction source"
       />
       <Actions>
         <button
@@ -62,7 +64,7 @@ function Invoke({ id }: { id: `C${string}` }) {
               config: { fee: { base: "100" }, timeout: 60 },
             })}
         >
-          Invoke with connected wallet (+1)
+          Invoke with selected connection (+1)
         </button>
       </Actions>
       <QueryState query={count}>
@@ -76,5 +78,11 @@ function Invoke({ id }: { id: `C${string}` }) {
 }
 export default function WalletInvoke() {
   const id = contractId(exampleCounter);
-  return id ? <Invoke id={id} /> : <FixtureRequired />;
+  return id
+    ? (
+      <SignerProvider>
+        <Invoke id={id} />
+      </SignerProvider>
+    )
+    : <FixtureRequired />;
 }
