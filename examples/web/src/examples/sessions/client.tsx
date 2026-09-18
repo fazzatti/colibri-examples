@@ -1,39 +1,69 @@
 /**
  * Discover a Colibri WebAuth client before performing authentication.
  *
- * Run deno task auth from examples/web in another terminal and click Discover.
+ * Start deno task dev or preview from examples/web and click Discover.
+ * Both start the local auth fixture automatically.
  * useWebAuthClient reads SEP-1 authentication configuration for the fixed local
  * domain and returns a protocol client. Inspect its home domain and network;
  * no challenge is signed and no session/token is created here. session.tsx
  * performs its own discovery, so this lesson is an optional explanation rather
  * than a prerequisite. The forwarding fetch callback is needed by this version
- * of WebAuth when used with native browser fetch.
+ * of WebAuth when used with native browser fetch. The activity panel observes
+ * actual HTTP requests; successful discovery is logged only after validation.
  *
  * @module
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWebAuthClient } from "@colibri/react/webauth";
+import { AuthActivity } from "../../components/auth-activity.tsx";
+import { useAuthActivity } from "../../setup/auth-activity.ts";
 import { authDomain } from "../../setup/fixtures.ts";
 import { Actions, Note, QueryState, Value } from "../../components/lesson.tsx";
 
 export default function AuthClient() {
+  const activity = useAuthActivity();
+  const { record } = activity;
   const [enabled, setEnabled] = useState(false);
 
   // The hook discovers SEP-10/45 configuration through the domain's SEP-1 file.
   // Discovering a client does not sign a challenge or create a session.
   // WebAuth 1.1.0 stores the fetch callback as a method. The forwarding
-  // function preserves Window's receiver in browsers (native fetch needs it).
+  // activity transport preserves Window's receiver and records request/status
+  // labels only. It never consumes response bodies or logs credentials.
   const client = useWebAuthClient(
     enabled ? authDomain : undefined,
     {
       allowHttp: true,
-      fetch: (input, init) => globalThis.fetch(input, init),
+      fetch: activity.fetch,
+      timeout: 10_000,
     },
-    {},
-    // This policy key identifies the custom transport in the query cache.
-    // The session lesson uses the same policy and forwarding fetch behavior.
-    "loopback-browser",
+    { retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false },
+    // A client holds its fetch callback. Scope it to this mounted observer so
+    // another lesson cannot inherit a cached client pointing at this log.
+    activity.scope,
   );
+
+  useEffect(() => {
+    // Cached data can remain available during a refetch; announce the outcome
+    // only once the current request has settled.
+    if (client.isFetching) return;
+    if (client.isSuccess) {
+      record("Discovery validated. Testnet WebAuth client ready.", "success");
+    }
+    if (client.isError) {
+      record(
+        "Discovery failed. Check the local service and the error above, then retry.",
+        "error",
+      );
+    }
+  }, [
+    client.isFetching,
+    client.isSuccess,
+    client.isError,
+    client.dataUpdatedAt,
+    client.errorUpdatedAt,
+    record,
+  ]);
 
   // Display the discovered domain/network instead of serializing the client.
   // The first click enables its query; later clicks refresh discovery after a
@@ -41,9 +71,10 @@ export default function AuthClient() {
   return (
     <>
       <Note>
-        Run <code>deno task auth</code>{" "}
-        first. This loopback fixture advertises a real SEP-10 endpoint using the
-        Testnet network passphrase. HTTP is allowed only for this local example.
+        <code>deno task dev</code> and <code>deno task preview</code>{" "}
+        start the local Testnet SEP-10 fixture automatically. Discovery reads
+        its stellar.toml; it does not sign in. Activity below shows the request
+        and validated result. HTTP is allowed only for this loopback example.
       </Note>
       <Actions>
         <button
@@ -68,6 +99,7 @@ export default function AuthClient() {
           </>
         )}
       </QueryState>
+      <AuthActivity {...activity} />
     </>
   );
 }

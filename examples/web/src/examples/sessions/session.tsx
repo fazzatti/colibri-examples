@@ -1,7 +1,7 @@
 /**
  * Authenticate with SEP-10 and observe an in-memory WebAuth session.
  *
- * Run deno task auth from examples/web, choose a compatible signer on this page,
+ * Start deno task dev or preview from examples/web, choose a compatible signer,
  * and authenticate. SessionExample discovers its own client and owns the session;
  * Authentication uses useWebAuth for the exchange and useSession for its state.
  * Only account/expiry metadata is displayed. Try local logout and disconnect,
@@ -11,7 +11,7 @@
  *
  * @module
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useColibriConfig, useConnection, useDisconnect } from "@colibri/react";
 import {
   createWebAuthSession,
@@ -22,6 +22,8 @@ import {
   useWebAuth,
   useWebAuthClient,
 } from "@colibri/react/webauth";
+import { AuthActivity } from "../../components/auth-activity.tsx";
+import { useAuthActivity } from "../../setup/auth-activity.ts";
 import { authDomain } from "../../setup/fixtures.ts";
 import {
   SignerProvider,
@@ -35,7 +37,10 @@ import {
   Value,
 } from "../../components/lesson.tsx";
 
-function Authentication({ session }: { session: WebAuthSession }) {
+function Authentication({ session, record }: {
+  session: WebAuthSession;
+  record: ReturnType<typeof useAuthActivity>["record"];
+}) {
   const identity = useLessonSigner();
   const disconnect = useDisconnect();
   const connection = useConnection();
@@ -44,7 +49,36 @@ function Authentication({ session }: { session: WebAuthSession }) {
   // useWebAuth performs the exchange but does not put the JWT in its mutation
   // result; useSession exposes the session's status and token metadata.
   const state = useSession(session);
-  const authentication = useWebAuth(session);
+  const authentication = useWebAuth(session, {
+    onError: () =>
+      record(
+        "Authentication failed. See the error above; no automatic retry was made.",
+        "error",
+      ),
+  });
+  const previousStatus = useRef(state.status);
+
+  // These are observed session transitions, not simulated progress timers.
+  // The transport separately records GET challenge and POST signed challenge;
+  // an authenticated state means Colibri accepted the returned token context.
+  useEffect(() => {
+    if (state.status === previousStatus.current) return;
+    if (state.status === "authenticating") record("Session: authenticating.");
+    if (state.status === "authenticated") {
+      record(
+        "Session authenticated. Token retained in memory; no ledger transaction submitted.",
+        "success",
+      );
+    }
+    if (state.status === "anonymous") {
+      record(
+        previousStatus.current === "authenticating"
+          ? "Session returned to anonymous; authentication did not complete."
+          : "Session cleared (logout, disconnect, identity change or expiry).",
+      );
+    }
+    previousStatus.current = state.status;
+  }, [state.status, record]);
   const [error, setError] = useState<unknown>();
 
   function authenticate() {
@@ -56,6 +90,10 @@ function Authentication({ session }: { session: WebAuthSession }) {
       const signer = identity.getKeypairSigner();
       authentication.mutate({ account: signer.publicKey(), signer });
     } catch (cause) {
+      record(
+        "Cannot begin authentication: select a compatible signer first.",
+        "error",
+      );
       setError(cause);
     }
   }
@@ -125,6 +163,8 @@ function Authentication({ session }: { session: WebAuthSession }) {
 }
 function SessionExample() {
   const config = useColibriConfig();
+  const activity = useAuthActivity();
+  const { record } = activity;
 
   // Preserve the browser fetch receiver when the WebAuth transport invokes it.
   // This lesson discovers its own client; no earlier discovery step is needed.
@@ -132,11 +172,36 @@ function SessionExample() {
     authDomain,
     {
       allowHttp: true,
-      fetch: (input, init) => globalThis.fetch(input, init),
+      fetch: activity.fetch,
+      timeout: 10_000,
     },
-    { retry: false },
-    "loopback-browser",
+    { retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false },
+    activity.scope,
   );
+  useEffect(() => {
+    // Cached data can remain available during a refetch; announce the outcome
+    // only once the current request has settled.
+    if (client.isFetching) return;
+    if (client.isSuccess) {
+      record(
+        "Discovery validated. SEP-10 client ready for this lesson.",
+        "success",
+      );
+    }
+    if (client.isError) {
+      record(
+        "Discovery failed. Check the local service and the error above, then refresh discovery.",
+        "error",
+      );
+    }
+  }, [
+    client.isFetching,
+    client.isSuccess,
+    client.isError,
+    client.dataUpdatedAt,
+    client.errorUpdatedAt,
+    record,
+  ]);
   const [session, setSession] = useState<WebAuthSession>();
 
   // Session construction subscribes to the provider. Own it in an effect,
@@ -153,24 +218,27 @@ function SessionExample() {
   return (
     <>
       <Note>
-        Run <code>deno task auth</code>{" "}
-        from examples/web in another terminal. Choose a signer above, then
-        authenticate. The local server verifies the signed challenge and issues
-        a short-lived token. Your connected wallet is separate from this session
-        when using a local signer.
+        Dev and preview start the local auth fixture automatically. Choose a
+        signer above, then authenticate. Activity shows discovery, the challenge
+        request, signed-challenge exchange and session changes. The local server
+        verifies the challenge and returns a short-lived token. Your header
+        wallet stays separate when using a local signer.
       </Note>
       <Actions>
         <button
           type="button"
           className="secondary"
-          disabled={client.isFetching}
+          disabled={client.isFetching || activity.busy}
           onClick={() => void client.refetch()}
         >
           Refresh discovery
         </button>
       </Actions>
       <QueryState query={client} />
-      {session && <Authentication session={session} />}
+      {session && client.isSuccess && !client.isFetching && (
+        <Authentication session={session} record={record} />
+      )}
+      <AuthActivity {...activity} />
     </>
   );
 }

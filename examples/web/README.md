@@ -26,6 +26,13 @@ enable **Auto-refresh every 5 seconds** to see a countdown between requests. A
 spinner indicates an active request. Disable the option or leave the page to
 stop polling.
 
+Dev also starts the local SEP-10 fixture on **http://127.0.0.1:8787** for
+WebAuth and discovery lessons. Preview does the same. A compatible fixture
+already running there is reused; another service on that port causes a clear
+startup error. Stop the owning process when finished. If you already had the
+older dev server running, restart `deno task dev` once to load this startup
+integration.
+
 `install` installs the pinned npm/JSR dependencies and generates the local
 counter client **offline**, directly from the existing
 [counter Wasm](../contract-bindings/contract/counter.wasm). Inspect
@@ -207,19 +214,22 @@ message and verify again to observe a mismatch. You can also paste independently
 obtained values without connecting an identity. Invalid hex is reported before
 verification. Neither operation submits a transaction or requires funding.
 
-## Authentication and discovery (optional local server)
+## Authentication, discovery and activity
 
-In a second terminal, enter `examples/web` and run:
+`deno task dev` and `deno task preview` start the loopback authentication
+fixture automatically. You can also run it independently from `examples/web`
+when using another frontend server:
 
 ```sh
 deno task auth
 ```
 
-The loopback server at **http://127.0.0.1:8787** exposes a SEP-1 file and SEP-10
-challenge endpoint using the Testnet passphrase. It validates challenge domain,
-server/client signatures, expiry, single use, and existing account thresholds
-before issuing a signed, two-minute JWT. Server keys and pending challenges are
-memory-only. No challenge transaction is submitted to the ledger.
+Keep that terminal running. The loopback server at **http://127.0.0.1:8787**
+exposes a SEP-1 file and SEP-10 challenge endpoint using the Testnet passphrase.
+It validates challenge domain, server/client signatures, expiry, single use, and
+existing account thresholds before issuing a signed, two-minute JWT. Server keys
+and pending challenges are memory-only. No challenge transaction is submitted to
+the ledger.
 
 Open **Authenticate & log out** directly; it discovers its own client. Create a
 local signer and authenticate. **Discover stellar.toml** and **Discover
@@ -230,11 +240,41 @@ change, expiry, or leaving this lesson clears the session. No JWT is shown in
 diagnostics, query data or browser storage. Repeated authentication requests use
 new challenges.
 
-The discovery/session examples supply an explicit forwarding `fetch` callback.
-WebAuth 1.1.0 stores that callback on its transport; the wrapper preserves the
-Window receiver required by native browser fetch. The session lesson has its own
-provider/cache and uses the same explicit transport policy as the discovery
-lesson.
+### Follow the activity
+
+All three pages—SEP-1 discovery, WebAuth discovery and authentication—show a
+small **Activity** log. It retains the last 20 events with timestamps, including
+HTTP requests/responses, validated discovery and session changes. A spinner
+indicates an actual outstanding request; fast completed steps remain readable.
+Discovery uses explicit refresh/retry controls with background refetch disabled.
+
+The SEP-10 sequence is: discover stellar.toml → request a challenge → validate
+and sign it in Colibri → exchange the signed challenge → authenticate the
+session. Activity observes HTTP boundaries and session state. A POST entry means
+client validation/signing has completed; it does not claim visibility into every
+internal validation step. Logs contain fixed labels and HTTP status, never query
+parameters, challenge XDR, signatures, response bodies or JWTs.
+
+[auth-activity.ts](src/setup/auth-activity.ts) supplies the forwarding fetch
+callback. WebAuth 1.1.0 stores that callback on its transport; forwarding
+preserves the Window receiver required by native browser fetch. Each mounted
+lesson has a distinct discovery scope so a cached client cannot retain another
+page's log callback. The actual Colibri hooks remain directly in the lesson
+files.
+
+### If discovery fails
+
+`SEP1_001` with `Failed to fetch` means the browser could not read stellar.toml;
+it is not an authentication rejection. The page now shows the service address
+and recovery commands. From `examples/web`, restart `deno task dev` or
+`deno task preview`, or start `deno task auth` separately. Check that terminal
+for startup/port errors, then click Discover or Refresh discovery again. After
+restarting the fixture, refresh discovery to read its new server signing key.
+
+Use the demo on `http://127.0.0.1:5173` / `:4173`, or the equivalent `localhost`
+origins. These are the only browser origins accepted by the fixture. A built
+static site alone does not include the auth server; local preview supplies it. A
+remote deployment needs its own HTTPS authentication service/configuration.
 
 The current Colibri SEP-10 client requires a full keypair signer. The Kit's
 transaction adapter does **not** satisfy that interface, so the lesson uses its
@@ -242,11 +282,11 @@ own explicit practice connector. SEP-45 is a separate contract-account flow; see
 the existing [WebAuth CLI examples](../webauth/README.md).
 
 This server is a local protocol fixture, not a production authentication
-service. It binds only to loopback, accepts this app's dev/preview origins, and
-has no persistent signing keys, revocation service, production JWT audience
-policy or TLS deployment. Restart it to rotate its key; reload client discovery
-afterward. HTTP is permitted only for this fixed local development domain in the
-app.
+service. It binds only to loopback, accepts this app's fixed dev/preview
+origins, and has no persistent signing keys, revocation service, production JWT
+audience policy or TLS deployment. Restart it to rotate its key; reload client
+discovery afterward. HTTP is permitted only for this fixed local development
+domain in the app.
 
 ## Hook-to-lesson map
 
@@ -299,7 +339,8 @@ The 29th page is the
 - `src/components/`: presentation and exact amount formatting.
 - `src/generated/`: ignored, reproducible counter bindings.
 - `scripts/`: offline generation and optional Testnet provisioning.
-- `auth-server/`: optional local SEP-10 fixture.
+- `auth-server/`: loopback SEP-10 fixture, Vite lifecycle integration and
+  standalone entry point.
 
 The web app owns its `deno.json` imports, tasks, compiler options and
 `deno.lock`. Root CLI dependency versions are unchanged. The Deno Vite plugin

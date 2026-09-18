@@ -1,9 +1,10 @@
 # Browser verification checklist
 
 From `examples/web`, use `deno task install`, `deno task setup`,
-`deno task dev`, and a second terminal running `deno task auth`. Also build and
-repeat the smoke checks with `deno task preview`. Use the exact 127.0.0.1
-origins documented in the README for local authentication.
+`deno task dev`. Dev and preview start the local auth fixture automatically.
+Also build and repeat the smoke checks with `deno task preview`. Verify both the
+127.0.0.1 and localhost origins on the documented ports. `deno task auth`
+remains available to run the fixture separately.
 
 These checks are manual behavior checks, in keeping with the repository's
 learning-example convention. They are not a replacement for Colibri's own
@@ -102,16 +103,30 @@ Record those checks separately.
   result clears; Verify reports invalid. Malformed hex/public-key inputs show an
   error. Restore the original values: valid again. Verify an empty message and
   independently pasted values without a wallet connection too.
-- Discover local stellar.toml and WebAuth; both report Testnet.
+- Start dev/preview with no server on8787: the fixture starts automatically.
+  Start the other Vite mode while it is running: it reuses the fixture and does
+  not stop it on exit. An unrelated service on8787 fails startup clearly.
+- Discover local stellar.toml and WebAuth; both report Testnet. Activity records
+  the actual request, HTTP200 and validated result. Clear empties the log;
+  another request repopulates it. Entries are bounded to20 and do not leak
+  between mounted lessons or signer choices.
 - Authenticate a local signer through SEP-10: display account and expiry,
-  without rendering a JWT or saving one in browser storage.
+  without rendering a JWT or saving one in browser storage. Activity shows GET
+  challenge, POST signed challenge and authenticated state in that order. No
+  query parameters, XDR, signatures, response payloads or tokens appear in logs.
 - Logout, reconnect/change identity, disconnect and wait two minutes for expiry:
   each applicable transition returns the session to anonymous.
 - Leave and re-enter the session lesson: the owned old session is destroyed.
 - Server checks: a replayed challenge, unsigned challenge, wrong signer, expired
   challenge and disallowed browser Origin must be rejected.
-- Stop the auth server and retry discovery: show an actionable error. Restart
-  and reload discovery to pick up its new signing key.
+- With the frontend still running, stop a separately owned auth fixture and
+  retry discovery: show an actionable service/restart error and retained failed
+  request. Restore the service and retry without a page reload. No automatic
+  retry loop should run. Refresh discovery to pick up the new signing key.
+- Force an HTTP error and a malformed challenge response: activity must show
+  failure and must not claim an authenticated session or completed signing.
+- Logout, disconnect and expiry update Activity. Navigating away clears it; no
+  delayed request should populate another page's log.
 
 ## Reproducibility
 

@@ -362,6 +362,47 @@ h1 {
   padding: 2px 7px;
   border-radius: 3px;
 }
+.auth-activity {
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 16px;
+}
+.activity-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.activity-heading h3 {
+  margin: 0;
+}
+.activity-log {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  max-height: 240px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+.activity-log li {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.activity-log time {
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+}
+.activity-log [data-kind="success"] span {
+  color: var(--teal);
+}
+.activity-log [data-kind="error"] span {
+  color: #913c36;
+}
 .data {
   margin-top: 18px;
   border: 1px solid var(--line);
