@@ -21,9 +21,10 @@ deno task install
 deno task dev
 ```
 
-Optional `deno task setup` prepares Testnet fixtures; `deno task auth` starts
-the local authentication lesson. The web app uses its own dependency scope and
-lockfile; the CLI lessons below keep their existing versions.
+Optional `deno task setup` prepares Testnet fixtures. The dev command starts the
+local authentication fixture too; `deno task auth` runs it separately when
+needed. The web app uses its own dependency scope and lockfile; the CLI lessons
+below keep their existing versions.
 
 ## Run a lesson
 
@@ -106,14 +107,15 @@ or production authentication policies.
 
 ## Inspection, ingestion, and local tooling
 
-| Lesson                                                          | What you learn                                                                     |
-| --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| [Local test ledger](examples/stellar-test-ledger/README.md)     | Direct Docker-backed test setup, plus optional reusable-ledger/logging tasks       |
-| [Build verification](examples/build-verification/README.md)     | GitHub out-of-band rebuild, strict SEP-58 Testnet target, JSR CLI summary/evidence |
-| [Contract metadata](examples/contract-metadata/README.md)       | Declared SEP claims versus independent structural interface matching               |
-| [Event streamer](examples/event-streamer/README.md)             | Live and archived Soroban event ingestion                                          |
-| [Transaction streamer](examples/transaction-streamer/README.md) | Finite transaction and successful native-payment slices                            |
-| [Identicon](examples/identicon/README.md)                       | Offline deterministic SVG/PNG rendering                                            |
+| Lesson                                                          | What you learn                                                                         |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [Test recorder](examples/test-recorder/README.md)               | Real Testnet tests with silent recording, console summaries, JSON, and standalone HTML |
+| [Local test ledger](examples/stellar-test-ledger/README.md)     | Direct Docker-backed test setup, plus optional reusable-ledger/logging tasks           |
+| [Build verification](examples/build-verification/README.md)     | GitHub out-of-band rebuild, strict SEP-58 Testnet target, JSR CLI summary/evidence     |
+| [Contract metadata](examples/contract-metadata/README.md)       | Declared SEP claims versus independent structural interface matching                   |
+| [Event streamer](examples/event-streamer/README.md)             | Live and archived Soroban event ingestion                                              |
+| [Transaction streamer](examples/transaction-streamer/README.md) | Finite transaction and successful native-payment slices                                |
+| [Identicon](examples/identicon/README.md)                       | Offline deterministic SVG/PNG rendering                                                |
 
 ## Validate examples
 
@@ -125,8 +127,9 @@ deno task fmt:check
 
 The check task first generates the ignored package for the bindings lesson, then
 type-checks the examples. These commands do not submit transactions. To exercise
-behavior, run the individual lessons. Only the local-test-ledger subproject has
-tests because that lesson is explicitly about testing.
+behavior, run the individual lessons. The local-test-ledger and test-recorder
+subprojects contain tests because those lessons explicitly teach testing. The
+recorder lesson requires Deno 2.9.6+ and uses real public Testnet endpoints.
 
 ## Contributing a lesson
 

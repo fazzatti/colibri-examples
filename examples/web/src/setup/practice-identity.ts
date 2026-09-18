@@ -46,12 +46,6 @@ export function createPracticeIdentity() {
   });
   return {
     connector,
-    getSigner() {
-      if (!signer) {
-        throw new Error("Create a local signer in this lesson first.");
-      }
-      return signer;
-    },
     destroy() {
       disposed = true;
       release();

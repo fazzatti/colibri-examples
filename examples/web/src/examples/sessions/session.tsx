@@ -6,12 +6,14 @@
  * Authentication uses useWebAuth for the exchange and useSession for its state.
  * Only account/expiry metadata is displayed. Try local logout and disconnect,
  * then leave the page to exercise cleanup. SEP-10 signs a challenge without
- * submitting a ledger transaction. The current client needs a synchronous full
- * keypair signer, so the Kit and direct Freighter adapters cannot be selected.
+ * submitting a ledger transaction. Both local and connected-wallet envelope
+ * signers use the same asynchronous WebAuth API; wallet approval may take time.
  *
  * @module
  */
 import { useEffect, useRef, useState } from "react";
+import { type EnvelopeSigner, isEnvelopeSigner } from "@colibri/core";
+import { useSigners } from "@colibri/react/signers";
 import { useColibriConfig, useConnection, useDisconnect } from "@colibri/react";
 import {
   createWebAuthSession,
@@ -24,16 +26,14 @@ import {
 } from "@colibri/react/webauth";
 import { AuthActivity } from "../../components/auth-activity.tsx";
 import { useAuthActivity } from "../../setup/auth-activity.ts";
-import { authDomain } from "../../setup/fixtures.ts";
-import {
-  SignerProvider,
-  useLessonSigner,
-} from "../../setup/signer-provider.tsx";
+import { accountId, authDomain } from "../../setup/fixtures.ts";
+import { SignerProvider } from "../../setup/signer-provider.tsx";
 import {
   Actions,
   Failure,
   Note,
   QueryState,
+  Spinner,
   Value,
 } from "../../components/lesson.tsx";
 
@@ -41,9 +41,18 @@ function Authentication({ session, record }: {
   session: WebAuthSession;
   record: ReturnType<typeof useAuthActivity>["record"];
 }) {
-  const identity = useLessonSigner();
   const disconnect = useDisconnect();
   const connection = useConnection();
+
+  // Read the selected provider's guarded envelope capability. A local key and
+  // an extension wallet both implement it; connection guards reject stale
+  // authority if the wallet changes while its approval prompt is open.
+  const signers = useSigners();
+  const account = accountId(connection.connection?.address ?? "");
+  const signer = signers.find((candidate): candidate is EnvelopeSigner =>
+    isEnvelopeSigner(candidate) && !!accountId(candidate.signerKey()) &&
+    !!account && candidate.signsFor(account)
+  );
 
   // Observe the session store separately from the authentication mutation.
   // useWebAuth performs the exchange but does not put the JWT in its mutation
@@ -83,19 +92,27 @@ function Authentication({ session, record }: {
 
   function authenticate() {
     setError(undefined);
-    try {
-      // SEP-10 verifies the server challenge before signing and exchanging it.
-      // This API currently requires a complete keypair signer; the Kit's
-      // envelope capability alone is insufficient. No transaction is submitted.
-      const signer = identity.getKeypairSigner();
-      authentication.mutate({ account: signer.publicKey(), signer });
-    } catch (cause) {
-      record(
-        "Cannot begin authentication: select a compatible signer first.",
-        "error",
-      );
-      setError(cause);
-    }
+    if (!account || !signer) return;
+
+    // WebAuth calls this only after validating the server challenge. Forward to
+    // the guarded signer and log real approval boundaries without exposing XDR
+    // or signatures. The SDK then validates the returned signed envelope before
+    // POSTing it to the auth service; it never submits it to the ledger.
+    const recordedSigner: EnvelopeSigner = {
+      signerKey: () => signer.signerKey(),
+      signsFor: (target) => signer.signsFor(target),
+      signTransaction: async (transaction) => {
+        record(
+          "Challenge validated. Waiting for the selected signer; approve the request if using a wallet.",
+        );
+        const signed = await signer.signTransaction(transaction);
+        record(
+          "Signer returned an envelope. WebAuth will validate it before exchange.",
+        );
+        return signed;
+      },
+    };
+    authentication.mutate({ account, signer: recordedSigner });
   }
   async function release() {
     setError(undefined);
@@ -116,11 +133,13 @@ function Authentication({ session, record }: {
       <Actions>
         <button
           type="button"
-          disabled={connection.status !== "connected" ||
-            authentication.isPending}
+          disabled={!account || !signer || authentication.isPending}
           onClick={authenticate}
         >
-          Authenticate with SEP-10
+          {authentication.isPending && <Spinner />}
+          {authentication.isPending
+            ? "Authenticating…"
+            : "Authenticate with SEP-10"}
         </button>
       </Actions>
       <Failure error={error ?? authentication.error} />
@@ -219,10 +238,11 @@ function SessionExample() {
     <>
       <Note>
         Dev and preview start the local auth fixture automatically. Choose a
-        signer above, then authenticate. Activity shows discovery, the challenge
-        request, signed-challenge exchange and session changes. The local server
-        verifies the challenge and returns a short-lived token. Your header
-        wallet stays separate when using a local signer.
+        local signer or the connected wallet above, then authenticate. Approve
+        the wallet request when prompted. Activity shows discovery, challenge
+        validation, the wait for signing, exchange and session changes. The
+        local server verifies the challenge and returns a short-lived token.
+        Your header wallet stays separate when using a local signer.
       </Note>
       <Actions>
         <button
@@ -243,12 +263,11 @@ function SessionExample() {
   );
 }
 
-// Require the complete synchronous keypair capability used by this WebAuth
-// client. A wallet's async envelope signer is a different interface; the
-// selector explains that limitation instead of silently changing authority.
+// Both sources use an Ed25519 envelope signer. This selector enables wallets
+// connected after mount and keeps local keys independent of the header wallet.
 export default function Session() {
   return (
-    <SignerProvider capability="keypair">
+    <SignerProvider capability="authentication">
       <SessionExample />
     </SignerProvider>
   );

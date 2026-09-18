@@ -79,11 +79,14 @@ Record those checks separately.
 - Select the wallet: the button reads Using connected wallet. Disconnect and
   reconnect without reloading; the choice and selected address follow the live
   connection. Account and capability changes must update the current step too.
-- On Authenticate & log out, connecting Kit changes the disabled button to
-  Wallet unavailable for this step with a connected-but-incompatible SEP-10
-  explanation. This differs from the initial disconnected state. On Sign and
-  verify a message, direct Freighter explains its missing SEP-53 capability,
-  while Kit/Freighter enables the choice.
+- On Authenticate & log out, connecting Kit/Freighter or direct Freighter
+  enables the wallet option immediately. Select it and authenticate: Activity
+  records the wallet signing wait, and the action stays pending until approval
+  and exchange finish. Reject once, then retry explicitly and approve.
+- Disconnect, switch wallet account/network, log out, or leave during pending
+  authentication. A late approval cannot exchange the challenge or restore a
+  session. Cancellation does not close the extension prompt or recall a POST
+  that was already sent.
 - Create local signer. The selected address differs from the header wallet, and
   transaction submission stays disabled until funding/account checks succeed.
   Fund with Friendbot, then invoke successfully; the read increases by one.
@@ -100,9 +103,10 @@ Record those checks separately.
   envelope-only and shows why message signing is unavailable. Missing
   capability, wrong returned account, invalid signature and
   account/network/module changes must fail without claiming success.
-- SEP-10 explains its synchronous raw-key requirement and disables Kit/direct
-  Freighter selection. Create a local signer and authenticate directly without
-  first visiting discovery/message signing. Header wallet remains unchanged.
+- SEP-10 supports local and connected-wallet envelope signers. Authenticate
+  directly without first visiting discovery/message signing, then log out and
+  disconnect. Local mode keeps the header wallet unchanged; wallet mode follows
+  the selected header identity.
 - Classic payment: generate/fund a recipient here; both source and recipient
   checks gate Send. Invalid or missing addresses never enable submission.
 

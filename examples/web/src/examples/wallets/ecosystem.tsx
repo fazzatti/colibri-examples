@@ -102,10 +102,11 @@ export default function WalletConnectivity() {
         capabilities.
       </p>
       <p>
-        The current SEP-10 client needs a complete keypair signer. This example
-        uses a practice identity there; it does not claim the Kit's envelope
-        adapter satisfies that interface. SEP-45 contract-account authentication
-        needs a separate authorization policy and is outside this example.
+        SEP-10 accepts the selected local or wallet envelope signer. Wallets Kit
+        and direct Freighter approval are asynchronous; WebAuth validates the
+        challenge before signing and the returned envelope before exchange.
+        SEP-45 contract-account authentication needs a separate authorization
+        policy and is outside this example.
       </p>
       <p>
         <a

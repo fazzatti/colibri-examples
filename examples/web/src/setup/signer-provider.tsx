@@ -12,16 +12,14 @@
  * @module
  */
 import {
-  createContext,
   type PropsWithChildren,
-  useContext,
   useEffect,
   useId,
   useRef,
   useState,
   useSyncExternalStore,
 } from "react";
-import { isKeypairSigner, type KeypairSigner } from "@colibri/core";
+import { isEnvelopeSigner } from "@colibri/core";
 import {
   createColibriConfig,
   useColibriConfig,
@@ -35,10 +33,7 @@ import { accountId } from "./fixtures.ts";
 import { network } from "./network.ts";
 
 type Source = "none" | "local" | "wallet";
-type Capability = "transaction" | "message" | "keypair";
-const SignerContext = createContext<
-  { source: Source; getKeypairSigner(): KeypairSigner } | null
->(null);
+type Capability = "transaction" | "message" | "authentication";
 
 // Capture the app's provider BEFORE nesting the selected lesson provider.
 // Wallet mode uses the original config, so its identity-change guards remain
@@ -69,17 +64,18 @@ export function SignerProvider(
   const mounted = useRef(false);
   const connection = wallet.connection;
 
-  // A source can expose transaction signing without message or synchronous
-  // raw-key signing. Check the exact capability requested by the lesson and,
-  // for SEP-10, require a full signer matching the connected address.
-  const keypair = connection?.signers.find((signer): signer is KeypairSigner =>
-    isKeypairSigner(signer) && signer.publicKey() === connection.address
-  );
+  // SEP-10 accepts an Ed25519 envelope signer, including asynchronous wallets.
+  // Message signing remains a separate capability. The WebAuth engine verifies
+  // the returned challenge and signature; no raw private-key handle is needed.
+  const address = accountId(connection?.address ?? "");
   const available = capability === "message"
     ? !!connection?.messageSigner
-    : capability === "keypair"
-    ? !!keypair
-    : !!connection?.signers.some((signer) => "signTransaction" in signer);
+    : !!connection?.signers.some((signer) =>
+      isEnvelopeSigner(signer) &&
+      (capability !== "authentication" ||
+        (!!accountId(signer.signerKey()) && !!address &&
+          signer.signsFor(address)))
+    );
   const walletReady = wallet.status === "connected" &&
     !!accountId(connection?.address ?? "") && available;
   const selected = source === "wallet" ? connection : local.connection;
@@ -99,8 +95,8 @@ export function SignerProvider(
         ? "Using the header wallet. Account changes and disconnection are reflected here automatically."
         : "Wallet connected and compatible with this step. Select it to use its signer; connecting alone does not change your chosen signer.";
     }
-    if (capability === "keypair") {
-      return "Wallet connected, but unavailable for SEP-10 in this demo. Colibri WebAuth currently needs synchronous raw-key signing; Wallets Kit and direct Freighter provide asynchronous signing. Create a local signer for this step.";
+    if (capability === "authentication") {
+      return "Wallet connected, but SEP-10 needs an Ed25519 transaction-envelope signer for this account. Use Wallets Kit with Freighter, direct Freighter, or a local signer.";
     }
     if (capability === "message") {
       return "Wallet connected, but this connection has no SEP-53 message signer. Use Wallets Kit with Freighter, or create a local signer.";
@@ -145,19 +141,8 @@ export function SignerProvider(
     }
   }
 
-  // Only the SEP-10 lesson needs the full keypair handle. Other lessons use
-  // Colibri's guarded connection capabilities directly. Never expose this
-  // handle in diagnostics or treat an async wallet signer as a raw keypair.
-  function getKeypairSigner() {
-    if (source === "local") return identity.getSigner();
-    if (source === "wallet" && keypair) return keypair;
-    throw new Error(
-      "Choose a signer with the synchronous keypair capability required by SEP-10.",
-    );
-  }
-
   return (
-    <SignerContext.Provider value={{ source, getKeypairSigner }}>
+    <>
       {
         /* A choice/account change clears the previous lesson's forms, receipts
           and session. The wallet configuration itself is never recreated. */
@@ -192,7 +177,7 @@ export function SignerProvider(
         <Failure error={error} />
         {children}
       </ColibriQueryProvider>
-    </SignerContext.Provider>
+    </>
   );
 }
 
@@ -259,10 +244,4 @@ function ChoiceControls({
       </p>
     </fieldset>
   );
-}
-
-export function useLessonSigner() {
-  const signer = useContext(SignerContext);
-  if (!signer) throw new Error("The example needs its signer provider.");
-  return signer;
 }

@@ -121,7 +121,7 @@ export function App() {
           })}
         </nav>
         <div className="sidebar-foot">
-          React 19 · Colibri React 0.2<br />
+          React 19 · Colibri React 0.3<br />
           <a
             href="https://jsr.io/@colibri/react/doc"
             target="_blank"

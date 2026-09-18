@@ -2,7 +2,7 @@
 
 A React application for learning Stellar by running one focused example at a
 time. Every network operation uses **Testnet**. A sidebar groups 29 lessons
-covering all 33 public hooks in `@colibri/react` 0.2. Each lesson has its own
+covering all 33 public hooks in `@colibri/react` 0.3. Each lesson has its own
 commented TSX file, live controls, observable state and a didactic explanation.
 Each explanation covers the task, ordered steps, expected result, hooks and
 specific Colibri documentation. Previous/next links follow the sidebar order.
@@ -173,15 +173,13 @@ signature is decoded and verified before returning bytes to the hook. The direct
 Freighter adapter remains envelope-only. Unsupported wallet options explain the
 missing capability; they never silently substitute a local signer.
 
-**SEP-10 limitation:** Colibri WebAuth currently calls synchronous raw-key
-`sign()`. Wallets Kit/direct Freighter expose asynchronous approval-based
-signing, so they cannot be selected for that lesson. The selector confirms that
-the wallet is connected and explains this capability restriction; a disabled
-choice here does not mean the connection is stale. Create its local signer
-instead; a wallet integration exposing a genuine complete Core keypair signer
-could use the same selector. See the
-[Freighter message API](https://docs.freighter.app/docs/playground/signmessage/)
-for the separate SEP-53 capability.
+**SEP-10 authentication:** WebAuth 1.2 and React 0.3 accept the selected Ed25519
+envelope signer. Local keys, Wallets Kit/Freighter and direct Freighter all use
+the same asynchronous flow. A wallet prompts for approval after Colibri
+validates the challenge. The returned envelope is checked before exchange.
+Disconnect, account/network changes, logout and leaving invalidate pending
+authentication. A late approval cannot create a stale session. See
+[connected-wallet authentication](https://fifo-docs.gitbook.io/colibri/colibri-react/wallet-authentication).
 
 ## Run a transaction example independently
 
@@ -256,19 +254,19 @@ HTTP requests/responses, validated discovery and session changes. A spinner
 indicates an actual outstanding request; fast completed steps remain readable.
 Discovery uses explicit refresh/retry controls with background refetch disabled.
 
-The SEP-10 sequence is: discover stellar.toml → request a challenge → validate
-and sign it in Colibri → exchange the signed challenge → authenticate the
-session. Activity observes HTTP boundaries and session state. A POST entry means
-client validation/signing has completed; it does not claim visibility into every
-internal validation step. Logs contain fixed labels and HTTP status, never query
-parameters, challenge XDR, signatures, response bodies or JWTs.
+The SEP-10 sequence is: discover stellar.toml → request a challenge → validate →
+await local/wallet signing → validate the signed envelope → exchange the signed
+challenge → authenticate the session. Activity observes HTTP boundaries and
+session state. A POST entry means client validation/signing has completed; it
+does not claim visibility into every internal validation step. Logs contain
+fixed labels and HTTP status, never query parameters, challenge XDR, signatures,
+response bodies or JWTs.
 
 [auth-activity.ts](src/setup/auth-activity.ts) supplies the forwarding fetch
-callback. WebAuth 1.1.0 stores that callback on its transport; forwarding
-preserves the Window receiver required by native browser fetch. Each mounted
-lesson has a distinct discovery scope so a cached client cannot retain another
-page's log callback. The actual Colibri hooks remain directly in the lesson
-files.
+callback. WebAuth stores that callback on its transport; forwarding preserves
+the Window receiver required by native browser fetch. Each mounted lesson has a
+distinct discovery scope so a cached client cannot retain another page's log
+callback. The actual Colibri hooks remain directly in the lesson files.
 
 ### If discovery fails
 
@@ -284,10 +282,12 @@ origins. These are the only browser origins accepted by the fixture. A built
 static site alone does not include the auth server; local preview supplies it. A
 remote deployment needs its own HTTPS authentication service/configuration.
 
-The current Colibri SEP-10 client requires a full keypair signer. The Kit's
-transaction adapter does **not** satisfy that interface, so the lesson uses its
-own explicit practice connector. SEP-45 is a separate contract-account flow; see
-the existing [WebAuth CLI examples](../webauth/README.md).
+Choose a local signer or the connected wallet on this page. No funded account is
+required for this fixture's master-key authentication path. Approval happens in
+the wallet for wallet mode; a local key signs in memory. Activity includes the
+actual wait for signing, followed by envelope validation and exchange. SEP-45 is
+a separate contract-account flow; see the existing
+[WebAuth CLI examples](../webauth/README.md).
 
 This server is a local protocol fixture, not a production authentication
 service. It binds only to loopback, accepts this app's fixed dev/preview

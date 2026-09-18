@@ -27,7 +27,7 @@ export default function AuthClient() {
 
   // The hook discovers SEP-10/45 configuration through the domain's SEP-1 file.
   // Discovering a client does not sign a challenge or create a session.
-  // WebAuth 1.1.0 stores the fetch callback as a method. The forwarding
+  // WebAuth stores the fetch callback as a method. The forwarding
   // activity transport preserves Window's receiver and records request/status
   // labels only. It never consumes response bodies or logs credentials.
   const client = useWebAuthClient(
