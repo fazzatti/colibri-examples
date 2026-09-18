@@ -150,8 +150,14 @@ contract-wallet support.
 ### Choose the signer on each page
 
 Signer-dependent examples start with two buttons: **Create local signer** or
-**Use connected wallet**. Connect from the header to enable the wallet option.
-The selected address is shown before any signing action. The header always
+**Use connected wallet**. You can connect from the header before or after
+opening the page. The selector observes that connection live, including while a
+local signer is selected. A compatible connection enables the wallet option
+without reloading; connecting alone does not replace the selected local signer.
+The button shows **Connecting wallet…**, **Using connected wallet**, or **Wallet
+unavailable for this step** as appropriate, with an explanation beside it.
+Disconnecting disables the wallet option again; reconnecting updates it. The
+selected address is shown before any signing action. The header always
 represents the external wallet; a local key never replaces it.
 
 [SignerProvider](src/setup/signer-provider.tsx) supplies the chosen
@@ -169,7 +175,9 @@ missing capability; they never silently substitute a local signer.
 
 **SEP-10 limitation:** Colibri WebAuth currently calls synchronous raw-key
 `sign()`. Wallets Kit/direct Freighter expose asynchronous approval-based
-signing, so they cannot be selected for that lesson. Create its local signer
+signing, so they cannot be selected for that lesson. The selector confirms that
+the wallet is connected and explains this capability restriction; a disabled
+choice here does not mean the connection is stale. Create its local signer
 instead; a wallet integration exposing a genuine complete Core keypair signer
 could use the same selector. See the
 [Freighter message API](https://docs.freighter.app/docs/playground/signmessage/)

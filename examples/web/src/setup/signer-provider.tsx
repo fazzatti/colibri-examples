@@ -16,6 +16,7 @@ import {
   type PropsWithChildren,
   useContext,
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
@@ -28,7 +29,7 @@ import {
 } from "@colibri/react";
 import { ColibriQueryProvider } from "@colibri/react/provider";
 import { useIsMutating } from "@tanstack/react-query";
-import { Actions, Failure, Value } from "../components/lesson.tsx";
+import { Actions, Failure, Spinner, Value } from "../components/lesson.tsx";
 import { createPracticeIdentity } from "./practice-identity.ts";
 import { accountId } from "./fixtures.ts";
 import { network } from "./network.ts";
@@ -48,6 +49,9 @@ export function SignerProvider(
   >,
 ) {
   const appConfig = useColibriConfig();
+  // Subscribe to the HEADER wallet, even while this lesson uses its local key.
+  // Derive button availability on every snapshot: copying connection state into
+  // useState would miss a wallet connected after the lesson has mounted.
   const wallet = useConnection();
   const [identity] = useState(createPracticeIdentity);
   const [localConfig] = useState(() =>
@@ -79,6 +83,30 @@ export function SignerProvider(
   const walletReady = wallet.status === "connected" &&
     !!accountId(connection?.address ?? "") && available;
   const selected = source === "wallet" ? connection : local.connection;
+
+  function describeWallet() {
+    if (wallet.status === "connecting") {
+      return "Connecting the header wallet. Complete the wallet prompt to check its signing capabilities.";
+    }
+    if (wallet.status !== "connected") {
+      return "No wallet connected. Connect in the header to check whether it supports this step.";
+    }
+    if (!accountId(connection?.address ?? "")) {
+      return "Wallet connected, but this step requires a Stellar G-account. Choose a G-account or create a local signer.";
+    }
+    if (walletReady) {
+      return source === "wallet"
+        ? "Using the header wallet. Account changes and disconnection are reflected here automatically."
+        : "Wallet connected and compatible with this step. Select it to use its signer; connecting alone does not change your chosen signer.";
+    }
+    if (capability === "keypair") {
+      return "Wallet connected, but unavailable for SEP-10 in this demo. Colibri WebAuth currently needs synchronous raw-key signing; Wallets Kit and direct Freighter provide asynchronous signing. Create a local signer for this step.";
+    }
+    if (capability === "message") {
+      return "Wallet connected, but this connection has no SEP-53 message signer. Use Wallets Kit with Freighter, or create a local signer.";
+    }
+    return "Wallet connected, but this connection has no transaction-envelope signer. Use a wallet with that capability, or create a local signer.";
+  }
 
   useEffect(() => {
     mounted.current = true;
@@ -143,6 +171,8 @@ export function SignerProvider(
         <ChoiceControls
           selecting={selecting}
           walletReady={walletReady}
+          walletStatus={wallet.status}
+          walletDescription={describeWallet()}
           source={source}
           choose={choose}
         />
@@ -151,17 +181,6 @@ export function SignerProvider(
           switch to the wallet or leave. The connected wallet stays in the
           header.
         </p>
-        {!walletReady && (
-          <p className="muted">
-            {capability === "keypair"
-              ? "SEP-10 currently needs synchronous raw-key signing in Colibri WebAuth. Wallets Kit and direct Freighter cannot supply that capability; use a local signer here."
-              : !connection
-              ? "Connect a wallet in the header to enable the wallet option."
-              : capability === "message"
-              ? "This connection has no SEP-53 message signer. Use Wallets Kit with Freighter, or create a local signer."
-              : "This example needs a G-account with transaction-envelope signing support."}
-          </p>
-        )}
         <Value label="Selected signer">
           {source === "none"
             ? "Choose a signer above"
@@ -177,14 +196,36 @@ export function SignerProvider(
   );
 }
 
-function ChoiceControls({ selecting, walletReady, source, choose }: {
+function ChoiceControls({
+  selecting,
+  walletReady,
+  walletStatus,
+  walletDescription,
+  source,
+  choose,
+}: {
   selecting: boolean;
   walletReady: boolean;
+  walletStatus: ReturnType<typeof useConnection>["status"];
+  walletDescription: string;
   source: Source;
   choose(source: "local" | "wallet"): Promise<void>;
 }) {
   // Keep a signing request and its source together until it settles.
   const pending = useIsMutating() > 0;
+  const walletDescriptionId = useId();
+  const walletSelected = source === "wallet" && walletReady;
+
+  // A connected wallet can be incompatible with a particular lesson. Show that
+  // state explicitly instead of leaving the same unexplained disabled button.
+  // Keep the reason beside the control and announce connection changes.
+  const walletLabel = walletStatus === "connecting"
+    ? "Connecting wallet…"
+    : walletStatus === "connected" && !walletReady
+    ? "Wallet unavailable for this step"
+    : walletSelected
+    ? "Using connected wallet"
+    : "Use connected wallet";
   return (
     <fieldset className="lesson-step">
       <legend>Choose a signer</legend>
@@ -202,13 +243,20 @@ function ChoiceControls({ selecting, walletReady, source, choose }: {
         <button
           type="button"
           className="secondary"
-          aria-pressed={source === "wallet"}
+          aria-pressed={walletSelected}
+          aria-describedby={walletDescriptionId}
           disabled={!walletReady || selecting || pending || source === "wallet"}
           onClick={() => void choose("wallet")}
         >
-          Use connected wallet
+          {walletStatus === "connecting" && <Spinner />}
+          {walletLabel}
         </button>
       </Actions>
+      <p id={walletDescriptionId} className="muted" role="status">
+        {walletDescription}
+        {(selecting || pending) &&
+          " Signer choices are locked until the current operation finishes."}
+      </p>
     </fieldset>
   );
 }

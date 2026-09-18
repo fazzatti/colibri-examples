@@ -72,6 +72,18 @@ Record those checks separately.
 - Open each signer-dependent page directly. Both source choices are visible;
   wallet choice is disabled without a compatible connection. There is no default
   hidden signer and no automatic wallet prompt.
+- Keep each page open while connecting from the header. The choice shows
+  Connecting wallet, then enables Use connected wallet if compatible. Repeat
+  with a local signer already selected: its address and results must survive
+  connecting/disconnecting the header wallet until an explicit source change.
+- Select the wallet: the button reads Using connected wallet. Disconnect and
+  reconnect without reloading; the choice and selected address follow the live
+  connection. Account and capability changes must update the current step too.
+- On Authenticate & log out, connecting Kit changes the disabled button to
+  Wallet unavailable for this step with a connected-but-incompatible SEP-10
+  explanation. This differs from the initial disconnected state. On Sign and
+  verify a message, direct Freighter explains its missing SEP-53 capability,
+  while Kit/Freighter enables the choice.
 - Create local signer. The selected address differs from the header wallet, and
   transaction submission stays disabled until funding/account checks succeed.
   Fund with Friendbot, then invoke successfully; the read increases by one.
