@@ -1,3 +1,15 @@
+/**
+ * Read the deployed Counter using a generated client's typed method helper.
+ *
+ * Run deno task setup for the Testnet counter ID. useContract retains the client,
+ * then useContractRead calls its getCount.read() helper and exposes query state.
+ * Follow the empty argument list, inspect the count and request another read
+ * with the button. Reads simulate execution; they do not persist contract
+ * changes or request a wallet signature. spec-read.tsx shows the alternative
+ * when the application has an ABI but does not need the full generated client.
+ *
+ * @module
+ */
 import { useNetwork } from "@colibri/react";
 import { useContract } from "@colibri/react/contracts";
 import { useContractRead } from "@colibri/react/contracts/read";
@@ -8,6 +20,10 @@ import { FixtureRequired } from "../../components/fixture-required.tsx";
 
 function Read({ id }: { id: `C${string}` }) {
   const network = useNetwork();
+
+  // Bind the generated API to this deployment on the provider's Testnet
+  // network. Include both dependencies so a changed configuration cannot leave
+  // reads attached to an old client.
   const counter = useContract(() =>
     new Counter({
       networkConfig: network,
@@ -22,6 +38,8 @@ function Read({ id }: { id: `C${string}` }) {
     args: [],
   });
 
+  // Refetch reruns the same read. Check data against undefined below so the
+  // counter's valid initial value of zero is displayed instead of hidden.
   return (
     <>
       <Note>

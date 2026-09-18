@@ -1,3 +1,16 @@
+/**
+ * Let each signing lesson choose a local identity or the connected app wallet.
+ *
+ * This is setup shared by the examples, not a replacement for their Colibri
+ * hooks. Capture the outer configuration first, create a separate local one,
+ * then nest a provider containing the selected source and its own query cache.
+ * Children continue to call useWallet/useSigners/useSignMessage directly.
+ * Capability checks explain unavailable wallet choices; they never silently
+ * substitute a local key. Source changes remount children to clear old forms,
+ * receipts and sessions. Cleanup releases only resources this lesson owns.
+ *
+ * @module
+ */
 import {
   createContext,
   type PropsWithChildren,
@@ -51,6 +64,10 @@ export function SignerProvider(
   const [error, setError] = useState<unknown>();
   const mounted = useRef(false);
   const connection = wallet.connection;
+
+  // A source can expose transaction signing without message or synchronous
+  // raw-key signing. Check the exact capability requested by the lesson and,
+  // for SEP-10, require a full signer matching the connected address.
   const keypair = connection?.signers.find((signer): signer is KeypairSigner =>
     isKeypairSigner(signer) && signer.publicKey() === connection.address
   );
@@ -67,6 +84,7 @@ export function SignerProvider(
     mounted.current = true;
     return () => {
       mounted.current = false;
+
       // Preserve the same handle during Strict Mode effect replay. Actual
       // unmount releases ONLY lesson-owned authority, never the outer wallet.
       queueMicrotask(() => {
@@ -81,6 +99,9 @@ export function SignerProvider(
     setSelecting(true);
     setError(undefined);
     try {
+      // Generating a key is an explicit action. Switching to the wallet first
+      // releases the local connection/key; neither branch reconnects or replaces
+      // the outer wallet. generation below forces a fresh lesson after each choice.
       if (next === "local") await localConfig.connect("practice-identity");
       else {
         if (!walletReady) return;
@@ -96,6 +117,9 @@ export function SignerProvider(
     }
   }
 
+  // Only the SEP-10 lesson needs the full keypair handle. Other lessons use
+  // Colibri's guarded connection capabilities directly. Never expose this
+  // handle in diagnostics or treat an async wallet signer as a raw keypair.
   function getKeypairSigner() {
     if (source === "local") return identity.getSigner();
     if (source === "wallet" && keypair) return keypair;

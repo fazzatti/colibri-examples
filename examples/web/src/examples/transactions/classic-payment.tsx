@@ -1,3 +1,15 @@
+/**
+ * Build and submit a Classic payment of exactly one Testnet XLM.
+ *
+ * Choose a local signer or connected wallet, and check/fund both the source and
+ * recipient on this page. An ordinary payment requires an existing recipient;
+ * the optional practice-recipient button creates only a public key until you
+ * fund it. Follow Operation.payment into useClassicTransaction, then inspect
+ * the confirmed result by hash. The source authorizes the payment and pays the
+ * fee. Nothing depends on running another lesson first.
+ *
+ * @module
+ */
 import { SignerProvider } from "../../setup/signer-provider.tsx";
 import { useState } from "react";
 import { LocalSigner } from "@colibri/core";
@@ -21,6 +33,10 @@ function Payment() {
   const [destination, setDestination] = useState(exampleAccount);
   const source = accountId(wallet.address ?? "");
   const recipient = accountId(destination);
+
+  // Check source and recipient independently. Friendbot creates missing
+  // Testnet ledger accounts; the payment below does not include CreateAccount.
+  // Both setup panels refetch these queries before submission becomes available.
   const sourceAccount = useAccount(source, { retry: false });
   const recipientAccount = useAccount(recipient, { retry: false });
 
@@ -44,6 +60,10 @@ function Payment() {
       asset: Asset.native(),
       amount: "1",
     });
+
+    // Pass native operations plus explicit source/signers into the Classic
+    // pipeline. It loads the source sequence and builds/signs/submits the
+    // transaction; the operation alone is not a signed envelope.
     payment.mutate({
       operations: [operation],
       config: { source, signers: [...wallet.signers], fee: "100", timeout: 60 },
@@ -117,6 +137,8 @@ function Payment() {
   );
 }
 
+// The selected provider supplies authority for this page only. Local-key
+// setup and recipient setup are independent, so another lesson is unnecessary.
 export default function ClassicPayment() {
   return (
     <SignerProvider>

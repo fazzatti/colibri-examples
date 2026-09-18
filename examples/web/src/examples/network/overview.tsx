@@ -1,3 +1,14 @@
+/**
+ * Read Testnet configuration and observe the latest ledger without a wallet.
+ *
+ * Start with the provider hooks: they expose configuration and an RPC client.
+ * Then follow useLatestLedger, which performs the actual request. The controls
+ * let the reader compare a manual refresh with an optional five-second schedule;
+ * the effect below owns both the countdown and its cleanup. No transaction is
+ * built or signed. See app/provider.tsx for the configuration shared by lessons.
+ *
+ * @module
+ */
 import { useEffect, useState } from "react";
 import { useColibriConfig, useNetwork } from "@colibri/react";
 import { useLatestLedger, useRpc } from "@colibri/react/rpc";
@@ -47,6 +58,9 @@ export default function NetworkOverview() {
     return () => clearInterval(timer);
   }, [autoRefresh, isFetching, refetch, fetchStatus]);
 
+  // The controls expose the request schedule separately from returned data.
+  // A cached ledger may remain visible during refetch; isFetching indicates
+  // network work, while dataUpdatedAt identifies the last successful read.
   return (
     <>
       <Note>

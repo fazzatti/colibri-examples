@@ -1,3 +1,15 @@
+/**
+ * Connect directly to Freighter through its upstream SDK and Colibri adapter.
+ *
+ * Install the extension and select Testnet before requesting access. This lesson
+ * first checks availability, then connects with the "freighter" connector ID
+ * registered in app/provider.tsx. Inspect setup/freighter.ts for the adapter.
+ * Unlike the Kit route, it has no wallet-selection modal and declares only
+ * envelope signing. The connection still belongs to the shared app provider,
+ * so its status and address also appear in the header.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { isConnected } from "@stellar/freighter-api";
 import { useConnect, useConnection, useDisconnect } from "@colibri/react";
@@ -13,6 +25,9 @@ export default function Freighter() {
   const disconnect = useDisconnect();
   const connection = useConnection();
   const [error, setError] = useState<unknown>();
+
+  // The availability probe happens before Colibri enters "connecting".
+  // Keep the button busy across both stages to avoid overlapping prompts.
   const [checking, setChecking] = useState(false);
 
   async function requestAccess() {
@@ -40,6 +55,8 @@ export default function Freighter() {
   async function release() {
     setError(undefined);
     try {
+      // Clear the shared provider connection. The extension may still remember
+      // site access, which is why a later explicit connection can be possible.
       await disconnect();
     } catch (cause) {
       setError(cause);

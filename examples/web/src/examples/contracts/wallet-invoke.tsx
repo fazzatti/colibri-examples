@@ -1,3 +1,15 @@
+/**
+ * Invoke Counter using authority derived from the selected connection.
+ *
+ * Choose a local signer or compatible connected wallet, then check/fund its
+ * Testnet account on this page. The counter comes from deno task setup.
+ * useWalletContractInvoke obtains source/signers from the nearest provider;
+ * the button still supplies method arguments, fees and timeout. On success,
+ * refetch getCount to observe the committed increment. Compare invoke.tsx for
+ * explicit authority. The "wallet" hook also works with the local connector.
+ *
+ * @module
+ */
 import { SignerProvider } from "../../setup/signer-provider.tsx";
 import { useNetwork } from "@colibri/react";
 import { useWallet } from "@colibri/react/wallet";
@@ -20,6 +32,10 @@ import { FixtureRequired } from "../../components/fixture-required.tsx";
 function Invoke({ id }: { id: `C${string}` }) {
   const network = useNetwork();
   const wallet = useWallet();
+
+  // useWallet reads the selected lesson provider, which may hold a local
+  // connector. Check that source's ledger account before enabling a write;
+  // connecting or generating a key alone cannot make it pay transaction fees.
   const source = accountId(wallet.address ?? "");
   const account = useAccount(source, { retry: false });
   const counter = useContract(() =>
@@ -37,9 +53,15 @@ function Invoke({ id }: { id: `C${string}` }) {
   // connection. Explicit fees and timeout remain visible at the call site.
   const increment = useWalletContractInvoke(counter, "increment", {
     onSuccess: () => {
+      // This page has one affected read, so request it again after success.
+      // The explicit-invoke lesson shows invalidating a precise shared query key.
       void count.refetch();
     },
   });
+
+  // The button passes only arguments and transaction policy. Source/signers
+  // are intentionally omitted because this hook obtains guarded authority from
+  // the connection when invoked. The base fee is separate from Soroban resources.
   return (
     <>
       <Note>
@@ -76,6 +98,9 @@ function Invoke({ id }: { id: `C${string}` }) {
     </>
   );
 }
+
+// Require the deployment, then offer both signer sources inside this lesson.
+// No signer choice or funded account from an earlier lesson is required.
 export default function WalletInvoke() {
   const id = contractId(exampleCounter);
   return id

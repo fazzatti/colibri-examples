@@ -1,3 +1,15 @@
+/**
+ * Sign a SEP-53 message, inspect its bytes, then verify it as a separate step.
+ *
+ * Choose a local signer or a wallet with message-signing support. Follow sign()
+ * from useSignMessage to the hexadecimal output and editable verification form.
+ * Then follow verify(), which checks only the supplied public key, text and
+ * signature; it works even without a selected signer. Altering the text should
+ * produce a mismatch. No ledger account, funding or transaction is required.
+ * SignerProvider resets the lesson when its source changes and owns local keys.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
 import { useConnection } from "@colibri/react";
@@ -12,10 +24,17 @@ import {
 } from "../../components/lesson.tsx";
 
 function MessageExample() {
+  // Read identity and message-signing authority from the same selected
+  // provider. A connected address is insufficient without messageSigner;
+  // the Sign button below checks that capability before starting the mutation.
   const { connection } = useConnection();
   const signing = useSignMessage();
   const [message, setMessage] = useState("Approve document revision 42.");
   const [signedHex, setSignedHex] = useState("");
+
+  // Keep verification inputs independent from the compose field. They record
+  // the last signed values or pasted public data; editing them clears the
+  // verification result so it cannot describe a different message.
   const [verificationMessage, setVerificationMessage] = useState("");
   const [verificationKey, setVerificationKey] = useState("");
   const [verificationHex, setVerificationHex] = useState("");
@@ -35,6 +54,9 @@ function MessageExample() {
       const submittedMessage = message;
       const publicKey = connection.address;
       const signature = await signing.mutateAsync(submittedMessage);
+
+      // Convert bytes to fixed-width pairs, retaining leading zeroes. Hex is
+      // an exchange/display format; verification converts it back to bytes.
       const hex = Array.from(
         signature,
         (byte) => byte.toString(16).padStart(2, "0"),
@@ -211,6 +233,9 @@ function MessageExample() {
   );
 }
 
+// Request the message capability specifically. The selector can reject a
+// wallet that signs transactions but cannot produce SEP-53 signatures, and
+// changing the source remounts the form so old results are cleared.
 export default function Message() {
   return (
     <SignerProvider capability="message">

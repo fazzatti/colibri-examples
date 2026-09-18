@@ -1,6 +1,21 @@
+/**
+ * Explain where wallet integration lives before trying the connection hooks.
+ *
+ * This page is a reading guide: it makes no wallet or RPC calls itself. Follow
+ * setup/wallets-kit.ts for module selection and declared capabilities, then
+ * app/provider.tsx for connector registration. The wallet.tsx and freighter.tsx
+ * lessons exercise those two paths independently. Keep account discovery,
+ * envelope signing, authorization-entry signing and message signing distinct
+ * when adapting another wallet; one capability does not imply the others.
+ *
+ * @module
+ */
 import { Note } from "../../components/lesson.tsx";
 
 export default function WalletConnectivity() {
+  // Read these sections in integration order: choose modules, declare what
+  // those modules can sign, register their connector, then wire user actions.
+  // The executable examples keep those actions in their own lesson files.
   return (
     <>
       <Note>

@@ -1,3 +1,15 @@
+/**
+ * Own the external-wallet configuration shared by this browser application.
+ *
+ * The app mounts this provider around the active lesson and header. Navigation
+ * therefore retains one Testnet configuration, external-wallet connection and
+ * query cache. Both connector IDs come from the setup modules below.
+ * Signer-dependent lessons nest setup/signer-provider.tsx to select this wallet
+ * or a separately owned local key. Hot-module cleanup releases connection
+ * listeners when Vite replaces this configuration during development.
+ *
+ * @module
+ */
 import { createColibriConfig } from "@colibri/react";
 import { ColibriQueryProvider } from "@colibri/react/provider";
 import type { PropsWithChildren } from "react";

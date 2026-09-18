@@ -37,6 +37,43 @@ Dependencies and tasks belong to this example's `deno.json`. Deno installs npm
 packages locally for Vite, including Colibri through JSR's npm bridge. No
 separate Node or npm installation is required.
 
+## Follow a lesson into its source
+
+Use the [hook-to-lesson map](#hook-to-lesson-map) below to open the runnable
+`.tsx` file for any page. Each file starts with its learning objective,
+prerequisites, actions to try and expected result. Comments immediately before
+the relevant blocks explain the hook inputs, Stellar concepts and state changes.
+
+Read a lesson in this order:
+
+1. **Setup and ownership.** The default export is the page entry point. Some
+   pages first require a public fixture or wrap their inner component in
+   [SignerProvider](src/setup/signer-provider.tsx). That wrapper offers a local
+   signer or the connected wallet; the example's SDK calls stay in the lesson.
+2. **Inputs and hooks.** Follow validated addresses into the read hooks. Notice
+   which queries start with valid input and which wait for an explicit action.
+   [Account](src/examples/accounts/account.tsx), for example, separates draft
+   input from the account selected by submitting the form.
+3. **User action.** Trace the button into its handler or mutation. In
+   [explicit contract invocation](src/examples/contracts/invoke.tsx), account
+   setup comes before the call that supplies arguments, source, signers and
+   fees. Reads, simulations, signatures and submissions have different effects.
+4. **Result and lifetime.** Follow success/error state into the rendered output,
+   any affected query refresh, and cleanup on source changes or navigation.
+   [Message signing](src/examples/signing/message.tsx) keeps signing and public
+   verification separate; [sessions](src/examples/sessions/session.tsx) own and
+   destroy their authentication state.
+
+Each adjacent `.guide.ts` contains the explanations and documentation links
+shown in the app, rather than executable SDK calls. For example,
+[invoke.guide.ts](src/examples/contracts/invoke.guide.ts) accompanies the
+invocation source. Shared [display components](src/components/lesson.tsx) render
+query/mutation states;
+[TestnetAccountSetup](src/components/testnet-account-setup.tsx) is the shared
+funding control. [fixtures.ts](src/setup/fixtures.ts) reads public identifiers
+and validates address syntax, while [provider.tsx](src/app/provider.tsx)
+configures the app's Testnet network and external wallets.
+
 ## Prepare Testnet data (optional)
 
 Public reads can use addresses you enter yourself. For ready-to-run account,
@@ -81,12 +118,14 @@ those into a general connection and declared signer capabilities. The provider
 checks the actual wallet network passphrase and invalidates stale authority on
 identity changes.
 
-| Setup file                                             | Responsibility                                                                         |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| [wallets-kit.ts](src/setup/wallets-kit.ts)             | Kit initialization and explicit envelope, G-account auth-entry and SEP-53 capabilities |
-| [freighter.ts](src/setup/freighter.ts)                 | Independent direct Freighter adapter; envelope signing only                            |
-| [practice-identity.ts](src/setup/practice-identity.ts) | Factory for separate, disposable lesson identities                                     |
-| [provider.tsx](src/app/provider.tsx)                   | Shared provider for real wallet connections across routes                              |
+| Setup file                                                     | Responsibility                                                                         |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [wallets-kit.ts](src/setup/wallets-kit.ts)                     | Kit initialization and explicit envelope, G-account auth-entry and SEP-53 capabilities |
+| [wallet-message-signer.ts](src/setup/wallet-message-signer.ts) | Adapt and verify the Kit/Freighter SEP-53 signature bytes                              |
+| [freighter.ts](src/setup/freighter.ts)                         | Independent direct Freighter adapter; envelope signing only                            |
+| [practice-identity.ts](src/setup/practice-identity.ts)         | Factory for separate, disposable lesson identities                                     |
+| [signer-provider.tsx](src/setup/signer-provider.tsx)           | Per-lesson source choice, capability checks and local-key cleanup                      |
+| [provider.tsx](src/app/provider.tsx)                           | Shared provider for real wallet connections across routes                              |
 
 To support another Kit wallet, import its module, add it to `modules`, and
 review its signing support before adding a capability rule. Some modules need

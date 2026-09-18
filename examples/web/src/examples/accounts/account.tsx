@@ -1,3 +1,15 @@
+/**
+ * Read a public Testnet account with useAccount and inspect its ledger data.
+ *
+ * Enter an existing G-address or use the optional account from deno task setup.
+ * The input is a draft: submitting chooses the address observed by the hook,
+ * while Refresh reads that same account again. Trace address validation before
+ * the query, then QueryState and the balance display. A well-formed public key
+ * may have no ledger account; that lookup error stays visible. This lesson needs
+ * neither a connected wallet nor a signature.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { useAccount } from "@colibri/react/accounts";
 import { accountId, exampleAccount } from "../../setup/fixtures.ts";
@@ -12,6 +24,9 @@ import {
 import { formatAmount } from "../../components/amount.ts";
 
 export default function Account() {
+  // Separate draft input from the address being observed. Typing alone does
+  // not replace the current query; submitting validates and selects the next
+  // account. Refresh below reuses the already-selected address.
   const [input, setInput] = useState(exampleAccount);
   const [address, setAddress] = useState(accountId(exampleAccount));
 
@@ -19,6 +34,9 @@ export default function Account() {
   // Undefined disables the query; a missing account remains a visible error.
   const account = useAccount(address);
 
+  // The balance is an exact integer with seven decimal places. formatAmount
+  // formats it without floating-point conversion; QueryState keeps loading and
+  // lookup errors visible alongside the returned public account data.
   return (
     <>
       <Note>

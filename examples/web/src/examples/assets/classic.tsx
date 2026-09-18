@@ -1,3 +1,15 @@
+/**
+ * Read a Classic issued-asset balance using its code and issuer identity.
+ *
+ * Use the GUIDE owner/issuer created by deno task setup, or enter matching
+ * Testnet addresses. The outer component validates those addresses before
+ * mounting Balance, whose useBalance call reads the owner's trustline. Compare
+ * this asset-oriented result with accounts/trustline.tsx for the full ledger
+ * entry. A missing trustline is an error; this read cannot create one or issue
+ * GUIDE. A different issuer defines a different asset even with the same code.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { useBalance } from "@colibri/react/assets";
 import {
@@ -22,6 +34,9 @@ function Balance(
     { kind: "classic", code: "GUIDE", issuer },
     address,
   );
+
+  // Use the decimals carried by the balance result and keep raw as bigint.
+  // The result object is present even for zero, so a zero balance still renders.
   return (
     <QueryState query={balance}>
       {balance.data && (
@@ -38,6 +53,10 @@ function Balance(
 export default function ClassicBalance() {
   const [address, setAddress] = useState(exampleAccount);
   const [issuer, setIssuer] = useState(exampleIssuer);
+
+  // Mount the querying child only after both addresses validate. This keeps
+  // its hook unconditional and avoids constructing a half-specified asset
+  // while the reader edits either field.
   const owner = accountId(address);
   const assetIssuer = accountId(issuer);
   return (

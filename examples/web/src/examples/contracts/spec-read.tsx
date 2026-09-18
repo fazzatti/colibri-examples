@@ -1,3 +1,15 @@
+/**
+ * Read Counter directly from its ABI with useContractReadSpec.
+ *
+ * Use the Testnet deployment created by deno task setup and the generated
+ * CounterSpec. This variant supplies the contract's exact get_count ABI name
+ * without constructing Counter. The decoder checks the returned value before
+ * the UI treats it as a number. Compare read.tsx for generated helper type
+ * inference. This is a simulation with no committed write or wallet approval;
+ * a local ABI describes calls but does not prove the deployed code's identity.
+ *
+ * @module
+ */
 import { useContractReadSpec } from "@colibri/react/contracts/read";
 import { CounterSpec } from "../../generated/counter/constants.ts";
 import { contractId, exampleCounter } from "../../setup/fixtures.ts";
@@ -12,6 +24,8 @@ function Read({ id }: { id: `C${string}` }) {
     spec: CounterSpec,
     method: "get_count",
   }, (value) => {
+    // Without a generated method helper, make the expected decoded shape
+    // explicit. An unexpected result becomes a query error, not a displayed count.
     if (typeof value !== "number") {
       throw new Error("Expected a u32 counter value.");
     }
@@ -41,6 +55,9 @@ function Read({ id }: { id: `C${string}` }) {
     </>
   );
 }
+
+// Reuse the same deployment fixture as the generated-client lesson so both
+// paths can be compared against the same stored counter value.
 export default function SpecRead() {
   const id = contractId(exampleCounter);
   return id ? <Read id={id} /> : <FixtureRequired />;

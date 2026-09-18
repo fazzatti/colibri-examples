@@ -1,3 +1,16 @@
+/**
+ * Authenticate with SEP-10 and observe an in-memory WebAuth session.
+ *
+ * Run deno task auth from examples/web, choose a compatible signer on this page,
+ * and authenticate. SessionExample discovers its own client and owns the session;
+ * Authentication uses useWebAuth for the exchange and useSession for its state.
+ * Only account/expiry metadata is displayed. Try local logout and disconnect,
+ * then leave the page to exercise cleanup. SEP-10 signs a challenge without
+ * submitting a ledger transaction. The current client needs a synchronous full
+ * keypair signer, so the Kit and direct Freighter adapters cannot be selected.
+ *
+ * @module
+ */
 import { useEffect, useState } from "react";
 import { useColibriConfig, useConnection, useDisconnect } from "@colibri/react";
 import {
@@ -26,6 +39,10 @@ function Authentication({ session }: { session: WebAuthSession }) {
   const identity = useLessonSigner();
   const disconnect = useDisconnect();
   const connection = useConnection();
+
+  // Observe the session store separately from the authentication mutation.
+  // useWebAuth performs the exchange but does not put the JWT in its mutation
+  // result; useSession exposes the session's status and token metadata.
   const state = useSession(session);
   const authentication = useWebAuth(session);
   const [error, setError] = useState<unknown>();
@@ -45,11 +62,17 @@ function Authentication({ session }: { session: WebAuthSession }) {
   async function release() {
     setError(undefined);
     try {
+      // Disconnect the selected provider's identity, which also invalidates
+      // its session. The separate logout button clears only this local session;
+      // using a local signer does not disconnect the header's external wallet.
       await disconnect();
     } catch (cause) {
       setError(cause);
     }
   }
+
+  // Render only account and expiry, never the token string. Session data must
+  // not be sent to the generic Data diagnostic component or browser persistence.
   return (
     <>
       <Actions>
@@ -102,6 +125,7 @@ function Authentication({ session }: { session: WebAuthSession }) {
 }
 function SessionExample() {
   const config = useColibriConfig();
+
   // Preserve the browser fetch receiver when the WebAuth transport invokes it.
   // This lesson discovers its own client; no earlier discovery step is needed.
   const client = useWebAuthClient(
@@ -151,6 +175,9 @@ function SessionExample() {
   );
 }
 
+// Require the complete synchronous keypair capability used by this WebAuth
+// client. A wallet's async envelope signer is a different interface; the
+// selector explains that limitation instead of silently changing authority.
 export default function Session() {
   return (
     <SignerProvider capability="keypair">

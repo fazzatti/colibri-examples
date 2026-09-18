@@ -1,3 +1,14 @@
+/**
+ * Compare useIdenticon with the ready-made AccountIdenticon component.
+ *
+ * Enter a valid G- or C-address; the public fixture or native token address
+ * provides an initial value. Both render the same deterministic image locally,
+ * without a wallet, funded account or RPC request. Follow address validation into
+ * the data-URL hook and compare it with the component rendering. The visual
+ * pattern helps recognize an address but does not authenticate its owner.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { AccountIdenticon, useIdenticon } from "@colibri/react/identicon";
 import {
@@ -10,6 +21,10 @@ import { Field, Note, Value } from "../../components/lesson.tsx";
 
 export default function Identicon() {
   const [input, setInput] = useState(exampleAccount || nativeToken);
+
+  // Validate the identifier before rendering. An address can have an identicon
+  // even if it has never been funded or deployed; this check concerns its
+  // encoding, not existence on the network.
   const address = accountId(input) ?? contractId(input);
 
   // This hook renders locally and needs no RPC. G-addresses follow SEP-33;

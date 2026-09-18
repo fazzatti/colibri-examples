@@ -1,3 +1,15 @@
+/**
+ * Provide reusable Testnet funding controls without hiding lesson hook calls.
+ *
+ * The parent lesson owns useAccount and passes its selected address and query
+ * here. Check account refetches that observation; Fund with Friendbot creates
+ * and funds the Testnet account, waits for RPC visibility, then refetches it.
+ * The lesson gates submission on the query's success. Parents key this component
+ * by address so a new source or recipient gets fresh setup feedback. Funding
+ * never generates/replaces the signer and remains an explicit user action.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { initializeWithFriendbot } from "@colibri/core";
 import { useNetwork } from "@colibri/react";
@@ -28,6 +40,9 @@ export function TestnetAccountSetup(
       });
       await account.refetch();
     } catch (cause) {
+      // Keep the selected address and signer intact on a failed/rate-limited
+      // funding request. The reader can check RPC state or retry funding without
+      // accidentally creating a different identity.
       setError(cause);
     } finally {
       setPending(false);

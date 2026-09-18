@@ -1,3 +1,15 @@
+/**
+ * Expose public Testnet fixtures and validate addresses entered in lessons.
+ *
+ * scripts/setup.ts writes the optional VITE_EXAMPLE_* identifiers; Vite exposes
+ * those values to the browser. Keep secrets out of this module and environment
+ * variables. Empty fixtures leave read forms available for manual input, while
+ * contract lessons show setup instructions. The validators check address
+ * encoding only: a valid key is not proof of a funded account or deployment.
+ * The native XLM SAC address is derived for the configured network.
+ *
+ * @module
+ */
 import { Asset } from "@stellar/stellar-sdk";
 import { StrKey } from "@colibri/core/strkey";
 import { network } from "./network.ts";

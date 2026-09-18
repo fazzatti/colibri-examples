@@ -1,3 +1,15 @@
+/**
+ * Connect and disconnect an external wallet with the combined useWallet hook.
+ *
+ * Install Freighter, select Testnet, then connect through the registered Wallets
+ * Kit connector. Follow the click handler into wallet.connect(), and observe how
+ * the same hook exposes status, address and signers. This uses the app provider,
+ * so the header and other wallet lessons see the same connection. Connecting
+ * requests access to an identity; funding and transaction approval are separate
+ * steps. connection.tsx shows the individual hooks behind this convenience API.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { useWallet } from "@colibri/react/wallet";
 import {
@@ -8,6 +20,9 @@ import {
 } from "../../components/lesson.tsx";
 
 export default function Wallet() {
+  // Observe the nearest provider rather than keeping a second address/status
+  // in local state. This keeps the lesson and header aligned on disconnect or
+  // wallet changes; only a caught action error belongs to this component.
   const wallet = useWallet();
   const [error, setError] = useState<unknown>();
 
@@ -27,6 +42,8 @@ export default function Wallet() {
   async function disconnect() {
     setError(undefined);
     try {
+      // Release this app's connection and guarded signers. This does not erase
+      // the wallet's keys or revoke the extension's permission for this site.
       await wallet.disconnect();
     } catch (cause) {
       setError(cause);

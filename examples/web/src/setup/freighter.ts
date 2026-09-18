@@ -1,3 +1,15 @@
+/**
+ * Register the direct Freighter alternative to the Wallets Kit integration.
+ *
+ * Pass the installed upstream API into Colibri's createFreighterConnector,
+ * then register this connector in app/provider.tsx. The freighter.tsx lesson
+ * selects it by ID. It declares envelope signing and observes authorized
+ * account/network changes; the separate Kit connector's message/auth-entry
+ * capabilities are not inherited. Importing this adapter does not request
+ * permission or open a signing prompt.
+ *
+ * @module
+ */
 import * as freighter from "@stellar/freighter-api";
 import { createFreighterConnector } from "@colibri/react/ecosystem/freighter";
 

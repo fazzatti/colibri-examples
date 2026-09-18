@@ -1,3 +1,15 @@
+/**
+ * Observe a bounded live window of Counter contract events.
+ *
+ * Use the Testnet counter from deno task setup. Keep this page open and invoke
+ * that same counter in another tab to produce CountChanged events. Follow the
+ * memoized createContractEvents store into useContractEvents, then inspect the
+ * returned ledger, topics, value and transaction hash. Only 25 events are kept;
+ * this is a live view, not a complete history. Stop/start demonstrates observer
+ * cleanup by unmounting and recreating the Stream component.
+ *
+ * @module
+ */
 import { useMemo, useState } from "react";
 import { EventFilter } from "@colibri/core/events";
 import { useColibriConfig } from "@colibri/react";
@@ -24,6 +36,10 @@ function Stream({ id }: { id: `C${string}` }) {
       maxEvents: 25,
     }), [config, id]);
   const state = useContractEvents(subscription);
+
+  // Render public event payloads with the transaction hash and ledger so the
+  // reader can relate each event to an invocation. Restart acts on this store;
+  // the outer Stop control instead removes the observer/component entirely.
   return (
     <>
       <Value label="Stream status">
@@ -57,6 +73,10 @@ function Stream({ id }: { id: `C${string}` }) {
 }
 export default function Events() {
   const id = contractId(exampleCounter);
+
+  // Conditional mounting below is the stop mechanism. Unmounting Stream
+  // releases its subscription; starting again creates a fresh live window
+  // rather than accumulating an unbounded event history across visits.
   const [running, setRunning] = useState(true);
   if (!id) return <FixtureRequired />;
   return (

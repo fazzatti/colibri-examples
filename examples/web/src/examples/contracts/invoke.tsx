@@ -1,3 +1,15 @@
+/**
+ * Invoke Counter with an explicit fee payer and signer list, then refresh its read.
+ *
+ * Run deno task setup for the counter, choose a local signer or connected wallet
+ * on this page, and check/fund its Testnet account here. Follow the generated
+ * client and getCount query into useContractInvoke and the invoke() click handler.
+ * The call commits +1 and pays fees; success invalidates the affected read key.
+ * No earlier lesson prepares this source. Compare wallet-invoke.tsx, where the
+ * hook derives authority from the selected connection instead of call arguments.
+ *
+ * @module
+ */
 import { useQueryClient } from "@tanstack/react-query";
 import { useColibriConfig, useConnection, useNetwork } from "@colibri/react";
 import { useAccount } from "@colibri/react/accounts";
@@ -27,6 +39,10 @@ function Invoke({ id }: { id: `C${string}` }) {
   const queryClient = useQueryClient();
   const { connection } = useConnection();
   const signers = useSigners();
+
+  // The selected signer owns a key, but fees require an actual ledger account.
+  // Check the selected G-address through RPC and let TestnetAccountSetup fund it
+  // here. Disable automatic retries so an unfunded source remains actionable.
   const source = accountId(connection?.address ?? "");
   const account = useAccount(source, { retry: false });
   const counter = useContract(() =>
@@ -34,6 +50,9 @@ function Invoke({ id }: { id: `C${string}` }) {
       networkConfig: network,
       contractConfig: { contractId: id },
     }), [network, id]);
+
+  // Keep a single read descriptor for both observation and invalidation.
+  // Reconstructing a different key after the write could leave this count stale.
   const read = {
     contract: counter,
     method: "getCount" as const,
@@ -50,6 +69,9 @@ function Invoke({ id }: { id: `C${string}` }) {
       }),
   });
 
+  // Creating the mutation hook does not execute the pipeline. The click handler
+  // starts it only after the source account is available; its pending state
+  // covers preparation, signing, submission and confirmation.
   function invoke() {
     if (!source || !account.isSuccess) return;
 
@@ -59,6 +81,8 @@ function Invoke({ id }: { id: `C${string}` }) {
       config: {
         source,
         signers: [...signers],
+        // Base fee is in stroops; the Soroban pipeline also prepares the
+        // resource fee. This is not a cap of 100 stroops on the total fee.
         fee: { base: "100" },
         timeout: 60,
       },
@@ -109,6 +133,9 @@ function Invoke({ id }: { id: `C${string}` }) {
     </>
   );
 }
+
+// Give this page its own signer choice and local-key lifetime. Provider
+// changes reset the lesson's forms/results; the app wallet stays in the header.
 export default function ContractInvoke() {
   const id = contractId(exampleCounter);
   return id

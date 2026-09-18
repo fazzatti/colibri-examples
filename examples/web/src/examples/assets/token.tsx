@@ -1,3 +1,15 @@
+/**
+ * Read SEP-41 token metadata and balances through a contract address.
+ *
+ * The default token is Testnet's native XLM Stellar Asset Contract (SAC).
+ * Enter another SEP-41 contract to compare its metadata, then enter a G- or
+ * C-address balance owner. useTokenMetadata and useBalance are separate queries:
+ * metadata can load before a valid owner is supplied. Follow the contract/owner
+ * validation and use the returned decimals for display. Arbitrary SEP-41 tokens
+ * need not represent Classic assets or use XLM's seven decimal places.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { useBalance, useTokenMetadata } from "@colibri/react/assets";
 import {
@@ -22,6 +34,10 @@ function Token(
   // Contract (SAC). A custom SEP-41 token is not necessarily a Classic asset.
   const metadata = useTokenMetadata(id);
   const balance = useBalance({ kind: "sep41", contractId: id }, address);
+
+  // Render the two observations independently: token metadata can succeed
+  // without an owner balance. Format the balance with its own declared decimals,
+  // keeping the raw integer exact for tokens with different precision.
   return (
     <>
       <QueryState query={metadata}>
@@ -51,6 +67,9 @@ export default function TokenBalance() {
   const [token, setToken] = useState(nativeToken);
   const [address, setAddress] = useState(exampleAccount);
   const id = contractId(token);
+
+  // SEP-41 balances can belong to accounts or contracts. Accept either
+  // StrKey form, while requiring the token itself to have a contract address.
   const owner = accountId(address) ?? contractId(address);
   return (
     <>

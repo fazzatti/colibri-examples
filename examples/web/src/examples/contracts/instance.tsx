@@ -1,3 +1,15 @@
+/**
+ * Keep a generated Counter client stable across ordinary React rerenders.
+ *
+ * Install generates src/generated/counter from the local Wasm; deno task setup
+ * separately supplies a Testnet deployment ID. Follow useContract's factory and
+ * dependencies, inspect the generated ABI, then press Rerender component to
+ * compare object identity. Constructing and inspecting this client does not
+ * invoke the contract. read.tsx adds a query to the same client pattern; the
+ * buttons here change only local React state or navigate to that lesson.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { useNetwork } from "@colibri/react";
 import { useContract } from "@colibri/react/contracts";
@@ -17,6 +29,10 @@ function Client({ id }: { id: `C${string}` }) {
       networkConfig: network,
       contractConfig: { contractId: id },
     }), [network, id]);
+
+  // Retain the initial reference only for this identity demonstration. The
+  // button changes unrelated React state; equality should remain true while
+  // the network and deployment dependencies are unchanged.
   const [firstClient] = useState(counter);
 
   return (
@@ -44,6 +60,9 @@ function Client({ id }: { id: `C${string}` }) {
     </>
   );
 }
+
+// The generated class describes the contract API; it does not deploy it.
+// Require the public deployment fixture before mounting the client lesson.
 export default function ContractInstance() {
   const id = contractId(exampleCounter);
   return id ? <Client id={id} /> : <FixtureRequired />;

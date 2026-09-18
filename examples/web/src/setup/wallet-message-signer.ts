@@ -1,3 +1,15 @@
+/**
+ * Adapt the configured Kit/Freighter SEP-53 message capability to Colibri.
+ *
+ * createWalletMessageSigner captures one connected G-address, network and Kit
+ * module. Each request verifies that identity before and after wallet approval,
+ * converts the upstream base64 signature to bytes, and verifies those bytes
+ * against the requested message. Only verified bytes reach useSignMessage.
+ * The adapter uses installed Kit types and accepts text or valid UTF-8 bytes;
+ * it does not generalize Freighter's signing format to unrelated modules.
+ *
+ * @module
+ */
 import type { MessageSigner } from "@colibri/core/signers";
 import { StrKey } from "@colibri/core/strkey";
 import type { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
@@ -17,6 +29,9 @@ export function createWalletMessageSigner(
     throw new Error("Message signing needs a G-address.");
   }
 
+  // Wallet approval is asynchronous: the user can change accounts or
+  // networks while a prompt is open. Check the live Kit state at both ends
+  // of the request before accepting a signature for the captured identity.
   async function checkIdentity() {
     const current = await kit.getAddress();
     const network = await kit.getNetwork();
@@ -52,6 +67,10 @@ export function createWalletMessageSigner(
           "The wallet returned a signature from another account.",
         );
       }
+
+      // The upstream result is base64 text; Colibri's MessageSigner returns
+      // bytes. Invalid base64 rejects here, and length/SEP-53 checks below reject
+      // well-encoded but incompatible signatures.
       const signature = Uint8Array.from(
         atob(result.signedMessage),
         (byte) => byte.charCodeAt(0),

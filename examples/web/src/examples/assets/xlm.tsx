@@ -1,3 +1,14 @@
+/**
+ * Read native XLM through the asset-oriented useBalance hook.
+ *
+ * Enter a funded Testnet G-address or use the public setup fixture. The XLM asset
+ * identity selects an account balance read, with raw bigint stroops and seven
+ * decimal places. Compare the exact raw value with its formatted display below.
+ * This public query neither connects a wallet nor moves funds, and its ledger
+ * balance is not a calculation of spendable XLM after reserves and liabilities.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { useBalance } from "@colibri/react/assets";
 import { accountId, exampleAccount } from "../../setup/fixtures.ts";
@@ -11,11 +22,17 @@ import {
 import { formatAmount } from "../../components/amount.ts";
 
 export default function XlmBalance() {
+  // Unlike the submit-to-read account lesson, this form feeds the query as
+  // soon as accountId accepts a complete G-address. Partial input becomes
+  // undefined, leaving the balance query waiting for an address.
   const [address, setAddress] = useState(exampleAccount);
 
   // Native XLM is a distinct identity. raw is bigint stroops, with 7 decimals.
   const balance = useBalance({ kind: "xlm" }, accountId(address));
 
+  // Keep raw as bigint through formatting: dividing a Number could lose
+  // precision. Displaying raw stroops beside XLM makes the unit conversion
+  // visible without confusing the total ledger balance with spendable funds.
   return (
     <>
       <Note>

@@ -1,3 +1,15 @@
+/**
+ * Exercise connection state and actions as separate Colibri hooks.
+ *
+ * useConnection observes the provider while useConnect, useReconnect and
+ * useDisconnect supply explicit actions. Try an interactive connection first,
+ * then compare it with silent reconnection when the adapter has an identity to
+ * restore. A missing cached identity is an expected result. This lesson uses
+ * the same external-wallet provider as the header and never signs a transaction;
+ * wallet.tsx demonstrates the combined useWallet API for the same workflow.
+ *
+ * @module
+ */
 import { useState } from "react";
 import {
   useConnect,
@@ -13,6 +25,9 @@ import {
 } from "../../components/lesson.tsx";
 
 export default function Connection() {
+  // State observation is independent of the action functions. Read the
+  // provider snapshot after an action; do not invent a second connected flag
+  // that could outlive an account or network change.
   const state = useConnection();
   const connect = useConnect();
   const reconnect = useReconnect();
@@ -24,6 +39,9 @@ export default function Connection() {
     setError(undefined);
     setMessage("");
     try {
+      // Use the connector ID registered in app/provider.tsx. The Kit owns its
+      // selection UI; Colibri checks the returned wallet network against Testnet.
+      // WalletFailure below turns REACT_007 into instructions to switch networks.
       await connect("stellar-wallets-kit");
     } catch (cause) {
       setError(cause);
@@ -47,6 +65,8 @@ export default function Connection() {
   async function closeWallet() {
     setError(undefined);
     try {
+      // Disconnect clears authority in this provider. It is a separate action
+      // from silent reconnection, and does not remove wallet keys or permissions.
       await disconnect();
     } catch (cause) {
       setError(cause);

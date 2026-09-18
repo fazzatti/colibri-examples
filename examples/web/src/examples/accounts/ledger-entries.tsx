@@ -1,3 +1,15 @@
+/**
+ * Compose Colibri's ledger-entry reader with a TanStack Query observation.
+ *
+ * Enter a funded Testnet G-address and compare the result with account.tsx.
+ * useLedgerEntries supplies a stable reader, not a loading/error/data result.
+ * Here, its account helper becomes the query function passed to useQuery through
+ * colibriQueryOptions. Follow the network-scoped cache key, address input and
+ * enabled guard when adapting this pattern to another supported ledger key.
+ * Reading a known entry needs no wallet authorization.
+ *
+ * @module
+ */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useColibriConfig } from "@colibri/react";
@@ -18,6 +30,9 @@ export default function LedgerEntries() {
   const entry = useQuery(
     colibriQueryOptions(
       config,
+      // Use a lesson-specific operation name plus the address as cache identity.
+      // The config contributes provider/network scope. enabled below prevents
+      // calling the reader while address is undefined.
       "guide-account-entry",
       address,
       () => entries.account({ accountId: address! }),

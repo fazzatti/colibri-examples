@@ -1,3 +1,16 @@
+/**
+ * Register the app's primary Wallets Kit integration and signing policy.
+ *
+ * This browser-only module initializes the installed Kit with Freighter and
+ * Testnet, then adapts it to Colibri's general connector contract. The Kit owns
+ * selection/prompts; app/provider.tsx registers the resulting connector.
+ * Capabilities are chosen per wallet module: envelope/auth-entry signing uses
+ * Colibri's signer adapter, while wallet-message-signer.ts adapts SEP-53.
+ * Adding another Kit module requires reviewing and declaring its own support,
+ * rather than assuming every module implements every Kit method.
+ *
+ * @module
+ */
 import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
 import {
   FREIGHTER_ID,
