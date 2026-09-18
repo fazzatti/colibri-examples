@@ -1,8 +1,9 @@
 # Browser verification checklist
 
-Use `web:install`, `web:setup`, `web`, and a second terminal running `web:auth`.
-Also build and repeat the smoke checks with `deno task preview`. Use the exact
-127.0.0.1 origins documented in the README for local authentication.
+From `examples/web`, use `deno task install`, `deno task setup`,
+`deno task dev`, and a second terminal running `deno task auth`. Also build and
+repeat the smoke checks with `deno task preview`. Use the exact 127.0.0.1
+origins documented in the README for local authentication.
 
 These checks are manual behavior checks, in keeping with the repository's
 learning-example convention. They are not a replacement for Colibri's own
@@ -71,8 +72,8 @@ network-change notifications. Record those checks separately.
 ## Reproducibility
 
 - Fresh install regenerates ignored bindings from the existing Wasm, offline.
-- `web:check` and `web:build` pass; `npm ls react @tanstack/react-query` shows
-  one resolved version of each. Check the production app, not only Vite
+- `check` and `build` pass; `deno info src/app/provider.tsx` shows one resolved
+  version of React and Query. Check the production app, not only Vite
   development.
 - Root CLI `check` and `lint` still use their own dependency scope.
 - No `.env.local`, generated clients, private keys or build output enters Git.

@@ -22,7 +22,7 @@ export default function AuthClient() {
   return (
     <>
       <Note>
-        Run <code>deno task web:auth</code>{" "}
+        Run <code>deno task auth</code>{" "}
         first. This loopback fixture advertises a real SEP-10 endpoint using the
         Testnet network passphrase. HTTP is allowed only for this local example.
       </Note>

@@ -3,7 +3,7 @@ import { Note } from "./lesson.tsx";
 export function FixtureRequired() {
   return (
     <Note>
-      Run <code>deno task web:setup</code>{" "}
+      Run <code>deno task setup</code>{" "}
       from the repository root, then reload this page. It deploys the counter to
       Testnet and writes only public identifiers into{" "}
       <code>examples/web/.env.local</code>. The counter starts at zero and has a

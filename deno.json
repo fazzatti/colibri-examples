@@ -23,13 +23,7 @@
   "tasks": {
     "check": "deno task --cwd examples/contract-bindings generate && deno check \"examples/**/*.ts\" \"getting-started/**/*.ts\"",
     "lint": "deno lint --config deno.json \"examples/**/*.ts\" \"getting-started/**/*.ts\"",
-    "fmt:check": "deno fmt --check",
-    "web:install": "cd examples/web && npm ci && deno task generate",
-    "web": "cd examples/web && deno task dev",
-    "web:check": "cd examples/web && deno task check",
-    "web:build": "cd examples/web && deno task build",
-    "web:setup": "cd examples/web && deno task setup",
-    "web:auth": "cd examples/web && deno task auth"
+    "fmt:check": "deno fmt --check"
   },
   "exclude": [
     "**/target",

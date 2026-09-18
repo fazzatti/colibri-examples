@@ -22,8 +22,8 @@ export default function Account() {
   return (
     <>
       <Note>
-        Use any funded Testnet G-address, or run deno task web:setup to create
-        the public example fixtures.
+        Use any funded Testnet G-address, or run deno task setup to create the
+        public example fixtures.
       </Note>
       <form
         onSubmit={(event) => {

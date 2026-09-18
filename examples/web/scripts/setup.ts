@@ -81,5 +81,5 @@ await Deno.writeTextFile(
 );
 console.log(environment);
 console.log(
-  "Testnet fixtures ready. Start/reload deno task web. Rerun setup after a Testnet reset or when the counter reaches 100.",
+  "Testnet fixtures ready. Start/reload deno task dev. Rerun setup after a Testnet reset or when the counter reaches 100.",
 );

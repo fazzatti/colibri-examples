@@ -154,7 +154,7 @@ export default function Session() {
   return (
     <>
       <Note>
-        Run <code>deno task web:auth</code>{" "}
+        Run <code>deno task auth</code>{" "}
         in another terminal. Create an unfunded practice identity, then
         authenticate. The local server verifies the signed challenge and issues
         a short-lived token; this is a real exchange, not a simulated success.

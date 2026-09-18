@@ -43,7 +43,7 @@ export default function ClassicBalance() {
   return (
     <>
       <Note>
-        web:setup issues 25 GUIDE to the fixture account. Classic assets have 7
+        setup issues 25 GUIDE to the fixture account. Classic assets have 7
         decimals; missing trustlines surface an error.
       </Note>
       <Field

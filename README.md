@@ -12,17 +12,18 @@ its README. Variants are separate commands, not branches in a large demo runner.
 
 The [React web field guide](examples/web/README.md) runs 29 focused Testnet
 lessons covering Colibri's 33 React hooks, with Wallets Kit, live controls and
-commented source alongside each example. Requires Deno 2.9.6+, Node 22.12+ and
-npm.
+commented source alongside each example. Requires Deno 2.9.6+. Run it from its
+own directory:
 
 ```sh
-deno task web:install
-deno task web
+cd examples/web
+deno task install
+deno task dev
 ```
 
-Optional `deno task web:setup` prepares Testnet fixtures; `deno task web:auth`
-starts the local authentication lesson. The web app uses its own dependency
-scope and lockfile; the CLI lessons below keep their existing versions.
+Optional `deno task setup` prepares Testnet fixtures; `deno task auth` starts
+the local authentication lesson. The web app uses its own dependency scope and
+lockfile; the CLI lessons below keep their existing versions.
 
 ## Run a lesson
 

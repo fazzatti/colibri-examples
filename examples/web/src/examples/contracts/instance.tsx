@@ -22,7 +22,7 @@ function Client({ id }: { id: `C${string}` }) {
   return (
     <>
       <Note>
-        The client is generated offline from the counter's Wasm by web:install.
+        The client is generated offline from the counter's Wasm by install.
         Inspect src/generated/counter/index.ts and its typed method helpers.
         Generation and Testnet deployment are separate steps.
       </Note>

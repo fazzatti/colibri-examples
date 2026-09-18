@@ -9,26 +9,28 @@ mounts.
 
 ## Start the application
 
-Requirements: **Deno 2.9.6+**, **Node 22.12+** (or Node 24), and npm. Rust,
-Docker and the Stellar CLI are not needed. From the repository root:
+Requires **Deno 2.9.6+**. From the repository root, enter the example directory;
+all subsequent commands run there:
 
 ```sh
-deno task web:install
-deno task web
+cd examples/web
+deno task install
+deno task dev
 ```
 
 Open **http://127.0.0.1:5173**. Start with **Network & provider**: the latest
 Testnet ledger updates every five seconds, without connecting a wallet.
 
-`web:install` installs the pinned npm/JSR dependencies and generates the local
+`install` installs the pinned npm/JSR dependencies and generates the local
 counter client **offline**, directly from the existing
 [counter Wasm](../contract-bindings/contract/counter.wasm). Inspect
 `src/generated/counter/index.ts`, `constants.ts` and `types.ts`. Generated code
 is ignored by Git and uses direct Core imports (`includeColibri: false`). It is
 not a published package or an on-chain deployment.
 
-All commands can also run from this directory as `deno task dev`, `check`,
-`build`, `generate`, `setup`, `auth` or `preview`.
+Dependencies and tasks belong to this example's `deno.json`. Deno installs npm
+packages locally for Vite, including Colibri through JSR's npm bridge. No
+separate Node or npm installation is required.
 
 ## Prepare Testnet data (optional)
 
@@ -36,7 +38,7 @@ Public reads can use addresses you enter yourself. For ready-to-run account,
 trustline and counter examples:
 
 ```sh
-deno task web:setup
+deno task setup
 ```
 
 This script:
@@ -118,10 +120,10 @@ not proof of failure and can also reflect limited RPC retention.
 
 ## Authentication and discovery (optional local server)
 
-In a second terminal, from the repository root:
+In a second terminal, enter `examples/web` and run:
 
 ```sh
-deno task web:auth
+deno task auth
 ```
 
 The loopback server at **http://127.0.0.1:8787** exposes a SEP-1 file and SEP-10
@@ -207,12 +209,13 @@ The 29th page is the
 - `scripts/`: offline generation and optional Testnet provisioning.
 - `auth-server/`: optional local SEP-10 fixture.
 
-The web app has an independent `package.json`, `package-lock.json` and Deno
-scope. Root CLI dependency versions are unchanged. JSR packages are consumed
-through their npm bridge. Vite unifies the npm alias and canonical Core/WebAuth
-paths, and React/Query resolve to one version. Features and their source views
-load on demand by route; the wallet SDK remains an application-owned dependency.
-The native Stellar SDK remains a substantial shared browser dependency.
+The web app owns its `deno.json` imports, tasks, compiler options and
+`deno.lock`. Root CLI dependency versions are unchanged. The Deno Vite plugin
+uses that same import map for browser builds. `.npmrc` only identifies the JSR
+npm registry; dependency versions all live in `deno.json`. Features and their
+source views load on demand by route; the wallet SDK remains an
+application-owned dependency. The native Stellar SDK remains a substantial
+shared browser dependency.
 
 Hash routes (for example `/#contract-read`) work on static hosting without
 server-side route rewrites. `base: "./"` also permits a subdirectory deployment.
@@ -222,16 +225,17 @@ this example.
 ## Verify and build
 
 ```sh
-deno task web:check
-deno task web:build
-cd examples/web
+deno task check
+deno task build
 deno task preview
 ```
 
-`web:check` checks TS/TSX, setup/server scripts, Deno lint and formatting.
-`web:build` creates `dist/`; preview serves it at **http://127.0.0.1:4173**.
-Build again after fixture identifiers change. npm's lockfile is the web package
-source of truth; use `web:install` for a fresh checkout.
+`check` checks TS/TSX, setup/server scripts, Deno lint and formatting. `build`
+creates `dist/`; preview serves it at **http://127.0.0.1:4173**. Build again
+after fixture identifiers change. The local `deno.lock` is the dependency source
+of truth; `deno task install` uses it frozen and regenerates the counter
+bindings. Use `deno install` only when intentionally updating the local
+dependency graph.
 
 Following this repository's convention, these are learning examples rather than
 a new test suite. A manual browser checklist is in

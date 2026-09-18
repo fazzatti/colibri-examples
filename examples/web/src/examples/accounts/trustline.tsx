@@ -35,7 +35,7 @@ export default function Trustline() {
   return (
     <>
       <Note>
-        Run web:setup for an account with a GUIDE trustline, or enter another
+        Run setup for an account with a GUIDE trustline, or enter another
         account and GUIDE issuer. A missing trustline is an error, not a zero
         balance.
       </Note>

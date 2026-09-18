@@ -21,8 +21,8 @@ export default function Toml() {
     <>
       <Note>
         In another terminal, run{" "}
-        <code>deno task web:auth</code>. SEP-1 discovers service configuration;
-        it does not implement the advertised services.
+        <code>deno task auth</code>. SEP-1 discovers service configuration; it
+        does not implement the advertised services.
       </Note>
       <Value label="Discovery URL">
         http://{authDomain}/.well-known/stellar.toml

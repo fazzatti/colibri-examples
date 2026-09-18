@@ -28,14 +28,14 @@ function route() {
 
 class LessonBoundary
   extends Component<{ children: ReactNode }, { error?: Error }> {
-  state: { error?: Error } = {};
+  override state: { error?: Error } = {};
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Lesson failed", error, info.componentStack);
   }
-  render() {
+  override render() {
     if (this.state.error) {
       return (
         <div className="failure" role="alert">
@@ -203,8 +203,7 @@ export function App() {
         <footer className="page-footer">
           <span>Built with Colibri. Made to be read.</span>
           <span>
-            Testnet resets can remove example data. Rerun{" "}
-            <code>web:setup</code>.
+            Testnet resets can remove example data. Rerun <code>setup</code>.
           </span>
         </footer>
       </div>

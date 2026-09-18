@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import type { Lesson } from "../app/catalog.ts";
-import provider from "../app/provider.tsx?raw";
-import kit from "../setup/wallets-kit.ts?raw";
-import freighter from "../setup/freighter.ts?raw";
-import practice from "../setup/practice-identity.ts?raw";
 
 const sources = import.meta.glob<string>("../examples/**/*.tsx", {
   query: "?raw",
   import: "default",
 });
+// Vite loads setup source as text; the same files remain runnable TypeScript.
+const setupSources = import.meta.glob<string>([
+  "../app/provider.tsx",
+  "../setup/wallets-kit.ts",
+  "../setup/freighter.ts",
+  "../setup/practice-identity.ts",
+], { query: "?raw", import: "default", eager: true });
 const setup = {
-  "Provider": provider,
-  "Wallets Kit": kit,
-  "Freighter": freighter,
-  "Practice identity": practice,
+  "Provider": setupSources["../app/provider.tsx"],
+  "Wallets Kit": setupSources["../setup/wallets-kit.ts"],
+  "Freighter": setupSources["../setup/freighter.ts"],
+  "Practice identity": setupSources["../setup/practice-identity.ts"],
 };
 
 export function SourcePanel({ lesson }: { lesson: Lesson }) {
