@@ -12,8 +12,16 @@ extension integration.
 
 ## Navigation and reading
 
-- Open every sidebar lesson and a direct `/#contract-read` URL. The source panel
-  must show the matching TSX file, and its provider/adapter tabs must work.
+- Open every sidebar lesson and a direct `/#contract-read` URL. Each must show
+  its task, steps, expected result, hook explanations and specific Colibri
+  links. No source/snippet panels, fabricated logo or slogans should remain.
+- Follow Next through all 29 lessons, then Previous. The first/last pages have
+  no out-of-range navigation; sidebar search does not change the sequence.
+- The ledger loads once by default. Enable automatic refresh: the countdown
+  decreases, a spinner marks fetching, and the next wait starts after
+  completion. Disable it and verify that the last-read time stops changing.
+  Manual refresh still works; leaving and returning starts with auto-refresh
+  off.
 - Search `useReconnect` and confirm Connection primitives is discoverable.
 - Navigate with keyboard focus and the skip link. At 390px width, open/close
   Examples, select a lesson, and confirm no page-level horizontal overflow.
@@ -31,6 +39,8 @@ extension integration.
 Use a disposable **Testnet** account in the real Freighter extension:
 
 - Open/cancel Wallets Kit; the app must remain usable and disconnected.
+- Connect on another network: REACT_007 must explain that this demo uses
+  Testnet, ask to switch the wallet network, and instruct the user to reconnect.
 - Connect on Testnet; navigate to another lesson without losing the connection.
 - Switch to a different wallet network/account; stale authority must clear.
 - Return to Testnet and reconnect explicitly. A silent reconnect may return
@@ -56,8 +66,13 @@ network-change notifications. Record those checks separately.
 
 ## Messages and authentication
 
-- Create a practice identity and sign a message. SEP-53 verification succeeds.
-  Editing the input clears the displayed verification for the previous message.
+- Create a practice identity and sign a message. The signature is 128 hex
+  characters and the separate verification fields fill automatically, with no
+  verification result yet. Copy/paste must preserve the signature.
+- Verify the filled values: valid. Change the verification message: the old
+  result clears; Verify reports invalid. Malformed hex/public-key inputs show an
+  error. Restore the original values: valid again. Verify an empty message and
+  independently pasted values without a wallet connection too.
 - Discover local stellar.toml and WebAuth; both report Testnet.
 - Authenticate a practice identity through SEP-10: display account and expiry,
   without rendering a JWT or saving one in browser storage.

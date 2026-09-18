@@ -72,7 +72,6 @@ p {
 }
 code,
 pre,
-.source-path,
 .eyebrow,
 .nav-group a small,
 .network-pill,
@@ -92,40 +91,12 @@ code {
   padding: 31px 21px 20px;
 }
 .brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  text-decoration: none;
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -1.5px;
-  color: var(--ink);
-}
-.brand-mark {
-  width: 42px;
-  height: 46px;
-  color: #f7f8f4;
-  background: var(--teal);
-  border-radius: 5px 18px 5px 18px;
-  text-align: center;
-  font-style: italic;
-  line-height: 41px;
-  font-family: Georgia, serif;
-  font-size: 38px;
-  padding-right: 5px;
-}
-.brand small {
   display: block;
-  font-size: 9px;
-  letter-spacing: 2px;
-  font-weight: 500;
-  margin-top: 1px;
-}
-.sidebar-intro {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--muted);
-  margin: 25px 0 20px;
+  margin-bottom: 24px;
+  color: var(--ink);
+  font-size: 21px;
+  font-weight: 600;
+  text-decoration: none;
 }
 .search input {
   width: 100%;
@@ -243,9 +214,9 @@ main {
   margin-left: 10px;
 }
 h1 {
-  font-size: clamp(30px, 3vw, 45px);
+  font-size: clamp(27px, 3vw, 36px);
   line-height: 1.16;
-  letter-spacing: -1.4px;
+  letter-spacing: -0.5px;
   font-weight: 500;
   margin: 17px 0 12px;
 }
@@ -280,26 +251,12 @@ h1 {
   padding: 24px;
   min-width: 0;
   font-size: 14px;
-  box-shadow: 0 3px 0 #ebefe7;
 }
 .panel-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 26px;
-}
-.live-dot {
-  color: #7c8e7f;
-  font-size: 10px;
-}
-.live-dot:before {
-  content: "";
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  background: #85a577;
-  border-radius: 50%;
-  margin-right: 6px;
 }
 .note {
   color: #56685b;
@@ -424,92 +381,6 @@ h1 {
   color: var(--muted);
   font-size: 12px;
 }
-.source-panel {
-  min-width: 0;
-  border: 1px solid #ccdbcd;
-  border-radius: 7px;
-  overflow: hidden;
-  background: #f0f4ed;
-}
-.source-panel header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 21px 21px 17px;
-}
-.source-panel h2 {
-  margin: 7px 0 0;
-  font-weight: 500;
-  font-size: 16px;
-}
-.source-panel .eyebrow {
-  font-size: 9px;
-}
-.source-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 0 13px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid #ccd8ca;
-}
-.source-tabs button {
-  border: 0;
-  border-radius: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: #778677;
-  padding: 9px 7px;
-  font-size: 10px;
-}
-.source-tabs button:hover {
-  background: #e0e9db;
-}
-.source-tabs .selected {
-  color: #295b45;
-  border-bottom-color: var(--teal);
-}
-.source-path {
-  color: #7d967f;
-  background: #20352c;
-  padding: 12px 19px;
-  font-size: 10px;
-  overflow-wrap: anywhere;
-}
-.source-panel > pre {
-  margin: 0;
-  background: #20352c;
-  color: #d5e5ca;
-  overflow: auto;
-  max-height: 660px;
-  padding: 5px 20px 24px;
-  line-height: 1.9;
-  font-size: 11px;
-  tab-size: 2;
-}
-.source-panel code {
-  font-size: inherit;
-}
-.source-panel footer {
-  color: #6b7c69;
-  padding: 12px 17px;
-  font-size: 10px;
-  line-height: 1.8;
-}
-.source-panel footer a {
-  display: inline-block;
-  margin-left: 7px;
-}
-.page-footer {
-  border-top: 1px solid var(--line);
-  margin: 0 38px;
-  padding: 22px 0;
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  font-size: 10px;
-  color: #8b978a;
-}
 .menu-button {
   display: none;
 }
@@ -606,14 +477,6 @@ td {
   .lesson-grid {
     grid-template-columns: 1fr;
   }
-  .source-panel > pre {
-    max-height: 470px;
-  }
-  .page-footer {
-    flex-direction: column;
-    margin: 0 25px;
-    gap: 6px;
-  }
 }
 @media (max-width: 720px) {
   .sidebar {
@@ -663,33 +526,127 @@ td {
   .lesson-heading {
     margin-bottom: 24px;
   }
-  .source-panel header {
-    padding: 19px 15px;
-  }
-  .source-panel > pre {
-    font-size: 10px;
-  }
-  .page-footer {
-    margin: 0 18px;
-  }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .lesson-heading {
-    animation: appear .25s ease-out;
-  }
-  @keyframes appear {
-    from {
-      opacity: 0;
-      transform: translateY(5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
 .error-cause {
   display: block;
   margin-top: 8px;
+}
+
+.panel-heading h2,
+.guide-panel h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.guide-panel {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.guide-panel li {
+  margin-bottom: 12px;
+}
+.guide-panel h3 {
+  margin-bottom: 8px;
+}
+.hook-descriptions > div {
+  margin: 18px 0;
+}
+.hook-descriptions dt {
+  font-weight: 600;
+}
+.hook-descriptions dd {
+  margin: 6px 0 0;
+}
+.hook-tags a {
+  text-decoration: none;
+}
+.lesson-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.lesson-navigation > span {
+  color: var(--muted);
+}
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -0.12em;
+  margin-right: 6px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spinner {
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+.refresh-option {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 14px;
+}
+.refresh-status {
+  min-height: 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.field textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  padding: 10px 11px;
+  border: 1px solid #ccd7cc;
+  border-radius: 4px;
+  background: #fbfcf9;
+  color: var(--ink);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.lesson-step {
+  border: 0;
+  padding: 0;
+  margin: 24px 0;
+  min-width: 0;
+}
+.lesson-step legend {
+  font-size: 17px;
+  font-weight: 600;
+}
+@media (max-width: 1120px) {
+  .guide-panel {
+    order: -1;
+  }
+}
+@media (max-width: 720px) {
+  .guide-panel {
+    padding: 19px;
+  }
+  .lesson-navigation {
+    align-items: flex-start;
+  }
+  .lesson-navigation a {
+    max-width: 100%;
+  }
 }

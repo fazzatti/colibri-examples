@@ -19,6 +19,25 @@ export function Field({ label, hint, ...input }: {
 export function Actions({ children }: PropsWithChildren) {
   return <div className="actions">{children}</div>;
 }
+export function Spinner() {
+  return <span className="spinner" aria-hidden="true" />;
+}
+export function WalletFailure({ error }: { error: unknown }) {
+  // REACT_007 is Colibri's stable network-mismatch code. The connector reports
+  // the wallet's actual passphrase; changing the app label cannot fix it.
+  // Match the code rather than parsing error text, and keep other errors intact.
+  if (error instanceof ColibriError && error.code === "REACT_007") {
+    return (
+      <p className="failure" role="alert">
+        <strong>Switch your wallet to Testnet.</strong>{" "}
+        This demo is configured for Stellar Testnet, but your wallet reported a
+        different network. Select Testnet in the wallet’s network settings, then
+        click Connect again. <code>REACT_007</code>
+      </p>
+    );
+  }
+  return <Failure error={error} />;
+}
 export function Failure({ error }: { error: unknown }) {
   if (!error) return null;
   const cause = error instanceof ColibriError
@@ -80,6 +99,7 @@ export function QueryState({ query, children }: PropsWithChildren<{
       <div className="result-label">
         Observation{" "}
         <span>
+          {query.isFetching && <Spinner />}
           {query.isFetching
             ? "Loading"
             : query.isError
@@ -107,6 +127,7 @@ export function MutationState({ mutation }: {
       <div className="result-label">
         Action{" "}
         <span>
+          {mutation.isPending && <Spinner />}
           {mutation.isPending
             ? "Pending"
             : mutation.isSuccess

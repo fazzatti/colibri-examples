@@ -1,10 +1,12 @@
-# Colibri web field guide
+# Colibri web examples
 
 A React application for learning Stellar by running one focused example at a
 time. Every network operation uses **Testnet**. A sidebar groups 29 lessons
 covering all 33 public hooks in `@colibri/react` 0.2. Each lesson has its own
-commented TSX file, live controls, observable state and the actual source beside
-it. The provider and connection persist as you navigate; only the active lesson
+commented TSX file, live controls, observable state and a didactic explanation.
+Each explanation covers the task, ordered steps, expected result, hooks and
+specific Colibri documentation. Previous/next links follow the sidebar order.
+The provider and connection persist as you navigate; only the active lesson
 mounts.
 
 ## Start the application
@@ -19,7 +21,10 @@ deno task dev
 ```
 
 Open **http://127.0.0.1:5173**. Start with **Network & provider**: the latest
-Testnet ledger updates every five seconds, without connecting a wallet.
+Testnet ledger loads once, without connecting a wallet. Refresh manually or
+enable **Auto-refresh every 5 seconds** to see a countdown between requests. A
+spinner indicates an active request. Disable the option or leave the page to
+stop polling.
 
 `install` installs the pinned npm/JSR dependencies and generates the local
 counter client **offline**, directly from the existing
@@ -60,7 +65,7 @@ Alternatively, set `VITE_EXAMPLE_ACCOUNT`, `VITE_EXAMPLE_ISSUER` and
 `VITE_EXAMPLE_COUNTER` to your own matching **Testnet** fixtures. Never put
 secrets in `VITE_` variables: Vite includes them in browser code.
 
-## Wallets and ecosystem integrations
+## Wallet connectivity
 
 **Wallets Kit is the primary integration.** Install
 [Freighter](https://www.freighter.app/), enable/select Testnet in the extension,
@@ -83,8 +88,8 @@ identity changes.
 To support another Kit wallet, import its module, add it to `modules`, and
 review its signing support before adding a capability rule. Some modules need
 project IDs, initialization or additional dependencies. A method existing on the
-Kit does not mean every wallet supports it. See the in-app **wallet ecosystem**
-lesson and
+Kit does not mean every wallet supports it. See the in-app **Wallet
+connectivity** lesson and
 [upstream Kit documentation](https://stellarwalletskit.dev/kit-structure.html).
 
 For an existing/custom integration, use Colibri's `createWalletConnector`
@@ -117,6 +122,18 @@ not retry automatically. Pending covers the whole Core pipeline; the app does
 not invent signing/submission phases. A timeout can be ambiguous: inspect the
 account/transaction before deciding to submit again. Hash lookup `NOT_FOUND` is
 not proof of failure and can also reflect limited RPC retention.
+
+## Sign and verify a message
+
+Open **Sign and verify a message**. Create a practice identity, enter text and
+click **Sign message**. Copy the resulting signature as 128 hexadecimal
+characters (64 bytes). Signing fills the verification form but does not verify.
+
+Click **Verify signature** to check the message, public key and signature with
+SEP-53. Edit any verification field to clear the previous result; change the
+message and verify again to observe a mismatch. You can also paste independently
+obtained values without connecting an identity. Invalid hex is reported before
+verification. Neither operation submits a transaction or requires funding.
 
 ## Authentication and discovery (optional local server)
 
@@ -159,9 +176,10 @@ app.
 
 ## Hook-to-lesson map
 
-Each source below is also displayed in the running app. Search the sidebar by
-hook name. Related connection primitives share a lesson; convenience and
-granular transaction/client variants remain independent.
+Source stays in these independent files; the app displays explanations rather
+than snippets. Search the sidebar by hook name. Related connection primitives
+share a lesson; convenience and granular transaction/client variants remain
+independent.
 
 | Lesson/source                                                    | Hooks                                                  | Expected result                               |
 | ---------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------- |
@@ -170,7 +188,7 @@ granular transaction/client variants remain independent.
 | [Connection](src/examples/wallets/connection.tsx)                | useConnection, useConnect, useReconnect, useDisconnect | Explicit lifecycle and silent restore         |
 | [Direct Freighter](src/examples/wallets/freighter.tsx)           | useConnect, useConnection, useDisconnect               | Independent extension adapter                 |
 | [Signers](src/examples/signing/signers.tsx)                      | useSigners                                             | Explicit capability list                      |
-| [Message](src/examples/signing/message.tsx)                      | useSignMessage                                         | Verified SEP-53 signature                     |
+| [Message](src/examples/signing/message.tsx)                      | useSignMessage                                         | Separate SEP-53 signing and verification      |
 | [Account](src/examples/accounts/account.tsx)                     | useAccount                                             | Account data or visible missing-account error |
 | [Trustline](src/examples/accounts/trustline.tsx)                 | useTrustline                                           | GUIDE trustline, balance and limits           |
 | [Ledger entries](src/examples/accounts/ledger-entries.tsx)       | useLedgerEntries                                       | Stable reader composed with a query           |
@@ -195,7 +213,7 @@ granular transaction/client variants remain independent.
 | [Session](src/examples/sessions/session.tsx)                     | useWebAuth, useSession                                 | Real SEP-10 exchange and memory-only session  |
 
 The 29th page is the
-[ecosystem integration guide](src/examples/wallets/ecosystem.tsx).
+[wallet connectivity guide](src/examples/wallets/ecosystem.tsx).
 
 ## Structure and dependency boundaries
 
@@ -212,10 +230,9 @@ The 29th page is the
 The web app owns its `deno.json` imports, tasks, compiler options and
 `deno.lock`. Root CLI dependency versions are unchanged. The Deno Vite plugin
 uses that same import map for browser builds. `.npmrc` only identifies the JSR
-npm registry; dependency versions all live in `deno.json`. Features and their
-source views load on demand by route; the wallet SDK remains an
-application-owned dependency. The native Stellar SDK remains a substantial
-shared browser dependency.
+npm registry; dependency versions all live in `deno.json`. Runnable lessons load
+on demand by route; the wallet SDK remains an application-owned dependency. The
+native Stellar SDK remains a substantial shared browser dependency.
 
 Hash routes (for example `/#contract-read`) work on static hosting without
 server-side route rewrites. `base: "./"` also permits a subdirectory deployment.

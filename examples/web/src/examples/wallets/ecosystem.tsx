@@ -1,6 +1,6 @@
 import { Note } from "../../components/lesson.tsx";
 
-export default function Ecosystem() {
+export default function WalletConnectivity() {
   return (
     <>
       <Note>
@@ -8,7 +8,7 @@ export default function Ecosystem() {
         guards and transaction pipelines. The wallet owns approval and keys.
       </Note>
       <div className="steps">
-        <h3>Choose an ecosystem SDK</h3>
+        <h3>Choose a wallet SDK</h3>
         <p>
           Wallets Kit provides selection UI and wallet modules. This app starts
           with its Freighter module; install the Freighter extension and select
@@ -83,7 +83,7 @@ export default function Ecosystem() {
         capabilities.
       </p>
       <p>
-        The current SEP-10 client needs a complete keypair signer. This guide
+        The current SEP-10 client needs a complete keypair signer. This example
         uses a practice identity there; it does not claim the Kit's envelope
         adapter satisfies that interface. SEP-45 contract-account authentication
         needs a separate authorization policy and is outside this example.

@@ -10,7 +10,8 @@ import {
 } from "react";
 import { useConnection } from "@colibri/react";
 import { lessons } from "./catalog.ts";
-import { SourcePanel } from "../components/source-panel.tsx";
+import { GuidePanel } from "../components/guide-panel.tsx";
+import { hookDocumentation } from "./hook-reference.ts";
 
 const modules = import.meta.glob<{ default: ComponentType }>(
   "../examples/**/*.tsx",
@@ -56,6 +57,9 @@ export function App() {
   const connection = useConnection();
   const lesson = lessons.find((entry) => entry.id === id);
   const Page = lesson && pages.get(lesson.id);
+  const position = lesson ? lessons.indexOf(lesson) : -1;
+  const previous = lessons[position - 1];
+  const next = lessons[position + 1];
   useEffect(() => {
     const navigate = () => {
       setId(route());
@@ -82,14 +86,8 @@ export function App() {
       </a>
       <aside className={`sidebar ${menuOpen ? "open" : ""}`}>
         <a className="brand" href="#network">
-          <span className="brand-mark" aria-hidden="true">c.</span>
-          <span>
-            colibri<small>WEB FIELD GUIDE</small>
-          </span>
+          Colibri examples
         </a>
-        <div className="sidebar-intro">
-          Learn it by running it.<br />Stellar, one hook at a time.
-        </div>
         <label className="search">
           <span className="sr-only">Find a hook or lesson</span>
           <input
@@ -164,6 +162,23 @@ export function App() {
           {lesson && Page
             ? (
               <>
+                <nav className="lesson-navigation" aria-label="Lesson sequence">
+                  {previous
+                    ? (
+                      <a href={`#${previous.id}`} rel="prev">
+                        ← Previous: {previous.title}
+                      </a>
+                    )
+                    : <span>First example</span>}
+                  <span>{position + 1} / {lessons.length}</span>
+                  {next
+                    ? (
+                      <a href={`#${next.id}`} rel="next">
+                        Next: {next.title} →
+                      </a>
+                    )
+                    : <span>Last example</span>}
+                </nav>
                 <header className="lesson-heading">
                   <div className="eyebrow">
                     {lesson.group}{" "}
@@ -174,14 +189,22 @@ export function App() {
                   <h1>{lesson.title}</h1>
                   <p>{lesson.subtitle}</p>
                   <div className="hook-tags">
-                    {lesson.hooks.map((hook) => <code key={hook}>{hook}</code>)}
+                    {lesson.hooks.map((hook) => (
+                      <a
+                        key={hook}
+                        href={hookDocumentation(hook)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <code>{hook}</code>
+                      </a>
+                    ))}
                   </div>
                 </header>
                 <div className="lesson-grid">
                   <section className="live-panel">
                     <div className="panel-heading">
-                      <span className="eyebrow">Try it on Testnet</span>
-                      <span className="live-dot">Live example</span>
+                      <h2>Example</h2>
                     </div>
                     <LessonBoundary key={lesson.id}>
                       <Suspense fallback={<p role="status">Loading lesson…</p>}>
@@ -189,7 +212,7 @@ export function App() {
                       </Suspense>
                     </LessonBoundary>
                   </section>
-                  <SourcePanel lesson={lesson} />
+                  <GuidePanel lesson={lesson} />
                 </div>
               </>
             )
@@ -200,12 +223,6 @@ export function App() {
               </>
             )}
         </main>
-        <footer className="page-footer">
-          <span>Built with Colibri. Made to be read.</span>
-          <span>
-            Testnet resets can remove example data. Rerun <code>setup</code>.
-          </span>
-        </footer>
       </div>
     </>
   );

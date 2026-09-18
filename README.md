@@ -10,10 +10,10 @@ its README. Variants are separate commands, not branches in a large demo runner.
 
 ## Web examples
 
-The [React web field guide](examples/web/README.md) runs 29 focused Testnet
-lessons covering Colibri's 33 React hooks, with Wallets Kit, live controls and
-commented source alongside each example. Requires Deno 2.9.6+. Run it from its
-own directory:
+The [React web examples](examples/web/README.md) runs 29 focused Testnet lessons
+covering Colibri's 33 React hooks, with Wallets Kit, live controls and
+step-by-step explanations and feature documentation links. Requires Deno 2.9.6+.
+Run it from its own directory:
 
 ```sh
 cd examples/web

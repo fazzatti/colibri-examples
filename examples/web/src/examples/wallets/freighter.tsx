@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { isConnected } from "@stellar/freighter-api";
 import { useConnect, useConnection, useDisconnect } from "@colibri/react";
-import { Actions, Failure, Note, Value } from "../../components/lesson.tsx";
+import {
+  Actions,
+  Note,
+  Value,
+  WalletFailure,
+} from "../../components/lesson.tsx";
 
 export default function Freighter() {
   const connect = useConnect();
@@ -65,7 +70,7 @@ export default function Freighter() {
           Disconnect
         </button>
       </Actions>
-      <Failure error={error} />
+      <WalletFailure error={error ?? connection.error} />
       <Value label="Status">{connection.status}</Value>
       <Value label="Connector">{connection.connectorId ?? "—"}</Value>
       <Value label="Address">{connection.connection?.address ?? "—"}</Value>

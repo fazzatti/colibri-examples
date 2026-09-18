@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useWallet } from "@colibri/react/wallet";
-import { Actions, Failure, Note, Value } from "../../components/lesson.tsx";
+import {
+  Actions,
+  Note,
+  Value,
+  WalletFailure,
+} from "../../components/lesson.tsx";
 
 export default function Wallet() {
   const wallet = useWallet();
@@ -10,7 +15,9 @@ export default function Wallet() {
     setError(undefined);
     try {
       // The explicit ID opens Wallets Kit's modal. The provider never prompts
-      // during rendering, and rejects accounts on a different network.
+      // during rendering. A different wallet network throws REACT_007.
+      // WalletFailure explains how to switch to Testnet; we do not bypass
+      // the passphrase guard or silently change the wallet network.
       await wallet.connect("stellar-wallets-kit");
     } catch (cause) {
       setError(cause);
@@ -31,7 +38,7 @@ export default function Wallet() {
       <Note>
         Install Freighter, select Testnet in the extension, then connect through
         Wallets Kit. This app initializes the Kit with its Freighter module. The
-        ecosystem lesson explains how to add more modules.
+        Wallet connectivity lesson explains how to add more modules.
       </Note>
       <Actions>
         <button
@@ -50,7 +57,7 @@ export default function Wallet() {
           Disconnect
         </button>
       </Actions>
-      <Failure error={error} />
+      <WalletFailure error={error ?? wallet.error} />
       <div className="result" aria-live="polite">
         <Value label="Connection">{wallet.status}</Value>
         <Value label="Account">

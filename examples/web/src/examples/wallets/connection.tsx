@@ -5,7 +5,12 @@ import {
   useDisconnect,
   useReconnect,
 } from "@colibri/react";
-import { Actions, Failure, Note, Value } from "../../components/lesson.tsx";
+import {
+  Actions,
+  Note,
+  Value,
+  WalletFailure,
+} from "../../components/lesson.tsx";
 
 export default function Connection() {
   const state = useConnection();
@@ -80,7 +85,7 @@ export default function Connection() {
           Disconnect
         </button>
       </Actions>
-      <Failure error={error} />
+      <WalletFailure error={error ?? state.error} />
       <p aria-live="polite">{message}</p>
       <Value label="State">{state.status}</Value>
       <Value label="Address">{state.connection?.address ?? "—"}</Value>
