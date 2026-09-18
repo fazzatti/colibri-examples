@@ -1,0 +1,37 @@
+name: Web examples
+on:
+  pull_request:
+    paths:
+      - "examples/web/**"
+      - "examples/contract-bindings/contract/counter.wasm"
+      - "deno.json"
+      - ".github/workflows/web.yml"
+  push:
+    branches: [main]
+    paths:
+      - "examples/web/**"
+      - "examples/contract-bindings/contract/counter.wasm"
+      - "deno.json"
+      - ".github/workflows/web.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: examples/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.9.6
+      - run: deno task install
+      - run: deno task build

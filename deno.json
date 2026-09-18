@@ -1,5 +1,9 @@
 {
-  "workspace": ["./examples/*", "./getting-started/*"],
+  "workspace": [
+    "./examples/*",
+    "!./examples/web",
+    "./getting-started/*"
+  ],
   "nodeModulesDir": "auto",
   "imports": {
     "@colibri/core": "jsr:@colibri/core@^0.30.0",
@@ -16,10 +20,9 @@
     "stellar-sdk": "npm:@stellar/stellar-sdk@^17.0.1",
     "chalk": "npm:chalk@^5.3.0"
   },
-
   "tasks": {
-    "check": "deno task --cwd examples/contract-bindings generate && deno check examples/**/*.ts getting-started/**/*.ts",
-    "lint": "deno lint --config deno.json examples/**/*.ts getting-started/**/*.ts",
+    "check": "deno task --cwd examples/contract-bindings generate && deno check \"examples/**/*.ts\" \"getting-started/**/*.ts\"",
+    "lint": "deno lint --config deno.json \"examples/**/*.ts\" \"getting-started/**/*.ts\"",
     "fmt:check": "deno fmt --check"
   },
   "exclude": [
@@ -27,13 +30,20 @@
     "**/artifacts",
     "**/.verification",
     "**/.output",
-    "./examples/contract-bindings/package"
+    "./examples/contract-bindings/package",
+    "./examples/web"
   ],
   "lint": {
     "plugins": [],
     "rules": {
-      "exclude": ["no-slow-types", "explicit-function-return-type"]
+      "exclude": [
+        "no-slow-types",
+        "explicit-function-return-type"
+      ]
     }
   },
-  "allowScripts": ["npm:cpu-features@0.0.10", "npm:ssh2@1.17.0"]
+  "allowScripts": [
+    "npm:cpu-features@0.0.10",
+    "npm:ssh2@1.17.0"
+  ]
 }

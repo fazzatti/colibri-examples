@@ -1,0 +1,56 @@
+{
+  "workspace": [],
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "deno.ns",
+      "esnext"
+    ],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "jsxImportSourceTypes": "@types/react",
+    "types": [
+      "vite/client",
+      "@types/react",
+      "@types/react-dom"
+    ]
+  },
+  "imports": {
+    "@colibri/contract-bindings": "npm:@jsr/colibri__contract-bindings@0.3.0",
+    "@colibri/core": "npm:@jsr/colibri__core@1.3.1",
+    "@colibri/react": "npm:@jsr/colibri__react@0.3.0",
+    "@colibri/webauth": "npm:@jsr/colibri__webauth@1.2.0",
+    "@creit.tech/stellar-wallets-kit": "npm:@creit.tech/stellar-wallets-kit@2.6.0",
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@2.0.3",
+    "@fontsource/ibm-plex-mono": "npm:@fontsource/ibm-plex-mono@5.2.6",
+    "@fontsource/ibm-plex-sans": "npm:@fontsource/ibm-plex-sans@5.2.6",
+    "@stellar/freighter-api": "npm:@stellar/freighter-api@6.0.1",
+    "@stellar/stellar-sdk": "npm:@stellar/stellar-sdk@17.0.1",
+    "@tanstack/react-query": "npm:@tanstack/react-query@5.87.4",
+    "@types/node": "npm:@types/node@22.20.2",
+    "@types/react": "npm:@types/react@19.1.13",
+    "@types/react-dom": "npm:@types/react-dom@19.1.9",
+    "@vitejs/plugin-react": "npm:@vitejs/plugin-react@5.0.4",
+    "react": "npm:react@19.1.1",
+    "react-dom": "npm:react-dom@19.1.1",
+    "vite": "npm:vite@7.3.6"
+  },
+  "tasks": {
+    "install": "deno install --frozen && deno task generate",
+    "dev": "deno run -A npm:vite --host 127.0.0.1",
+    "check": "deno check \"src/**/*.ts\" \"src/**/*.tsx\" scripts/generate.ts scripts/setup.ts auth-server/main.ts vite.config.ts && deno lint src scripts auth-server && deno fmt --check",
+    "build": "deno task check && deno run -A npm:vite build",
+    "preview": "deno run -A npm:vite preview --host 127.0.0.1",
+    "generate": "deno run --allow-read --allow-write scripts/generate.ts",
+    "setup": "deno task generate && deno run --allow-read --allow-write=.env.local --allow-net scripts/setup.ts",
+    "auth": "deno run --allow-net=127.0.0.1:8787,soroban-testnet.stellar.org auth-server/main.ts"
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".vite",
+    "src/generated"
+  ]
+}
