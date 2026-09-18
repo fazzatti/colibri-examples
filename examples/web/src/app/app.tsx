@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useConnection } from "@colibri/react";
+import { WalletControl } from "../components/wallet-control.tsx";
 import { lessons } from "./catalog.ts";
 import { GuidePanel } from "../components/guide-panel.tsx";
 import { hookDocumentation } from "./hook-reference.ts";
@@ -54,7 +54,6 @@ export function App() {
   const [id, setId] = useState(route);
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const connection = useConnection();
   const lesson = lessons.find((entry) => entry.id === id);
   const Page = lesson && pages.get(lesson.id);
   const position = lesson ? lessons.indexOf(lesson) : -1;
@@ -149,13 +148,7 @@ export function App() {
             <span className="network-pill">
               <i />Testnet
             </span>
-            <a className="wallet-status" href="#wallet">
-              {connection.status === "connected"
-                ? `${connection.connection?.address.slice(0, 5)}…${
-                  connection.connection?.address.slice(-4)
-                }`
-                : "Connect wallet ↗"}
-            </a>
+            <WalletControl />
           </div>
         </header>
         <main id="lesson-content" tabIndex={-1}>

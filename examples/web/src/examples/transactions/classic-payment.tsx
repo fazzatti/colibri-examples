@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { LocalSigner } from "@colibri/core";
 import { Asset, Operation } from "@stellar/stellar-sdk";
 import { useWallet } from "@colibri/react/wallet";
+import { useAccount } from "@colibri/react/accounts";
+import { TestnetAccountSetup } from "../../components/testnet-account-setup.tsx";
 import { useClassicTransaction } from "@colibri/react/transactions/classic";
 import { accountId, exampleAccount } from "../../setup/fixtures.ts";
 import {
@@ -17,9 +20,21 @@ export default function ClassicPayment() {
   const [destination, setDestination] = useState(exampleAccount);
   const source = accountId(wallet.address ?? "");
   const recipient = accountId(destination);
+  const sourceAccount = useAccount(source, { retry: false });
+  const recipientAccount = useAccount(recipient, { retry: false });
+
+  function createRecipient() {
+    // A payment only needs the recipient's public key. Discard the disposable
+    // key immediately, then let the reader create its ledger account below.
+    using identity = LocalSigner.generateRandom(true);
+    setDestination(identity.publicKey());
+  }
 
   function send() {
-    if (!source || !recipient) return;
+    if (
+      !source || !recipient || !sourceAccount.isSuccess ||
+      !recipientAccount.isSuccess
+    ) return;
 
     // A Classic payment needs an existing recipient. Amount is a decimal string
     // in XLM, while fee is expressed in stroops (1 XLM = 10,000,000 stroops).
@@ -41,6 +56,11 @@ export default function ClassicPayment() {
         signature and sends exactly 1 XLM to an existing Testnet account.
         Colibri's Classic pipeline builds, signs and submits the operation.
       </Note>
+      <TestnetAccountSetup
+        key={source ?? "disconnected"}
+        address={source}
+        account={sourceAccount}
+      />
       <Value label="Source">{source ?? "Connect a wallet first"}</Value>
       <Field
         label="Recipient G-address"
@@ -51,7 +71,29 @@ export default function ClassicPayment() {
       <Actions>
         <button
           type="button"
-          disabled={!source || !recipient || !wallet.signers.length ||
+          className="secondary"
+          disabled={payment.isPending}
+          onClick={createRecipient}
+        >
+          Generate a practice recipient
+        </button>
+      </Actions>
+      <p className="muted">
+        Use an existing G-address, or generate a disposable recipient and fund
+        it below. Its key is discarded; the Testnet XLM sent to it is only for
+        this exercise.
+      </p>
+      <TestnetAccountSetup
+        key={recipient ?? "recipient"}
+        address={recipient}
+        account={recipientAccount}
+        label="Recipient"
+      />
+      <Actions>
+        <button
+          type="button"
+          disabled={!sourceAccount.isSuccess || !recipientAccount.isSuccess ||
+            !wallet.signers.length ||
             payment.isPending}
           onClick={send}
         >

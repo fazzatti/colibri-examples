@@ -1,5 +1,7 @@
 import { Contract, nativeToScVal } from "@stellar/stellar-sdk";
 import { useWallet } from "@colibri/react/wallet";
+import { useAccount } from "@colibri/react/accounts";
+import { TestnetAccountSetup } from "../../components/testnet-account-setup.tsx";
 import { useSorobanTransaction } from "@colibri/react/transactions/soroban";
 import { accountId, contractId, exampleCounter } from "../../setup/fixtures.ts";
 import {
@@ -14,9 +16,10 @@ function Submit({ id }: { id: `C${string}` }) {
   const wallet = useWallet();
   const transaction = useSorobanTransaction();
   const source = accountId(wallet.address ?? "");
+  const account = useAccount(source, { retry: false });
 
   function submit() {
-    if (!source) return;
+    if (!source || !account.isSuccess) return;
 
     // This lower-level path keeps the native operation and ABI encoding visible.
     // The pipeline builds, simulates, authorizes, assembles, signs and submits.
@@ -41,11 +44,17 @@ function Submit({ id }: { id: `C${string}` }) {
         funded Testnet wallet to pay the fee. The prepared simulation envelope
         is not reused; the pipeline obtains current account state.
       </Note>
+      <TestnetAccountSetup
+        key={source ?? "disconnected"}
+        address={source}
+        account={account}
+      />
       <Value label="Fee payer">{source ?? "Connect a wallet first"}</Value>
       <Actions>
         <button
           type="button"
-          disabled={!source || !wallet.signers.length || transaction.isPending}
+          disabled={!account.isSuccess || !wallet.signers.length ||
+            transaction.isPending}
           onClick={submit}
         >
           Submit Soroban increment (+1)

@@ -15,7 +15,10 @@ import {
   useWebAuthClient,
 } from "@colibri/react/webauth";
 import { authDomain } from "../../setup/fixtures.ts";
-import { getPracticeSigner } from "../../setup/practice-identity.ts";
+import {
+  PracticeProvider,
+  usePracticeIdentity,
+} from "../../setup/practice-provider.tsx";
 import {
   Actions,
   Failure,
@@ -25,6 +28,7 @@ import {
 } from "../../components/lesson.tsx";
 
 function Authentication({ session }: { session: WebAuthSession }) {
+  const identity = usePracticeIdentity();
   const connect = useConnect();
   const disconnect = useDisconnect();
   const connection = useConnection();
@@ -47,7 +51,7 @@ function Authentication({ session }: { session: WebAuthSession }) {
       // SEP-10 verifies the server challenge before signing and exchanging it.
       // This API currently requires a complete keypair signer; the Kit's
       // envelope capability alone is insufficient. No transaction is submitted.
-      const signer = getPracticeSigner();
+      const signer = identity.getSigner();
       authentication.mutate({ account: signer.publicKey(), signer });
     } catch (cause) {
       setError(cause);
@@ -125,10 +129,10 @@ function Authentication({ session }: { session: WebAuthSession }) {
     </>
   );
 }
-export default function Session() {
+function SessionExample() {
   const config = useColibriConfig();
   // Preserve the browser fetch receiver when the WebAuth transport invokes it.
-  // Match the discovery lesson's scope so both share this configured client.
+  // This lesson discovers its own client; no earlier discovery step is needed.
   const client = useWebAuthClient(
     authDomain,
     {
@@ -155,9 +159,10 @@ export default function Session() {
     <>
       <Note>
         Run <code>deno task auth</code>{" "}
-        in another terminal. Create an unfunded practice identity, then
-        authenticate. The local server verifies the signed challenge and issues
-        a short-lived token; this is a real exchange, not a simulated success.
+        from examples/web in another terminal. Create this lesson's own unfunded
+        practice identity, then authenticate. The local server verifies the
+        signed challenge and issues a short-lived token. Your connected wallet
+        and the message lesson's identity are separate from this session.
       </Note>
       <Actions>
         <button
@@ -172,5 +177,13 @@ export default function Session() {
       <QueryState query={client} />
       {session && <Authentication session={session} />}
     </>
+  );
+}
+
+export default function Session() {
+  return (
+    <PracticeProvider>
+      <SessionExample />
+    </PracticeProvider>
   );
 }

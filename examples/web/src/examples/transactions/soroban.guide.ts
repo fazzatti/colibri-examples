@@ -4,7 +4,7 @@ export default {
   "purpose":
     "Submit a native Soroban operation through Colibri’s complete transaction pipeline.",
   "steps": [
-    "Prepare the counter fixture and connect a funded Testnet wallet. Inspect the fee payer.",
+    "Prepare the counter fixture (deno task setup in examples/web). Connect a Testnet wallet using the header and inspect the fee payer. Use Fund with Friendbot here if needed; submission requires a successful account check.",
     "Click Submit Soroban increment (+1). The native operation encodes increment with a u32 argument; the pipeline gets current account state.",
     "Approve signing, then inspect the returned transaction hash and read the counter again.",
   ],

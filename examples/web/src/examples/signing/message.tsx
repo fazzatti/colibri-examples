@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
 import { useConnect, useConnection } from "@colibri/react";
 import { useSignMessage } from "@colibri/react/signers";
+import { PracticeProvider } from "../../setup/practice-provider.tsx";
 import {
   Actions,
   Failure,
@@ -11,7 +12,7 @@ import {
   Value,
 } from "../../components/lesson.tsx";
 
-export default function Message() {
+function MessageExample() {
   const connect = useConnect();
   const { connection, connectorId, status } = useConnection();
   const signing = useSignMessage();
@@ -112,10 +113,10 @@ export default function Message() {
   return (
     <>
       <Note>
-        This lesson uses a disposable practice identity. Creating it replaces
-        the current connection; its secret stays in memory and is lost on
-        disconnect or reload. Signing and verification do not need funding or
-        submit a transaction.
+        This lesson owns its disposable practice identity. The wallet shown in
+        the header stays unchanged. The key stays in memory and is destroyed
+        when you leave this lesson or reload. Signing and verification need no
+        funding and submit no transaction.
       </Note>
       <fieldset className="lesson-step">
         <legend>1. Choose the signing identity</legend>
@@ -244,5 +245,13 @@ export default function Message() {
         </p>
       </fieldset>
     </>
+  );
+}
+
+export default function Message() {
+  return (
+    <PracticeProvider>
+      <MessageExample />
+    </PracticeProvider>
   );
 }

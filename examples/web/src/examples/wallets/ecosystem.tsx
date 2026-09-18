@@ -69,7 +69,9 @@ export default function WalletConnectivity() {
             <td>Practice identity</td>
             <td>
               A general connector holding a disposable key in memory for SEP-53
-              and SEP-10 lessons. No extension, persistence or real funds.
+              and SEP-10 lessons, plus a funded signer in Invoke with signers.
+              Each lesson has its own provider and destroys its key on exit.
+              These identities never replace the header wallet.
             </td>
           </tr>
         </tbody>

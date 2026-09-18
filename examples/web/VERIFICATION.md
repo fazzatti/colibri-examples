@@ -46,9 +46,10 @@ Use a disposable **Testnet** account in the real Freighter extension:
 - Return to Testnet and reconnect explicitly. A silent reconnect may return
   null.
 - Compare Kit's combined signer and direct Freighter's envelope-only capability.
-- Fund the connected account through Compose an action. Reject a signature and
-  confirm a visible error with no automatic retry; approve a fresh 1 XLM
-  payment.
+- Connect from the header on a transaction page and fund the account there.
+  Submission must be disabled until its account check succeeds. Reject a
+  signature and confirm a visible error with no automatic retry; approve a fresh
+  1 XLM payment.
 - Follow the hash: lookup and confirmation must report the actual RPC result.
 - Start confirmation for an unknown hash, then stop it; NOT_FOUND is not
   failure.
@@ -60,9 +61,33 @@ Use a disposable **Testnet** account in the real Freighter extension:
   ledger/hash/data. Stop/restart observing and navigate away; the retained
   window is bounded at 25.
 
-The practice identity can exercise real signing and Testnet pipeline calls
-without an extension, but cannot validate extension prompts, rejection or wallet
-network-change notifications. Record those checks separately.
+The **Invoke with signers** lesson can exercise a real Testnet transaction
+without an extension. Its local signer cannot validate wallet-derived
+invocation, extension prompts, rejection or wallet network-change notifications.
+Record those checks separately.
+
+## Independent setup and identity isolation
+
+- Open Invoke with signers directly in a fresh page. Its invoke button must be
+  disabled. Create and fund the signer; show pending while Friendbot and RPC
+  propagation complete. Then invoke successfully and observe count +1, without
+  BTX_003 and without ever visiting the message or wallet lesson.
+- Interrupt funding connectivity and retry: the public key must remain the same,
+  and invocation stays disabled until setup succeeds.
+- Create a message identity while disconnected: the header must remain Connect
+  wallet. Repeat with a real wallet connected: its header address and wallet
+  signing capabilities must stay unchanged.
+- Leave and revisit each practice lesson: it starts without an identity. The
+  message, invocation and session identities must all be different. Leave while
+  funding is pending and return: the old result must not enable the new lesson.
+- Open authentication directly with the local server running; create its own
+  identity and authenticate without first visiting discovery or message signing.
+- Open Classic payment directly. Generate and fund a recipient on the page;
+  source and recipient existence must both gate Send. A missing or invalid
+  address must not enable submission. Changing either address must require its
+  own account check.
+- With an actual wallet connected, visit all practice lessons and return to a
+  wallet transaction: only the original wallet may supply source/signers.
 
 ## Messages and authentication
 

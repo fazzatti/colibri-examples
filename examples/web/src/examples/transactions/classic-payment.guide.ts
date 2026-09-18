@@ -4,7 +4,7 @@ export default {
   "purpose":
     "Submit a Classic payment of exactly 1 Testnet XLM using a native Stellar operation.",
   "steps": [
-    "Connect a funded Testnet wallet and enter an existing funded recipient G-address. Confirm the source and destination.",
+    "Connect a Testnet wallet using the header. Check or fund the source on this page. Enter a recipient G-address, or generate a practice recipient and fund it here. Both accounts must exist before sending; confirm their addresses.",
     "Click Send 1 Testnet XLM. useClassicTransaction receives the payment operation plus source, signers, fee and timeout.",
     "Approve the wallet request, inspect the result, and follow the transaction link to look up its hash.",
   ],

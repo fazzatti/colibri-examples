@@ -153,7 +153,7 @@ code {
   margin-left: 268px;
 }
 .topbar {
-  height: 72px;
+  min-height: 72px;
   border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
@@ -189,6 +189,22 @@ code {
   height: 5px;
   background: #6d8c41;
   border-radius: 50%;
+}
+.wallet-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.wallet-control button {
+  padding: 7px 10px;
+  font-size: 11px;
+}
+.wallet-control .failure {
+  flex-basis: 100%;
+  max-width: 420px;
+  margin: 4px 0;
 }
 .wallet-status {
   text-decoration: none;
@@ -492,7 +508,7 @@ td {
     margin-left: 0;
   }
   .topbar {
-    height: 64px;
+    min-height: 64px;
     padding: 0 18px;
     position: sticky;
     top: 0;
@@ -508,7 +524,11 @@ td {
     font-size: 11px;
   }
   .topbar-right {
-    gap: 12px;
+    gap: 8px;
+    max-width: 240px;
+  }
+  .wallet-control {
+    gap: 3px;
   }
   main {
     padding: 30px 18px;

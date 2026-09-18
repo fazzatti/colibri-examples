@@ -4,13 +4,12 @@ import type { PropsWithChildren } from "react";
 import { network } from "../setup/network.ts";
 import { walletsKitConnector } from "../setup/wallets-kit.ts";
 import { freighterConnector } from "../setup/freighter.ts";
-import { practiceConnector } from "../setup/practice-identity.ts";
 
 // One browser application owns one configuration. Navigation replaces only
 // the lesson, retaining its wallet connection and network-scoped query cache.
 const config = createColibriConfig({
   network,
-  connectors: [walletsKitConnector, freighterConnector, practiceConnector],
+  connectors: [walletsKitConnector, freighterConnector],
 });
 
 export function Provider({ children }: PropsWithChildren) {

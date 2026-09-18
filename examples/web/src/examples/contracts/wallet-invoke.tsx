@@ -1,10 +1,12 @@
 import { useNetwork } from "@colibri/react";
 import { useWallet } from "@colibri/react/wallet";
+import { useAccount } from "@colibri/react/accounts";
+import { TestnetAccountSetup } from "../../components/testnet-account-setup.tsx";
 import { useContract } from "@colibri/react/contracts";
 import { useContractRead } from "@colibri/react/contracts/read";
 import { useWalletContractInvoke } from "@colibri/react/contracts/invoke";
 import { Counter } from "../../generated/counter/index.ts";
-import { contractId, exampleCounter } from "../../setup/fixtures.ts";
+import { accountId, contractId, exampleCounter } from "../../setup/fixtures.ts";
 import {
   Actions,
   MutationState,
@@ -17,6 +19,8 @@ import { FixtureRequired } from "../../components/fixture-required.tsx";
 function Invoke({ id }: { id: `C${string}` }) {
   const network = useNetwork();
   const wallet = useWallet();
+  const source = accountId(wallet.address ?? "");
+  const account = useAccount(source, { retry: false });
   const counter = useContract(() =>
     new Counter({
       networkConfig: network,
@@ -42,10 +46,15 @@ function Invoke({ id }: { id: `C${string}` }) {
         wallet supplies authority only when the button is clicked; rendering
         never opens a signing prompt.
       </Note>
+      <TestnetAccountSetup
+        key={source ?? "disconnected"}
+        address={source}
+        account={account}
+      />
       <Actions>
         <button
           type="button"
-          disabled={!wallet.address || !wallet.signers.length ||
+          disabled={!account.isSuccess || !wallet.signers.length ||
             increment.isPending}
           onClick={() =>
             increment.mutate({

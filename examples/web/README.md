@@ -55,11 +55,12 @@ This script:
 
 The setup process destroys its signing handles on exit. The fixture account is a
 public read/payment recipient, not your connected wallet. The counter permits
-public increments, starts at zero, and caps its count at 100. A connected,
-funded Testnet wallet pays for writes. Rerun setup after a Testnet reset,
-archived fixture state, or the counter reaching its limit. Each run creates new
-fixtures and replaces the three `VITE_EXAMPLE_*` values while preserving other
-settings. Vite restarts when `.env.local` changes; reload the page afterward.
+public increments, starts at zero, and caps its count at 100. Writes use either
+the lesson-owned funded signer or your connected, funded Testnet wallet. Rerun
+setup after a Testnet reset, archived fixture state, or the counter reaching its
+limit. Each run creates new fixtures and replaces the three `VITE_EXAMPLE_*`
+values while preserving other settings. Vite restarts when `.env.local` changes;
+reload the page afterward.
 
 Alternatively, set `VITE_EXAMPLE_ACCOUNT`, `VITE_EXAMPLE_ISSUER` and
 `VITE_EXAMPLE_COUNTER` to your own matching **Testnet** fixtures. Never put
@@ -69,8 +70,10 @@ secrets in `VITE_` variables: Vite includes them in browser code.
 
 **Wallets Kit is the primary integration.** Install
 [Freighter](https://www.freighter.app/), enable/select Testnet in the extension,
-and choose **Connect a wallet → Connect with Wallets Kit**. Fund the connected
-address using the **Compose an action** lesson before submitting transactions.
+and click **Connect wallet** in the header of any page (or use the dedicated
+wallet lesson). Wallet transaction pages include their own account check and
+**Fund with Friendbot** action, so there is no earlier funding lesson to
+complete.
 
 The Kit is initialized with one deliberately explicit module: Freighter. It owns
 selection UI, extension interaction and prompts. Colibri's adapter converts
@@ -82,8 +85,8 @@ identity changes.
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | [wallets-kit.ts](src/setup/wallets-kit.ts)             | Kit initialization, selected modules, explicit envelope + G-account auth-entry capabilities |
 | [freighter.ts](src/setup/freighter.ts)                 | Independent direct Freighter adapter; envelope signing only                                 |
-| [practice-identity.ts](src/setup/practice-identity.ts) | Explicit, disposable in-memory connector for SEP-53 and SEP-10 lessons                      |
-| [provider.tsx](src/app/provider.tsx)                   | One Testnet configuration and query provider around all routes                              |
+| [practice-identity.ts](src/setup/practice-identity.ts) | Factory for separate, disposable lesson identities                                          |
+| [provider.tsx](src/app/provider.tsx)                   | Shared provider for real wallet connections across routes                                   |
 
 To support another Kit wallet, import its module, add it to `modules`, and
 review its signing support before adding a capability rule. Some modules need
@@ -98,24 +101,41 @@ and signing messages are different capabilities. Smart accounts require an
 explicit authorization implementation; this app does not imply universal
 contract-wallet support.
 
-The **practice identity** is created only by a clearly labeled button. It is a
-real disposable key, never an imported wallet secret, and is destroyed on
-disconnect/reload. It has no persistence or recovery. It can also be funded on
-Testnet to exercise the transaction lessons without an extension. This is a
-learning convenience, not a production custody pattern.
+### Independent lesson identities
 
-## Guided transaction flow
+The header always describes the connected **wallet**. Message signing, SEP-10
+and explicit-signer invocation each mount their own
+[PracticeProvider](src/setup/practice-provider.tsx), connection and query cache.
+Their setup buttons create distinct disposable keys; they never overwrite the
+wallet or reuse a key from another lesson. Leaving a lesson, disconnecting its
+identity or reloading destroys its signing handle. Nothing persists in storage.
 
-1. Connect through Wallets Kit with Freighter on Testnet.
-2. Copy the connected G-address to **Compose an action** and request funding.
-   Friendbot may reject already-funded accounts or rate-limit requests.
-3. Open **Classic payment**, enter an existing Testnet recipient (setup provides
-   one), and send exactly **1 XLM**. Approve the extension's signature request.
-4. Follow **Inspect transaction** to see the actual RPC status/hash.
-5. Run **Simulate Soroban**, then read the counter: the count stays unchanged.
-6. Use **Invoke with signers**, **Invoke with a wallet**, or **Submit Soroban**
-   to commit +1. A fee is charged and the stored count increases.
-7. Keep **Contract events** open in another tab while invoking to see the event.
+A generated key is **not an account on the ledger**. Message signing and SEP-10
+need no funded account. **Invoke with signers** includes **Create and fund
+signer**: Friendbot creates the account and supplies Testnet XLM, then Colibri
+waits until RPC can read it. Invocation stays disabled until that finishes. If
+funding fails, retrying reuses the same lesson identity. This prevents the
+missing-source `BTX_003` caused by trying to submit with an unfunded practice
+key.
+
+## Run a transaction example independently
+
+- **Invoke with signers:** open it directly, create and fund its local signer,
+  then invoke +1. No extension or prior message-signing step is needed.
+- **Invoke with a wallet / Submit Soroban:** connect from the header, check or
+  fund the wallet account on that page, then approve the transaction.
+- **Classic payment:** connect from the header and check/fund the source. Enter
+  an existing recipient, use the public fixture, or generate and fund a practice
+  recipient on that page. Its private key is discarded; it exists only to
+  receive this exercise's Testnet XLM. Send exactly **1 XLM** after both account
+  checks succeed.
+- Contract examples use the public counter configured by `deno task setup`
+  above; if it is missing, the page shows that command. No earlier UI lesson
+  prepares transaction authority for a later one.
+
+After a submission, follow **Inspect transaction** to check the RPC result.
+**Simulate Soroban** can run independently too: simulation leaves the stored
+count unchanged. **Contract events** can observe an invocation in another tab.
 
 Write buttons state their effect and are disabled while pending. Mutations do
 not retry automatically. Pending covers the whole Core pipeline; the app does
@@ -149,8 +169,9 @@ server/client signatures, expiry, single use, and existing account thresholds
 before issuing a signed, two-minute JWT. Server keys and pending challenges are
 memory-only. No challenge transaction is submitted to the ledger.
 
-Use **Discover stellar.toml**, **Discover WebAuth**, then **Authenticate & log
-out**. Create a practice identity and authenticate. Expect
+Open **Authenticate & log out** directly; it discovers its own client. Create
+its local practice identity and authenticate. **Discover stellar.toml** and
+**Discover WebAuth** are separate examples, not prerequisites. Expect
 `anonymous →
 authenticating → authenticated`; local logout, disconnect, identity
 change, expiry, or leaving this lesson clears the session. No JWT is shown in
@@ -159,8 +180,9 @@ new challenges.
 
 The discovery/session examples supply an explicit forwarding `fetch` callback.
 WebAuth 1.1.0 stores that callback on its transport; the wrapper preserves the
-Window receiver required by native browser fetch. Both lessons use the same
-query scope for this policy.
+Window receiver required by native browser fetch. The session lesson has its own
+provider/cache and uses the same explicit transport policy as the discovery
+lesson.
 
 The current Colibri SEP-10 client requires a full keypair signer. The Kit's
 transaction adapter does **not** satisfy that interface, so the lesson uses its
