@@ -61,5 +61,6 @@ policy becomes a submitted transaction.
 
 ## Learn more
 
+- [Adjust Soroban resources alongside the fee policy](../resources/README.md)
 - [Use a separate fee payer](../fee-bump/README.md)
 - [Colibri documentation](https://fifo-docs.gitbook.io/colibri/)

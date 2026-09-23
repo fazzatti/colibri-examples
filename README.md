@@ -78,13 +78,14 @@ discover prices, index an order book, or choose financial policies for users.
 
 ## Transaction configuration and composition
 
-| Lesson                                                        | What you learn                                                                   |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [Fees](examples/fees/README.md)                               | Per-operation base, exact inclusion, Soroban total cap; bid versus actual charge |
-| [Fee bump](examples/fee-bump/README.md)                       | Separate payment authority from the outer fee payer                              |
-| [Channel accounts](examples/channel-accounts/README.md)       | Independent sequence numbers; a separate advanced fee-bump/muxed composition     |
-| [Reserve sponsorship](examples/reserve-sponsorship/README.md) | Explicit native begin/end sponsorship and trustline ownership                    |
-| [SEP-29 memo guard](examples/memo-required/README.md)         | Native Memo plus opt-in pre-submission memo-presence checks                      |
+| Lesson                                                        | What you learn                                                                           |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [Fees](examples/fees/README.md)                               | Per-operation base, exact inclusion, Soroban total cap; bid versus actual charge         |
+| [Soroban resources](examples/resources/README.md)             | Absolute overrides, amount/percentage padding, and an explicit network-priced calculator |
+| [Fee bump](examples/fee-bump/README.md)                       | Separate payment authority from the outer fee payer                                      |
+| [Channel accounts](examples/channel-accounts/README.md)       | Independent sequence numbers; a separate advanced fee-bump/muxed composition             |
+| [Reserve sponsorship](examples/reserve-sponsorship/README.md) | Explicit native begin/end sponsorship and trustline ownership                            |
+| [SEP-29 memo guard](examples/memo-required/README.md)         | Native Memo plus opt-in pre-submission memo-presence checks                              |
 
 Pipelines are callable:
 `const sendPayment = createClassicTransactionPipeline(...)`, then
