@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "@colibri/core": "jsr:@colibri/core@1.4.0",
+    "stellar-sdk": "npm:@stellar/stellar-sdk@17.0.1"
+  },
+  "tasks": {
+    "padding": "deno run -A ./padding.ts",
+    "override": "deno run -A ./override.ts",
+    "calculator": "deno run -A ./calculator.ts",
+    "check": "deno check padding.ts override.ts calculator.ts"
+  }
+}
