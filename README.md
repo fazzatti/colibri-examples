@@ -38,9 +38,10 @@ deno task payment
 
 Transaction and authentication lessons use **Testnet**, disposable generated
 keys, and Friendbot test XLM where funding is needed. The existing
-event-streamer lessons only READ public Mainnet data and never sign or submit
-transactions. Do not insert production keys or replace Testnet with Mainnet.
-Public endpoints and Testnet state may change or reset.
+event-streamer lessons and Mainnet SEP-41 inspection only READ public Mainnet
+data and never sign or submit transactions. Do not insert production keys or
+replace Testnet with Mainnet in transaction lessons. Public endpoints and
+Testnet state may change or reset.
 
 Contract lessons include Wasm artifacts, so normal runs need no Rust or Stellar
 CLI. Rebuild commands are optional and require Rust, the wasm32v1-none target,
@@ -108,15 +109,16 @@ or production authentication policies.
 
 ## Inspection, ingestion, and local tooling
 
-| Lesson                                                          | What you learn                                                                         |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| [Test recorder](examples/test-recorder/README.md)               | Real Testnet tests with silent recording, console summaries, JSON, and standalone HTML |
-| [Local test ledger](examples/stellar-test-ledger/README.md)     | Direct Docker-backed test setup, plus optional reusable-ledger/logging tasks           |
-| [Build verification](examples/build-verification/README.md)     | GitHub out-of-band rebuild, strict SEP-58 Testnet target, JSR CLI summary/evidence     |
-| [Contract metadata](examples/contract-metadata/README.md)       | Declared SEP claims versus independent structural interface matching                   |
-| [Event streamer](examples/event-streamer/README.md)             | Live and archived Soroban event ingestion                                              |
-| [Transaction streamer](examples/transaction-streamer/README.md) | Finite transaction and successful native-payment slices                                |
-| [Identicon](examples/identicon/README.md)                       | Offline deterministic SVG/PNG rendering                                                |
+| Lesson                                                          | What you learn                                                                           |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [Test recorder](examples/test-recorder/README.md)               | Real Testnet tests with silent recording, console summaries, JSON, and standalone HTML   |
+| [Local test ledger](examples/stellar-test-ledger/README.md)     | Direct Docker-backed test setup, plus optional reusable-ledger/logging tasks             |
+| [Build verification](examples/build-verification/README.md)     | GitHub out-of-band rebuild, strict SEP-58 Testnet target, JSR CLI summary/evidence       |
+| [Contract metadata](examples/contract-metadata/README.md)       | Declared SEP claims versus independent structural interface matching                     |
+| [SEP-41 compatibility](examples/sep41-compliance/README.md)     | Fetch deployed Wasm on Mainnet or Testnet; inspect claims and versioned token interfaces |
+| [Event streamer](examples/event-streamer/README.md)             | Live and archived Soroban event ingestion                                                |
+| [Transaction streamer](examples/transaction-streamer/README.md) | Finite transaction and successful native-payment slices                                  |
+| [Identicon](examples/identicon/README.md)                       | Offline deterministic SVG/PNG rendering                                                  |
 
 ## Validate examples
 

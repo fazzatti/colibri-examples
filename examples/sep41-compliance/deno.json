@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "inspect": "deno run --frozen --allow-net ./inspect.ts"
+  }
+}
